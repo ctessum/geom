@@ -63,7 +63,7 @@ func (n *node) String() string {
 
 // entry represents a spatial index record stored in a tree node.
 type entry struct {
-	bb    Rect // bounding-box of all children of this entry
+	bb    *Rect // bounding-box of all children of this entry
 	child *node
 	obj   Spatial
 }
@@ -77,7 +77,7 @@ func (e entry) String() string {
 
 // Any type that implements Spatial can be stored in an Rtree and queried.
 type Spatial interface {
-	Bounds() Rect
+	Bounds() *Rect
 }
 
 // Insertion
@@ -190,8 +190,8 @@ func (n *node) getEntry() *entry {
 }
 
 // computeBoundingBox finds the MBR of the children of n.
-func (n *node) computeBoundingBox() Rect {
-	childBoxes := make([]Rect, len(n.entries))
+func (n *node) computeBoundingBox() *Rect {
+	childBoxes := make([]*Rect, len(n.entries))
 	for i, e := range n.entries {
 		childBoxes[i] = e.bb
 	}
@@ -422,11 +422,11 @@ func (tree *Rtree) condenseTree(n *node) {
 //
 // Implemented per Section 3.1 of "R-trees: A Dynamic Index Structure for
 // Spatial Searching" by A. Guttman, Proceedings of ACM SIGMOD, p. 47-57, 1984.
-func (tree *Rtree) SearchIntersect(bb Rect) []Spatial {
+func (tree *Rtree) SearchIntersect(bb *Rect) []Spatial {
 	return tree.searchIntersect(tree.root, bb)
 }
 
-func (tree *Rtree) searchIntersect(n *node, bb Rect) []Spatial {
+func (tree *Rtree) searchIntersect(n *node, bb *Rect) []Spatial {
 	results := []Spatial{}
 	for _, e := range n.entries {
 		if intersect(e.bb, bb) {

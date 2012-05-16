@@ -99,7 +99,7 @@ func TestContainsRect(t *testing.T) {
 	lengths2 := [Dim]float64{3.2, 0.6, 3.7}
 	rect2, _ := NewRect(q, lengths2)
 
-	if yes := rect1.containsRect(rect2); !yes {
+	if yes := rect1.containsRect(&rect2); !yes {
 		t.Errorf("Expected %v.containsRect(%v", rect1, rect2)
 	}
 }
@@ -113,7 +113,7 @@ func TestDoesNotContainRectOverlaps(t *testing.T) {
 	lengths2 := [Dim]float64{3.2, 1.4, 3.7}
 	rect2, _ := NewRect(q, lengths2)
 
-	if yes := rect1.containsRect(rect2); yes {
+	if yes := rect1.containsRect(&rect2); yes {
 		t.Errorf("Expected %v doesn't contain %v", rect1, rect2)
 	}
 }
@@ -127,7 +127,7 @@ func TestDoesNotContainRectDisjoint(t *testing.T) {
 	lengths2 := [Dim]float64{2.2, 5.9, 0.5}
 	rect2, _ := NewRect(q, lengths2)
 
-	if yes := rect1.containsRect(rect2); yes {
+	if yes := rect1.containsRect(&rect2); yes {
 		t.Errorf("Expected %v doesn't contain %v", rect1, rect2)
 	}
 }
@@ -143,7 +143,7 @@ func TestNoIntersection(t *testing.T) {
 
 	// rect1 and rect2 fail to overlap in just one dimension (second)
 
-	if intersect(rect1, rect2) {
+	if intersect(&rect1, &rect2) {
 		t.Errorf("Expected intersect(%v, %v) == false", rect1, rect2)
 	}
 }
@@ -159,7 +159,7 @@ func TestNoIntersectionJustTouches(t *testing.T) {
 
 	// rect1 and rect2 fail to overlap in just one dimension (second)
 
-	if intersect(rect1, rect2) {
+	if intersect(&rect1, &rect2) {
 		t.Errorf("Expected intersect(%v, %v) == nil", rect1, rect2)
 	}
 }
@@ -176,7 +176,7 @@ func TestContainmentIntersection(t *testing.T) {
 	r := Point{1, 2.2, 3.3}
 	s := Point{1.5, 2.7, 3.8}
 
-	if !intersect(rect1, rect2) {
+	if !intersect(&rect1, &rect2) {
 		t.Errorf("intersect(%v, %v) != %v, %v", rect1, rect2, r, s)
 	}
 }
@@ -193,7 +193,7 @@ func TestOverlapIntersection(t *testing.T) {
 	r := Point{1, 4, 3}
 	s := Point{2, 4.5, 3.5}
 
-	if !intersect(rect1, rect2) {
+	if !intersect(&rect1, &rect2) {
 		t.Errorf("intersect(%v, %v) != %v, %v", rect1, rect2, r, s)
 	}
 }
@@ -224,7 +224,7 @@ func TestBoundingBox(t *testing.T) {
 	r := Point{-6.5, -2.4, 0.0}
 	s := Point{4.7, 12.6, 8.5}
 
-	bb := boundingBox(rect1, rect2)
+	bb := boundingBox(&rect1, &rect2)
 	d1 := r.dist(bb.p)
 	d2 := s.dist(bb.q)
 	if d1 > EPS || d2 > EPS {
@@ -241,7 +241,7 @@ func TestBoundingBoxContains(t *testing.T) {
 	lengths2 := [Dim]float64{0.56, 6.222222, 0.946}
 	rect2, _ := NewRect(q, lengths2)
 
-	bb := boundingBox(rect1, rect2)
+	bb := boundingBox(&rect1, &rect2)
 	d1 := rect1.p.dist(bb.p)
 	d2 := rect1.q.dist(bb.q)
 	if d1 > EPS || d2 > EPS {
@@ -255,7 +255,7 @@ func TestBoundingBoxN(t *testing.T) {
 	rect3, _ := NewRect(Point{1, 0, 0}, [Dim]float64{1, 1, 0})
 
 	exp, _ := NewRect(Point{0, 0, 0}, [Dim]float64{2, 2, 0})
-	bb := boundingBoxN(rect1, rect2, rect3)
+	bb := boundingBoxN(&rect1, &rect2, &rect3)
 	d1 := bb.p.dist(exp.p)
 	d2 := bb.q.dist(exp.q)
 	if d1 > EPS || d2 > EPS {
@@ -275,7 +275,7 @@ func TestMinDistPositive(t *testing.T) {
 	p := Point{1, 2, 3}
 	r := Rect{Point{-1, -4, 7}, Point{2, -2, 9}}
 	expected := float64((-2-2)*(-2-2) + (7-3)*(7-3))
-	if d := p.minDist(r); math.Abs(d-expected) > EPS {
+	if d := p.minDist(&r); math.Abs(d-expected) > EPS {
 		t.Errorf("Expected %v.minDist(%v) == %v, got %v", p, r, expected, d)
 	}
 }
@@ -295,7 +295,7 @@ func TestMinMaxdist(t *testing.T) {
 	d3 := p.dist(q3)
 	expected := math.Min(d1*d1, math.Min(d2*d2, d3*d3))
 
-	if d := p.minMaxDist(r); math.Abs(d-expected) > EPS {
+	if d := p.minMaxDist(&r); math.Abs(d-expected) > EPS {
 		t.Errorf("Expected %v.minMaxDist(%v) == %v, got %v", p, r, expected, d)
 	}
 }
