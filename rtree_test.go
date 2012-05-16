@@ -803,3 +803,28 @@ func TestNearestNeighbors(t *testing.T) {
 		t.Errorf("NearestNeighbors failed")
 	}
 }
+
+func BenchmarkSearchIntersect(b *testing.B) {
+	b.StopTimer()
+	rt := NewTree(3, 3, 3)
+	things := []*Rect{
+		mustRect(Point{0, 0, 0}, []float64{2, 1, 1}),
+		mustRect(Point{3, 1, 0}, []float64{1, 2, 1}),
+		mustRect(Point{1, 2, 0}, []float64{2, 2, 1}),
+		mustRect(Point{8, 6, 0}, []float64{1, 1, 1}),
+		mustRect(Point{10, 3, 0}, []float64{1, 2, 1}),
+		mustRect(Point{11, 7, 0}, []float64{1, 1, 1}),
+		mustRect(Point{2, 6, 0}, []float64{1, 2, 1}),
+		mustRect(Point{3, 6, 0}, []float64{1, 2, 1}),
+		mustRect(Point{2, 8, 0}, []float64{1, 2, 1}),
+		mustRect(Point{3, 8, 0}, []float64{1, 2, 1}),
+	}
+	for _, thing := range things {
+		rt.Insert(thing)
+	}
+	bb := mustRect(Point{2, 1.5, 0}, []float64{10, 5.5, 1})
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		rt.SearchIntersect(bb)
+	}
+}
