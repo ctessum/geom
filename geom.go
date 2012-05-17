@@ -227,13 +227,12 @@ func intersect(r1, r2 *Rect) bool {
 
 // ToRect constructs a rectangle containing p with side lengths 2*tol.
 func (p Point) ToRect(tol float64) *Rect {
-	var a Point
-	var b Point
+	var r Rect
 	for i := range p {
-		a[i] = p[i] - tol
-		b[i] = p[i] + tol
+		r.p[i] = p[i] - tol
+		r.q[i] = p[i] + tol
 	}
-	return &Rect{a, b}
+	return &r
 }
 
 // boundingBox constructs the smallest rectangle containing both r1 and r2.
