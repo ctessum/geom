@@ -36,16 +36,16 @@ func NewTree(MinChildren, MaxChildren int) *Rtree {
 }
 
 // Size returns the number of objects currently stored in tree.
-func (tree Rtree) Size() int {
+func (tree *Rtree) Size() int {
 	return tree.size
 }
 
-func (tree Rtree) String() string {
+func (tree *Rtree) String() string {
 	return "(*Rtree)"
 }
 
 // Depth returns the maximum depth of tree.
-func (tree Rtree) Depth() int {
+func (tree *Rtree) Depth() int {
 	return tree.height
 }
 
