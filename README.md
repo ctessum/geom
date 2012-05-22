@@ -4,6 +4,9 @@ rtreego
 A library for efficiently storing and querying spatial data
 in the Go programming language.
 
+Forked from github.com/dhconnelly/rtreego to specialize for 3 dimensions
+and tune for fewer memory allocations.
+
 
 About
 -----
@@ -33,13 +36,13 @@ algorithms are currently under development.
 Install
 -------
 
-With Go 1 installed, just run `go get github.com/dhconnelly/rtreego`.
+With Go 1 installed, just run `go get github.com/patrick-higgins/rtreego`.
 
 
 Usage
 -----
 
-Make sure you `import github.com/dhconnelly/rtreego` in your Go source files.
+Make sure you `import github.com/patrick-higgins/rtreego` in your Go source files.
 
 ### Storing, updating, and deleting objects
 
@@ -140,7 +143,7 @@ query point.
 
 ### More information
 
-See http://dhconnelly.github.com/rtreego for full API documentation.
+See http://github.com/patrick-higgins/rtreego for full API documentation.
 
 
 References
@@ -165,6 +168,8 @@ Author
 
 rtreego is written and maintained by Daniel Connelly.  You can find my stuff
 at dhconnelly.com or email me at dhconnelly@gmail.com.
+
+This fork is maintained by Patrick Higgins (patrick.allen.higgins@gmail.com).
 
 
 License

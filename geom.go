@@ -18,7 +18,7 @@ func (err DistError) Error() string {
 	return "rtreego: improper distance"
 }
 
-// Point represents a point in n-dimensional Euclidean space.
+// Point represents a point in 3-dimensional Euclidean space.
 type Point [Dim]float64
 
 // Dist computes the Euclidean distance between two points p and q.
@@ -100,7 +100,7 @@ func (p Point) minMaxDist(r *Rect) float64 {
 	return min
 }
 
-// Rect represents a subset of n-dimensional Euclidean space of the form
+// Rect represents a subset of 3-dimensional Euclidean space of the form
 // [a1, b1] x [a2, b2] x ... x [an, bn], where ai < bi for all 1 <= i <= n.
 type Rect struct {
 	p, q Point // Enforced by NewRect: p[i] <= q[i] for all i.
@@ -154,7 +154,7 @@ func (r *Rect) margin() float64 {
 		b := r.q[i]
 		sum += b - a
 	}
-	return math.Pow(2, float64(Dim-1)) * sum
+	return 4.0 * sum
 }
 
 // containsPoint tests whether p is located inside or on the boundary of r.

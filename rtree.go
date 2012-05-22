@@ -14,8 +14,7 @@ import (
 const Dim = 3
 
 // Rtree represents an R-tree, a balanced search tree for storing and querying
-// spatial objects.  Dim specifies the number of spatial dimensions and
-// MinChildren/MaxChildren specify the minimum/maximum branching factors.
+// spatial objects.  MinChildren/MaxChildren specify the minimum/maximum branching factors.
 type Rtree struct {
 	MinChildren int
 	MaxChildren int
@@ -82,8 +81,7 @@ type Spatial interface {
 
 // Insertion
 
-// Insert inserts a spatial object into the tree.  A DimError is returned if
-// the dimensions of the object don't match those of the tree.  If insertion
+// Insert inserts a spatial object into the tree.  If insertion
 // causes a leaf node to overflow, the tree is rebalanced automatically.
 //
 // Implemented per Section 3.2 of "R-trees: A Dynamic Index Structure for
@@ -324,8 +322,7 @@ func pickNext(left, right *node, entries []entry) (next int) {
 // Deletion
 
 // Delete removes an object from the tree.  If the object is not found, ok
-// is false; otherwise ok is true.  A DimError is returned if the specified
-// object has improper dimensions for the tree.
+// is false; otherwise ok is true.
 //
 // Implemented per Section 3.3 of "R-trees: A Dynamic Index Structure for
 // Spatial Searching" by A. Guttman, Proceedings of ACM SIGMOD, p. 47-57, 1984.
