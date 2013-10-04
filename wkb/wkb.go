@@ -160,7 +160,7 @@ func readLinearRingZM(r io.Reader, byteOrder binary.ByteOrder) ([]PointZM, error
 	return pointZMs, nil
 }
 
-func Decode(r io.Reader) (Geom, error) {
+func Read(r io.Reader) (Geom, error) {
 
 	var wkbByteOrder uint8
 	err := binary.Read(r, binary.LittleEndian, &wkbByteOrder)
