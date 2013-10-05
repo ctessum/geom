@@ -108,6 +108,62 @@ func (lineStringZM LineStringZM) wkbWrite(w io.Writer, byteOrder binary.ByteOrde
 	return writeLinearRingZM(w, byteOrder, lineStringZM.Points)
 }
 
+func (polygon Polygon) wkbWrite(w io.Writer, byteOrder binary.ByteOrder) error {
+	err := binary.Write(w, byteOrder, uint32(len(polygon.Rings)))
+	if err != nil {
+		return err
+	}
+	for _, ring := range polygon.Rings {
+		err = writeLinearRing(w, byteOrder, ring)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (polygonZ PolygonZ) wkbWrite(w io.Writer, byteOrder binary.ByteOrder) error {
+	err := binary.Write(w, byteOrder, uint32(len(polygonZ.Rings)))
+	if err != nil {
+		return err
+	}
+	for _, ring := range polygonZ.Rings {
+		err = writeLinearRingZ(w, byteOrder, ring)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (polygonM PolygonM) wkbWrite(w io.Writer, byteOrder binary.ByteOrder) error {
+	err := binary.Write(w, byteOrder, uint32(len(polygonM.Rings)))
+	if err != nil {
+		return err
+	}
+	for _, ring := range polygonM.Rings {
+		err = writeLinearRingM(w, byteOrder, ring)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (polygonZM PolygonZM) wkbWrite(w io.Writer, byteOrder binary.ByteOrder) error {
+	err := binary.Write(w, byteOrder, uint32(len(polygonZM.Rings)))
+	if err != nil {
+		return err
+	}
+	for _, ring := range polygonZM.Rings {
+		err = writeLinearRingZM(w, byteOrder, ring)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func Write(w io.Writer, byteOrder binary.ByteOrder, g Geom) error {
 	var wkbByteOrder uint8
 	switch byteOrder {

@@ -50,6 +50,11 @@ func (PointZM) wkbGeometryType() uint32 {
 	return wkbPointZM
 }
 
+type LinearRing []Point
+type LinearRingZ []PointZ
+type LinearRingM []PointM
+type LinearRingZM []PointZM
+
 type LineString struct {
 	Points []Point
 }
@@ -80,4 +85,36 @@ type LineStringZM struct {
 
 func (LineStringZM) wkbGeometryType() uint32 {
 	return wkbLineStringZM
+}
+
+type Polygon struct {
+	Rings []LinearRing
+}
+
+func (Polygon) wkbGeometryType() uint32 {
+	return wkbPolygon
+}
+
+type PolygonZ struct {
+	Rings []LinearRingZ
+}
+
+func (PolygonZ) wkbGeometryType() uint32 {
+	return wkbPolygonZ
+}
+
+type PolygonM struct {
+	Rings []LinearRingM
+}
+
+func (PolygonM) wkbGeometryType() uint32 {
+	return wkbPolygonM
+}
+
+type PolygonZM struct {
+	Rings []LinearRingZM
+}
+
+func (PolygonZM) wkbGeometryType() uint32 {
+	return wkbPolygonZM
 }
