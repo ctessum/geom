@@ -23,48 +23,48 @@ var wkbReaders = map[uint32]wkbReader{
 	wkbPolygonZM:    polygonZMReader,
 }
 
-func readLinearRing(r io.Reader, byteOrder binary.ByteOrder) ([]Point, error) {
+func readLinearRing(r io.Reader, byteOrder binary.ByteOrder) (LinearRing, error) {
 	var numPoints uint32
 	if err := binary.Read(r, byteOrder, &numPoints); err != nil {
 		return nil, err
 	}
-	points := make([]Point, numPoints)
+	points := make(LinearRing, numPoints)
 	if err := binary.Read(r, byteOrder, &points); err != nil {
 		return nil, err
 	}
 	return points, nil
 }
 
-func readLinearRingZ(r io.Reader, byteOrder binary.ByteOrder) ([]PointZ, error) {
+func readLinearRingZ(r io.Reader, byteOrder binary.ByteOrder) (LinearRingZ, error) {
 	var numPoints uint32
 	if err := binary.Read(r, byteOrder, &numPoints); err != nil {
 		return nil, err
 	}
-	pointZs := make([]PointZ, numPoints)
+	pointZs := make(LinearRingZ, numPoints)
 	if err := binary.Read(r, byteOrder, &pointZs); err != nil {
 		return nil, err
 	}
 	return pointZs, nil
 }
 
-func readLinearRingM(r io.Reader, byteOrder binary.ByteOrder) ([]PointM, error) {
+func readLinearRingM(r io.Reader, byteOrder binary.ByteOrder) (LinearRingM, error) {
 	var numPoints uint32
 	if err := binary.Read(r, byteOrder, &numPoints); err != nil {
 		return nil, err
 	}
-	pointMs := make([]PointM, numPoints)
+	pointMs := make(LinearRingM, numPoints)
 	if err := binary.Read(r, byteOrder, &pointMs); err != nil {
 		return nil, err
 	}
 	return pointMs, nil
 }
 
-func readLinearRingZM(r io.Reader, byteOrder binary.ByteOrder) ([]PointZM, error) {
+func readLinearRingZM(r io.Reader, byteOrder binary.ByteOrder) (LinearRingZM, error) {
 	var numPoints uint32
 	if err := binary.Read(r, byteOrder, &numPoints); err != nil {
 		return nil, err
 	}
-	pointZMs := make([]PointZM, numPoints)
+	pointZMs := make(LinearRingZM, numPoints)
 	if err := binary.Read(r, byteOrder, &pointZMs); err != nil {
 		return nil, err
 	}

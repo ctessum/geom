@@ -56,7 +56,7 @@ type LinearRingM []PointM
 type LinearRingZM []PointZM
 
 type LineString struct {
-	Points []Point
+	Points LinearRing
 }
 
 func (LineString) wkbGeometryType() uint32 {
@@ -64,7 +64,7 @@ func (LineString) wkbGeometryType() uint32 {
 }
 
 type LineStringZ struct {
-	Points []PointZ
+	Points LinearRingZ
 }
 
 func (LineStringZ) wkbGeometryType() uint32 {
@@ -72,7 +72,7 @@ func (LineStringZ) wkbGeometryType() uint32 {
 }
 
 type LineStringM struct {
-	Points []PointM
+	Points LinearRingM
 }
 
 func (LineStringM) wkbGeometryType() uint32 {
@@ -80,7 +80,7 @@ func (LineStringM) wkbGeometryType() uint32 {
 }
 
 type LineStringZM struct {
-	Points []PointZM
+	Points LinearRingZM
 }
 
 func (LineStringZM) wkbGeometryType() uint32 {
