@@ -142,11 +142,11 @@ func polygonReader(r io.Reader, byteOrder binary.ByteOrder) (Geom, error) {
 	}
 	rings := make([]LinearRing, numRings)
 	for i := uint32(0); i < numRings; i++ {
-		points, err := readLinearRing(r, byteOrder)
-		if err != nil {
+		if points, err := readLinearRing(r, byteOrder); err != nil {
 			return nil, err
+		} else {
+			rings[i] = points
 		}
-		rings[i] = points
 	}
 	return Polygon{rings}, nil
 }
@@ -158,11 +158,11 @@ func polygonZReader(r io.Reader, byteOrder binary.ByteOrder) (Geom, error) {
 	}
 	rings := make([]LinearRingZ, numRings)
 	for i := uint32(0); i < numRings; i++ {
-		pointZs, err := readLinearRingZ(r, byteOrder)
-		if err != nil {
+		if pointZs, err := readLinearRingZ(r, byteOrder); err != nil {
 			return nil, err
+		} else {
+			rings[i] = pointZs
 		}
-		rings[i] = pointZs
 	}
 	return PolygonZ{rings}, nil
 }
@@ -174,11 +174,11 @@ func polygonMReader(r io.Reader, byteOrder binary.ByteOrder) (Geom, error) {
 	}
 	rings := make([]LinearRingM, numRings)
 	for i := uint32(0); i < numRings; i++ {
-		pointMs, err := readLinearRingM(r, byteOrder)
-		if err != nil {
+		if pointMs, err := readLinearRingM(r, byteOrder); err != nil {
 			return nil, err
+		} else {
+			rings[i] = pointMs
 		}
-		rings[i] = pointMs
 	}
 	return PolygonM{rings}, nil
 }
@@ -190,11 +190,11 @@ func polygonZMReader(r io.Reader, byteOrder binary.ByteOrder) (Geom, error) {
 	}
 	rings := make([]LinearRingZM, numRings)
 	for i := uint32(0); i < numRings; i++ {
-		pointZMs, err := readLinearRingZM(r, byteOrder)
-		if err != nil {
+		if pointZMs, err := readLinearRingZM(r, byteOrder); err != nil {
 			return nil, err
+		} else {
+			rings[i] = pointZMs
 		}
-		rings[i] = pointZMs
 	}
 	return PolygonZM{rings}, nil
 }
