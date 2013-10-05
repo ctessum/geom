@@ -1,4 +1,4 @@
-package wkb
+package geom
 
 import (
 	"bytes"

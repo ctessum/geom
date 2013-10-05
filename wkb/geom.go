@@ -1,4 +1,4 @@
-package wkb
+package geom
 
 type Geom interface{}
 
