@@ -1,5 +1,9 @@
 package wkb
 
+import (
+	"encoding/binary"
+)
+
 const (
 	wkbXDR = 0
 	wkbNDR = 1
@@ -46,4 +50,9 @@ const (
 	wkbGeometryCollectionZM = 3007
 	wkbPolyhedralSurfaceZM  = 3015
 	wkbTINZM                = 3016
+)
+
+var (
+	XDR = binary.BigEndian
+	NDR = binary.LittleEndian
 )
