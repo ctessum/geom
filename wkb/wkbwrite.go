@@ -152,7 +152,7 @@ func (polygonZM PolygonZM) wkbWrite(w io.Writer, byteOrder binary.ByteOrder) err
 	return nil
 }
 
-func Write(w io.Writer, byteOrder binary.ByteOrder, g Geom) error {
+func WKBWrite(w io.Writer, byteOrder binary.ByteOrder, g WKBGeom) error {
 	var wkbByteOrder uint8
 	switch byteOrder {
 	case XDR:

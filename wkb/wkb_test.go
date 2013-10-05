@@ -9,7 +9,7 @@ import (
 func TestWKB(t *testing.T) {
 
 	var testCases = []struct {
-		g   Geom
+		g   WKBGeom
 		xdr string
 		ndr string
 	}{
@@ -79,32 +79,32 @@ func TestWKB(t *testing.T) {
 
 		// test XDR reading
 		r := bytes.NewBufferString(tc.xdr)
-		if got, err := Read(r); err != nil || !reflect.DeepEqual(got, tc.g) {
-			t.Errorf("Read(%q) == %q, %s, want %q, nil", r, got, err, tc.g)
+		if got, err := WKBRead(r); err != nil || !reflect.DeepEqual(got, tc.g) {
+			t.Errorf("WKBRead(%q) == %q, %s, want %q, nil", r, got, err, tc.g)
 		}
 
 		// test XDR writing
 		w := bytes.NewBuffer(nil)
-		if err := Write(w, XDR, tc.g); err != nil {
-			t.Errorf("Write(%q, %q, %q) == %s, want nil", w, XDR, tc.g, err)
+		if err := WKBWrite(w, XDR, tc.g); err != nil {
+			t.Errorf("WKBWrite(%q, %q, %q) == %s, want nil", w, XDR, tc.g, err)
 		}
 		if got := w.String(); got != tc.xdr {
-			t.Errorf("expected Write(%q, %q, %q) to write %q, got %q", w, XDR, tc.g, tc.xdr, got)
+			t.Errorf("expected WKBWrite(%q, %q, %q) to write %q, got %q", w, XDR, tc.g, tc.xdr, got)
 		}
 
 		// test NDR reading
 		r = bytes.NewBufferString(tc.ndr)
-		if got, err := Read(r); err != nil || !reflect.DeepEqual(got, tc.g) {
-			t.Errorf("Read(%q) == %q, %s, want %q, nil", r, got, err, tc.g)
+		if got, err := WKBRead(r); err != nil || !reflect.DeepEqual(got, tc.g) {
+			t.Errorf("WKBRead(%q) == %q, %s, want %q, nil", r, got, err, tc.g)
 		}
 
 		// test NDR writing
 		w = bytes.NewBuffer(nil)
-		if err := Write(w, NDR, tc.g); err != nil {
-			t.Errorf("Write(%q, %q, %q) == %s, want nil", w, NDR, tc.g, err)
+		if err := WKBWrite(w, NDR, tc.g); err != nil {
+			t.Errorf("WKBWrite(%q, %q, %q) == %s, want nil", w, NDR, tc.g, err)
 		}
 		if got := w.String(); got != tc.ndr {
-			t.Errorf("expected Write(%q, %q, %q) to write %q, got %q", w, NDR, tc.g, tc.ndr, got)
+			t.Errorf("expected WKBWrite(%q, %q, %q) to write %q, got %q", w, NDR, tc.g, tc.ndr, got)
 		}
 
 	}

@@ -199,7 +199,7 @@ func polygonZMReader(r io.Reader, byteOrder binary.ByteOrder) (Geom, error) {
 	return PolygonZM{ringZMs}, nil
 }
 
-func Read(r io.Reader) (Geom, error) {
+func WKBRead(r io.Reader) (Geom, error) {
 
 	var wkbByteOrder uint8
 	if err := binary.Read(r, binary.LittleEndian, &wkbByteOrder); err != nil {

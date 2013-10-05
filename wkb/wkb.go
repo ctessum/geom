@@ -2,6 +2,7 @@ package wkb
 
 import (
 	"encoding/binary"
+	"io"
 )
 
 const (
@@ -56,3 +57,57 @@ var (
 	XDR = binary.BigEndian
 	NDR = binary.LittleEndian
 )
+
+type WKBGeom interface {
+	Geom
+	wkbGeometryType() uint32
+	wkbWrite(io.Writer, binary.ByteOrder) error
+}
+
+func (Point) wkbGeometryType() uint32 {
+	return wkbPoint
+}
+
+func (PointZ) wkbGeometryType() uint32 {
+	return wkbPointZ
+}
+
+func (PointM) wkbGeometryType() uint32 {
+	return wkbPointM
+}
+
+func (PointZM) wkbGeometryType() uint32 {
+	return wkbPointZM
+}
+
+func (LineString) wkbGeometryType() uint32 {
+	return wkbLineString
+}
+
+func (LineStringZ) wkbGeometryType() uint32 {
+	return wkbLineStringZ
+}
+
+func (LineStringM) wkbGeometryType() uint32 {
+	return wkbLineStringM
+}
+
+func (LineStringZM) wkbGeometryType() uint32 {
+	return wkbLineStringZM
+}
+
+func (Polygon) wkbGeometryType() uint32 {
+	return wkbPolygon
+}
+
+func (PolygonZ) wkbGeometryType() uint32 {
+	return wkbPolygonZ
+}
+
+func (PolygonM) wkbGeometryType() uint32 {
+	return wkbPolygonM
+}
+
+func (PolygonZM) wkbGeometryType() uint32 {
+	return wkbPolygonZM
+}
