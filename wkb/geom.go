@@ -31,6 +31,11 @@ type LinearRingZ []PointZ
 type LinearRingM []PointM
 type LinearRingZM []PointZM
 
+type LinearRings []LinearRing
+type LinearRingZs []LinearRingZ
+type LinearRingMs []LinearRingM
+type LinearRingZMs []LinearRingZM
+
 type LineString struct {
 	Points LinearRing
 }
@@ -48,17 +53,17 @@ type LineStringZM struct {
 }
 
 type Polygon struct {
-	Rings []LinearRing
+	Rings LinearRings
 }
 
 type PolygonZ struct {
-	Rings []LinearRingZ
+	Rings LinearRingZs
 }
 
 type PolygonM struct {
-	Rings []LinearRingM
+	Rings LinearRingMs
 }
 
 type PolygonZM struct {
-	Rings []LinearRingZM
+	Rings LinearRingZMs
 }
