@@ -8,8 +8,7 @@ import (
 
 func writeMany(w io.Writer, byteOrder binary.ByteOrder, data ...interface{}) error {
 	for _, datum := range data {
-		err := binary.Write(w, byteOrder, datum)
-		if err != nil {
+		if err := binary.Write(w, byteOrder, datum); err != nil {
 			return err
 		}
 	}
@@ -35,8 +34,7 @@ func writePointZM(w io.Writer, byteOrder binary.ByteOrder, pointZM PointZM) erro
 func writeLinearRing(w io.Writer, byteOrder binary.ByteOrder, linearRing []Point) error {
 	binary.Write(w, byteOrder, uint32(len(linearRing)))
 	for _, point := range linearRing {
-		err := writePoint(w, byteOrder, point)
-		if err != nil {
+		if err := writePoint(w, byteOrder, point); err != nil {
 			return err
 		}
 	}
@@ -46,8 +44,7 @@ func writeLinearRing(w io.Writer, byteOrder binary.ByteOrder, linearRing []Point
 func writeLinearRingZ(w io.Writer, byteOrder binary.ByteOrder, linearRingZ []PointZ) error {
 	binary.Write(w, byteOrder, uint32(len(linearRingZ)))
 	for _, pointZ := range linearRingZ {
-		err := writePointZ(w, byteOrder, pointZ)
-		if err != nil {
+		if err := writePointZ(w, byteOrder, pointZ); err != nil {
 			return err
 		}
 	}
@@ -57,8 +54,7 @@ func writeLinearRingZ(w io.Writer, byteOrder binary.ByteOrder, linearRingZ []Poi
 func writeLinearRingM(w io.Writer, byteOrder binary.ByteOrder, linearRingM []PointM) error {
 	binary.Write(w, byteOrder, uint32(len(linearRingM)))
 	for _, pointM := range linearRingM {
-		err := writePointM(w, byteOrder, pointM)
-		if err != nil {
+		if err := writePointM(w, byteOrder, pointM); err != nil {
 			return err
 		}
 	}
@@ -68,8 +64,7 @@ func writeLinearRingM(w io.Writer, byteOrder binary.ByteOrder, linearRingM []Poi
 func writeLinearRingZM(w io.Writer, byteOrder binary.ByteOrder, linearRingZM []PointZM) error {
 	binary.Write(w, byteOrder, uint32(len(linearRingZM)))
 	for _, pointZM := range linearRingZM {
-		err := writePointZM(w, byteOrder, pointZM)
-		if err != nil {
+		if err := writePointZM(w, byteOrder, pointZM); err != nil {
 			return err
 		}
 	}
@@ -109,13 +104,11 @@ func (lineStringZM LineStringZM) wkbWrite(w io.Writer, byteOrder binary.ByteOrde
 }
 
 func (polygon Polygon) wkbWrite(w io.Writer, byteOrder binary.ByteOrder) error {
-	err := binary.Write(w, byteOrder, uint32(len(polygon.Rings)))
-	if err != nil {
+	if err := binary.Write(w, byteOrder, uint32(len(polygon.Rings))); err != nil {
 		return err
 	}
 	for _, ring := range polygon.Rings {
-		err = writeLinearRing(w, byteOrder, ring)
-		if err != nil {
+		if err := writeLinearRing(w, byteOrder, ring); err != nil {
 			return err
 		}
 	}
@@ -123,13 +116,11 @@ func (polygon Polygon) wkbWrite(w io.Writer, byteOrder binary.ByteOrder) error {
 }
 
 func (polygonZ PolygonZ) wkbWrite(w io.Writer, byteOrder binary.ByteOrder) error {
-	err := binary.Write(w, byteOrder, uint32(len(polygonZ.Rings)))
-	if err != nil {
+	if err := binary.Write(w, byteOrder, uint32(len(polygonZ.Rings))); err != nil {
 		return err
 	}
 	for _, ring := range polygonZ.Rings {
-		err = writeLinearRingZ(w, byteOrder, ring)
-		if err != nil {
+		if err := writeLinearRingZ(w, byteOrder, ring); err != nil {
 			return err
 		}
 	}
@@ -137,13 +128,11 @@ func (polygonZ PolygonZ) wkbWrite(w io.Writer, byteOrder binary.ByteOrder) error
 }
 
 func (polygonM PolygonM) wkbWrite(w io.Writer, byteOrder binary.ByteOrder) error {
-	err := binary.Write(w, byteOrder, uint32(len(polygonM.Rings)))
-	if err != nil {
+	if err := binary.Write(w, byteOrder, uint32(len(polygonM.Rings))); err != nil {
 		return err
 	}
 	for _, ring := range polygonM.Rings {
-		err = writeLinearRingM(w, byteOrder, ring)
-		if err != nil {
+		if err := writeLinearRingM(w, byteOrder, ring); err != nil {
 			return err
 		}
 	}
@@ -156,8 +145,7 @@ func (polygonZM PolygonZM) wkbWrite(w io.Writer, byteOrder binary.ByteOrder) err
 		return err
 	}
 	for _, ring := range polygonZM.Rings {
-		err = writeLinearRingZM(w, byteOrder, ring)
-		if err != nil {
+		if err := writeLinearRingZM(w, byteOrder, ring); err != nil {
 			return err
 		}
 	}
@@ -174,8 +162,7 @@ func Write(w io.Writer, byteOrder binary.ByteOrder, g Geom) error {
 	default:
 		return fmt.Errorf("unsupported byte order %v", byteOrder)
 	}
-	err := writeMany(w, byteOrder, wkbByteOrder, g.wkbGeometryType())
-	if err != nil {
+	if err := writeMany(w, byteOrder, wkbByteOrder, g.wkbGeometryType()); err != nil {
 		return err
 	}
 	return g.wkbWrite(w, byteOrder)
