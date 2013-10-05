@@ -1,7 +1,13 @@
 package wkb
 
+import (
+	"encoding/binary"
+	"io"
+)
+
 type Geom interface {
 	wkbGeometryType() uint32
+	wkbWrite(io.Writer, binary.ByteOrder) error
 }
 
 type Point struct {
