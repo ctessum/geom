@@ -6,6 +6,19 @@ import (
 	"io"
 )
 
+type wkbReader func(io.Reader, binary.ByteOrder) (Geom, error)
+
+var wkbReaders = map[uint32]wkbReader{
+	wkbPoint:        pointReader,
+	wkbPointZ:       pointZReader,
+	wkbPointM:       pointMReader,
+	wkbPointZM:      pointZMReader,
+	wkbLineString:   lineStringReader,
+	wkbLineStringZ:  lineStringZReader,
+	wkbLineStringM:  lineStringMReader,
+	wkbLineStringZM: lineStringZMReader,
+}
+
 func readMany(r io.Reader, byteOrder binary.ByteOrder, data ...interface{}) error {
 	for _, datum := range data {
 		err := binary.Read(r, byteOrder, datum)
@@ -112,6 +125,74 @@ func readLinearRingZM(r io.Reader, byteOrder binary.ByteOrder) ([]PointZM, error
 	return pointZMs, nil
 }
 
+func pointReader(r io.Reader, byteOrder binary.ByteOrder) (Geom, error) {
+	point := Point{}
+	err := readPoint(r, byteOrder, &point)
+	if err != nil {
+		return nil, err
+	}
+	return point, nil
+}
+
+func pointZReader(r io.Reader, byteOrder binary.ByteOrder) (Geom, error) {
+	pointZ := PointZ{}
+	err := readPointZ(r, byteOrder, &pointZ)
+	if err != nil {
+		return nil, err
+	}
+	return pointZ, nil
+}
+
+func pointMReader(r io.Reader, byteOrder binary.ByteOrder) (Geom, error) {
+	pointM := PointM{}
+	err := readPointM(r, byteOrder, &pointM)
+	if err != nil {
+		return nil, err
+	}
+	return pointM, nil
+}
+
+func pointZMReader(r io.Reader, byteOrder binary.ByteOrder) (Geom, error) {
+	pointZM := PointZM{}
+	err := readPointZM(r, byteOrder, &pointZM)
+	if err != nil {
+		return nil, err
+	}
+	return pointZM, nil
+}
+
+func lineStringReader(r io.Reader, byteOrder binary.ByteOrder) (Geom, error) {
+	points, err := readLinearRing(r, byteOrder)
+	if err != nil {
+		return nil, err
+	}
+	return LineString{points}, nil
+}
+
+func lineStringZReader(r io.Reader, byteOrder binary.ByteOrder) (Geom, error) {
+	pointZs, err := readLinearRingZ(r, byteOrder)
+	if err != nil {
+		return nil, err
+	}
+	return LineStringZ{pointZs}, nil
+}
+
+func lineStringMReader(r io.Reader, byteOrder binary.ByteOrder) (Geom, error) {
+	pointMs, err := readLinearRingM(r, byteOrder)
+	if err != nil {
+		return nil, err
+	}
+	return LineStringM{pointMs}, nil
+}
+
+func lineStringZMReader(r io.Reader, byteOrder binary.ByteOrder) (Geom, error) {
+	pointZMs, err := readLinearRingZM(r, byteOrder)
+	if err != nil {
+		return nil, err
+	}
+	return LineStringZM{pointZMs}, nil
+}
+
 func Read(r io.Reader) (Geom, error) {
 
 	var wkbByteOrder uint8
@@ -126,7 +207,7 @@ func Read(r io.Reader) (Geom, error) {
 	case wkbNDR:
 		byteOrder = binary.LittleEndian
 	default:
-		return nil, fmt.Errorf("invalid byte order %v", wkbByteOrder)
+		return nil, fmt.Errorf("invalid byte order %u", wkbByteOrder)
 	}
 
 	var wkbGeometryType uint32
@@ -134,61 +215,10 @@ func Read(r io.Reader) (Geom, error) {
 	if err != nil {
 		return nil, err
 	}
-	switch wkbGeometryType {
-	case wkbPoint:
-		point := Point{}
-		err = readPoint(r, byteOrder, &point)
-		if err != nil {
-			return nil, err
-		}
-		return point, nil
-	case wkbLineString:
-		points, err := readLinearRing(r, byteOrder)
-		if err != nil {
-			return nil, err
-		}
-		return LineString{points}, nil
-	case wkbPointZ:
-		pointZ := PointZ{}
-		err = readPointZ(r, byteOrder, &pointZ)
-		if err != nil {
-			return nil, err
-		}
-		return pointZ, nil
-	case wkbLineStringZ:
-		pointZs, err := readLinearRingZ(r, byteOrder)
-		if err != nil {
-			return nil, err
-		}
-		return LineStringZ{pointZs}, nil
-	case wkbPointM:
-		pointM := PointM{}
-		err = readPointM(r, byteOrder, &pointM)
-		if err != nil {
-			return nil, err
-		}
-		return pointM, nil
-	case wkbLineStringM:
-		pointMs, err := readLinearRingM(r, byteOrder)
-		if err != nil {
-			return nil, err
-		}
-		return LineStringM{pointMs}, nil
-	case wkbPointZM:
-		pointZM := PointZM{}
-		err = readPointZM(r, byteOrder, &pointZM)
-		if err != nil {
-			return nil, err
-		}
-		return pointZM, nil
-	case wkbLineStringZM:
-		pointZMs, err := readLinearRingZM(r, byteOrder)
-		if err != nil {
-			return nil, err
-		}
-		return LineStringZM{pointZMs}, nil
-	default:
-		return nil, fmt.Errorf("unsupported geometry type: %v", wkbGeometryType)
+	if reader, ok := wkbReaders[wkbGeometryType]; ok {
+		return reader(r, byteOrder)
+	} else {
+		return nil, fmt.Errorf("unsupported geometry type %u", wkbGeometryType)
 	}
 
 }
