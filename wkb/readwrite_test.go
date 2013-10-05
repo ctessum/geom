@@ -36,6 +36,18 @@ func TestReadWritePointZM(t *testing.T) {
 	testReadWrite(t, PointZM{1, 2, 3, 4})
 }
 
+func TestReadWriteLineString(t *testing.T) {
+	testReadWrite(t, LineString{[]Point{{1, 2}, {3, 4}}})
+}
+
+func TestReadWriteLineStringZ(t *testing.T) {
+	testReadWrite(t, LineStringZ{[]PointZ{{1, 2, 3}, {4, 5, 6}}})
+}
+
+func TestReadWriteLineStringM(t *testing.T) {
+	testReadWrite(t, LineStringM{[]PointM{{1, 2, 3}, {4, 5, 6}}})
+}
+
 func TestReadWriteLineStringZM(t *testing.T) {
 	testReadWrite(t, LineStringZM{[]PointZM{{1, 2, 3, 4}, {5, 6, 7, 8}}})
 }
