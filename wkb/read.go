@@ -156,15 +156,15 @@ func polygonZReader(r io.Reader, byteOrder binary.ByteOrder) (Geom, error) {
 	if err := binary.Read(r, byteOrder, &numRings); err != nil {
 		return nil, err
 	}
-	rings := make([]LinearRingZ, numRings)
+	ringZs := make([]LinearRingZ, numRings)
 	for i := uint32(0); i < numRings; i++ {
 		if pointZs, err := readLinearRingZ(r, byteOrder); err != nil {
 			return nil, err
 		} else {
-			rings[i] = pointZs
+			ringZs[i] = pointZs
 		}
 	}
-	return PolygonZ{rings}, nil
+	return PolygonZ{ringZs}, nil
 }
 
 func polygonMReader(r io.Reader, byteOrder binary.ByteOrder) (Geom, error) {
@@ -172,15 +172,15 @@ func polygonMReader(r io.Reader, byteOrder binary.ByteOrder) (Geom, error) {
 	if err := binary.Read(r, byteOrder, &numRings); err != nil {
 		return nil, err
 	}
-	rings := make([]LinearRingM, numRings)
+	ringMs := make([]LinearRingM, numRings)
 	for i := uint32(0); i < numRings; i++ {
 		if pointMs, err := readLinearRingM(r, byteOrder); err != nil {
 			return nil, err
 		} else {
-			rings[i] = pointMs
+			ringMs[i] = pointMs
 		}
 	}
-	return PolygonM{rings}, nil
+	return PolygonM{ringMs}, nil
 }
 
 func polygonZMReader(r io.Reader, byteOrder binary.ByteOrder) (Geom, error) {
@@ -188,15 +188,15 @@ func polygonZMReader(r io.Reader, byteOrder binary.ByteOrder) (Geom, error) {
 	if err := binary.Read(r, byteOrder, &numRings); err != nil {
 		return nil, err
 	}
-	rings := make([]LinearRingZM, numRings)
+	ringZMs := make([]LinearRingZM, numRings)
 	for i := uint32(0); i < numRings; i++ {
 		if pointZMs, err := readLinearRingZM(r, byteOrder); err != nil {
 			return nil, err
 		} else {
-			rings[i] = pointZMs
+			ringZMs[i] = pointZMs
 		}
 	}
-	return PolygonZM{rings}, nil
+	return PolygonZM{ringZMs}, nil
 }
 
 func Read(r io.Reader) (Geom, error) {
