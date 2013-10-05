@@ -29,10 +29,8 @@ func readLinearRing(r io.Reader, byteOrder binary.ByteOrder) ([]Point, error) {
 		return nil, err
 	}
 	points := make([]Point, numPoints)
-	for i := uint32(0); i < numPoints; i++ {
-		if err := binary.Read(r, byteOrder, &points[i]); err != nil {
-			return nil, err
-		}
+	if err := binary.Read(r, byteOrder, &points); err != nil {
+		return nil, err
 	}
 	return points, nil
 }
@@ -43,10 +41,8 @@ func readLinearRingZ(r io.Reader, byteOrder binary.ByteOrder) ([]PointZ, error) 
 		return nil, err
 	}
 	pointZs := make([]PointZ, numPoints)
-	for i := uint32(0); i < numPoints; i++ {
-		if err := binary.Read(r, byteOrder, &pointZs[i]); err != nil {
-			return nil, err
-		}
+	if err := binary.Read(r, byteOrder, &pointZs); err != nil {
+		return nil, err
 	}
 	return pointZs, nil
 }
@@ -57,10 +53,8 @@ func readLinearRingM(r io.Reader, byteOrder binary.ByteOrder) ([]PointM, error) 
 		return nil, err
 	}
 	pointMs := make([]PointM, numPoints)
-	for i := uint32(0); i < numPoints; i++ {
-		if err := binary.Read(r, byteOrder, &pointMs[i]); err != nil {
-			return nil, err
-		}
+	if err := binary.Read(r, byteOrder, &pointMs); err != nil {
+		return nil, err
 	}
 	return pointMs, nil
 }
@@ -71,10 +65,8 @@ func readLinearRingZM(r io.Reader, byteOrder binary.ByteOrder) ([]PointZM, error
 		return nil, err
 	}
 	pointZMs := make([]PointZM, numPoints)
-	for i := uint32(0); i < numPoints; i++ {
-		if err := binary.Read(r, byteOrder, &pointZMs[i]); err != nil {
-			return nil, err
-		}
+	if err := binary.Read(r, byteOrder, &pointZMs); err != nil {
+		return nil, err
 	}
 	return pointZMs, nil
 }
