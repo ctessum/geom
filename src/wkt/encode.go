@@ -3,6 +3,7 @@ package wkt
 import (
 	"fmt"
 	"geom"
+	"reflect"
 	"strings"
 )
 
@@ -161,6 +162,6 @@ func WKT(g geom.T) (string, error) {
 	case geom.PolygonZM:
 		return polygonZMWKT(g.(geom.PolygonZM)), nil
 	default:
-		return "", fmt.Errorf("unknown geometry type")
+		return "", &UnsupportedGeometryError{reflect.TypeOf(g)}
 	}
 }
