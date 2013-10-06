@@ -32,100 +32,100 @@ func NewBoundsPointZM(pointZM PointZM) *Bounds {
 	return &Bounds{Point{pointZM.X, pointZM.Y}, Point{pointZM.X, pointZM.Y}}
 }
 
-func (bounds *Bounds) Copy() *Bounds {
-	return &Bounds{Point{bounds.Min.X, bounds.Min.Y}, Point{bounds.Max.X, bounds.Max.Y}}
+func (b *Bounds) Copy() *Bounds {
+	return &Bounds{Point{b.Min.X, b.Min.Y}, Point{b.Max.X, b.Max.Y}}
 }
 
-func (bounds *Bounds) Empty() bool {
-	return bounds.Max.X < bounds.Min.X || bounds.Max.Y < bounds.Min.Y
+func (b *Bounds) Empty() bool {
+	return b.Max.X < b.Min.X || b.Max.Y < b.Min.Y
 }
 
-func (bounds *Bounds) ExtendPoint(point Point) *Bounds {
-	bounds.Min.X = math.Min(bounds.Min.X, point.X)
-	bounds.Min.Y = math.Min(bounds.Min.Y, point.Y)
-	bounds.Max.X = math.Max(bounds.Max.X, point.X)
-	bounds.Max.Y = math.Max(bounds.Max.Y, point.Y)
-	return bounds
+func (b *Bounds) ExtendPoint(point Point) *Bounds {
+	b.Min.X = math.Min(b.Min.X, point.X)
+	b.Min.Y = math.Min(b.Min.Y, point.Y)
+	b.Max.X = math.Max(b.Max.X, point.X)
+	b.Max.Y = math.Max(b.Max.Y, point.Y)
+	return b
 }
 
-func (bounds *Bounds) ExtendPointZ(pointZ PointZ) *Bounds {
-	bounds.Min.X = math.Min(bounds.Min.X, pointZ.X)
-	bounds.Min.Y = math.Min(bounds.Min.Y, pointZ.Y)
-	bounds.Max.X = math.Max(bounds.Max.X, pointZ.X)
-	bounds.Max.Y = math.Max(bounds.Max.Y, pointZ.Y)
-	return bounds
+func (b *Bounds) ExtendPointZ(pointZ PointZ) *Bounds {
+	b.Min.X = math.Min(b.Min.X, pointZ.X)
+	b.Min.Y = math.Min(b.Min.Y, pointZ.Y)
+	b.Max.X = math.Max(b.Max.X, pointZ.X)
+	b.Max.Y = math.Max(b.Max.Y, pointZ.Y)
+	return b
 }
 
-func (bounds *Bounds) ExtendPointM(pointM PointM) *Bounds {
-	bounds.Min.X = math.Min(bounds.Min.X, pointM.X)
-	bounds.Min.Y = math.Min(bounds.Min.Y, pointM.Y)
-	bounds.Max.X = math.Max(bounds.Max.X, pointM.X)
-	bounds.Max.Y = math.Max(bounds.Max.Y, pointM.Y)
-	return bounds
+func (b *Bounds) ExtendPointM(pointM PointM) *Bounds {
+	b.Min.X = math.Min(b.Min.X, pointM.X)
+	b.Min.Y = math.Min(b.Min.Y, pointM.Y)
+	b.Max.X = math.Max(b.Max.X, pointM.X)
+	b.Max.Y = math.Max(b.Max.Y, pointM.Y)
+	return b
 }
 
-func (bounds *Bounds) ExtendPointZM(pointZM PointZM) *Bounds {
-	bounds.Min.X = math.Min(bounds.Min.X, pointZM.X)
-	bounds.Min.Y = math.Min(bounds.Min.Y, pointZM.Y)
-	bounds.Max.X = math.Max(bounds.Max.X, pointZM.X)
-	bounds.Max.Y = math.Max(bounds.Max.Y, pointZM.Y)
-	return bounds
+func (b *Bounds) ExtendPointZM(pointZM PointZM) *Bounds {
+	b.Min.X = math.Min(b.Min.X, pointZM.X)
+	b.Min.Y = math.Min(b.Min.Y, pointZM.Y)
+	b.Max.X = math.Max(b.Max.X, pointZM.X)
+	b.Max.Y = math.Max(b.Max.Y, pointZM.Y)
+	return b
 }
 
-func (bounds *Bounds) ExtendLinearRing(linearRing LinearRing) *Bounds {
+func (b *Bounds) ExtendLinearRing(linearRing LinearRing) *Bounds {
 	for _, point := range linearRing {
-		bounds.ExtendPoint(point)
+		b.ExtendPoint(point)
 	}
-	return bounds
+	return b
 }
 
-func (bounds *Bounds) ExtendLinearRingZ(linearRingZ LinearRingZ) *Bounds {
+func (b *Bounds) ExtendLinearRingZ(linearRingZ LinearRingZ) *Bounds {
 	for _, pointZ := range linearRingZ {
-		bounds.ExtendPointZ(pointZ)
+		b.ExtendPointZ(pointZ)
 	}
-	return bounds
+	return b
 }
 
-func (bounds *Bounds) ExtendLinearRingM(linearRingM LinearRingM) *Bounds {
+func (b *Bounds) ExtendLinearRingM(linearRingM LinearRingM) *Bounds {
 	for _, pointM := range linearRingM {
-		bounds.ExtendPointM(pointM)
+		b.ExtendPointM(pointM)
 	}
-	return bounds
+	return b
 }
 
-func (bounds *Bounds) ExtendLinearRingZM(linearRingZM LinearRingZM) *Bounds {
+func (b *Bounds) ExtendLinearRingZM(linearRingZM LinearRingZM) *Bounds {
 	for _, pointZM := range linearRingZM {
-		bounds.ExtendPointZM(pointZM)
+		b.ExtendPointZM(pointZM)
 	}
-	return bounds
+	return b
 }
 
-func (bounds *Bounds) ExtendLinearRings(linearRings LinearRings) *Bounds {
+func (b *Bounds) ExtendLinearRings(linearRings LinearRings) *Bounds {
 	for _, linearRing := range linearRings {
-		bounds.ExtendLinearRing(linearRing)
+		b.ExtendLinearRing(linearRing)
 	}
-	return bounds
+	return b
 }
 
-func (bounds *Bounds) ExtendLinearRingZs(linearRingZs LinearRingZs) *Bounds {
+func (b *Bounds) ExtendLinearRingZs(linearRingZs LinearRingZs) *Bounds {
 	for _, linearRingZ := range linearRingZs {
-		bounds.ExtendLinearRingZ(linearRingZ)
+		b.ExtendLinearRingZ(linearRingZ)
 	}
-	return bounds
+	return b
 }
 
-func (bounds *Bounds) ExtendLinearRingMs(linearRingMs LinearRingMs) *Bounds {
+func (b *Bounds) ExtendLinearRingMs(linearRingMs LinearRingMs) *Bounds {
 	for _, linearRingM := range linearRingMs {
-		bounds.ExtendLinearRingM(linearRingM)
+		b.ExtendLinearRingM(linearRingM)
 	}
-	return bounds
+	return b
 }
 
-func (bounds *Bounds) ExtendLinearRingZMs(linearRingZMs LinearRingZMs) *Bounds {
+func (b *Bounds) ExtendLinearRingZMs(linearRingZMs LinearRingZMs) *Bounds {
 	for _, linearRingZM := range linearRingZMs {
-		bounds.ExtendLinearRingZM(linearRingZM)
+		b.ExtendLinearRingZM(linearRingZM)
 	}
-	return bounds
+	return b
 }
 
 type Point struct {
