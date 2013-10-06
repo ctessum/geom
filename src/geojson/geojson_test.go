@@ -1,47 +1,47 @@
-package geom
+package geojson
 
 import (
-	"encoding/json"
+	"geom"
 	"reflect"
 	"testing"
 )
 
 func TestGeoJSON(t *testing.T) {
 	testCases := []struct {
-		g       GeoJSONGeom
+		g       geom.T
 		geoJSON []byte
 	}{
 		{
-			Point{1, 2},
-			[]byte(`{"coordinates":[1,2],"type":"Point"}`),
+			geom.Point{1, 2},
+			[]byte(`{"type":"Point","coordinates":[1,2]}`),
 		},
 		{
-			PointZ{1, 2, 3},
-			[]byte(`{"coordinates":[1,2,3],"type":"Point"}`),
+			geom.PointZ{1, 2, 3},
+			[]byte(`{"type":"Point","coordinates":[1,2,3]}`),
 		},
 		{
-			LineString{LinearRing{{1, 2}, {3, 4}}},
-			[]byte(`{"coordinates":[[1,2],[3,4]],"type":"LineString"}`),
+			geom.LineString{geom.LinearRing{{1, 2}, {3, 4}}},
+			[]byte(`{"type":"LineString","coordinates":[[1,2],[3,4]]}`),
 		},
 		{
-			LineStringZ{LinearRingZ{{1, 2, 3}, {3, 4, 5}}},
-			[]byte(`{"coordinates":[[1,2,3],[3,4,5]],"type":"LineString"}`),
+			geom.LineStringZ{geom.LinearRingZ{{1, 2, 3}, {3, 4, 5}}},
+			[]byte(`{"type":"LineString","coordinates":[[1,2,3],[3,4,5]]}`),
 		},
 		{
-			Polygon{LinearRings{{{1, 2}, {3, 4}, {5, 6}}}},
-			[]byte(`{"coordinates":[[[1,2],[3,4],[5,6]]],"type":"Polygon"}`),
+			geom.Polygon{geom.LinearRings{{{1, 2}, {3, 4}, {5, 6}}}},
+			[]byte(`{"type":"Polygon","coordinates":[[[1,2],[3,4],[5,6]]]}`),
 		},
 		{
-			PolygonZ{LinearRingZs{{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}}},
-			[]byte(`{"coordinates":[[[1,2,3],[4,5,6],[7,8,9]]],"type":"Polygon"}`),
+			geom.PolygonZ{geom.LinearRingZs{{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}}},
+			[]byte(`{"type":"Polygon","coordinates":[[[1,2,3],[4,5,6],[7,8,9]]]}`),
 		},
 	}
 	for _, tc := range testCases {
-		if got, err := json.Marshal(tc.g.GeoJSON()); err != nil || !reflect.DeepEqual(got, tc.geoJSON) {
-			t.Errorf("GeoJSON(%q) == %q, %q, want %q, nil", tc.g, got, err, tc.geoJSON)
+		if got, err := Marshal(tc.g); err != nil || !reflect.DeepEqual(got, tc.geoJSON) {
+			t.Errorf("Marshal(%q) == %q, %q, want %q, nil", tc.g, got, err, tc.geoJSON)
 		}
-		if got, err := GeoJSONUnmarshal(tc.geoJSON); err != nil || !reflect.DeepEqual(got, tc.g) {
-			t.Errorf("GeoJSONUnmarshal(%q) == %q, %q, want %q, nil", tc.geoJSON, got, err, tc.g)
+		if got, err := Unmarshal(tc.geoJSON); err != nil || !reflect.DeepEqual(got, tc.g) {
+			t.Errorf("Unmarshal(%q) == %q, %q, want %q, nil", tc.geoJSON, got, err, tc.g)
 		}
 	}
 }
@@ -69,8 +69,8 @@ func TestGeoJSONUnmarshallErrors(t *testing.T) {
 		[]byte(`{"coordinates":[[[1,2],[3,4,5]]],"type":"Polygon"}`),
 	}
 	for _, tc := range testCases {
-		if got, err := GeoJSONUnmarshal(tc); err == nil {
-			t.Errorf("GeoJSONUnmarshal(%q) == %q, nil, want err != nil", tc, got)
+		if got, err := Unmarshal(tc); err == nil {
+			t.Errorf("Unmarshal(%q) == %q, nil, want err != nil", tc, got)
 		}
 	}
 }
