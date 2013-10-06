@@ -345,76 +345,48 @@ func writeMany(w io.Writer, byteOrder binary.ByteOrder, data ...interface{}) err
 	return nil
 }
 
-func writePoint(w io.Writer, byteOrder binary.ByteOrder, point Point) error {
-	return writeMany(w, byteOrder, point.X, point.Y)
-}
-
-func writePointZ(w io.Writer, byteOrder binary.ByteOrder, pointZ PointZ) error {
-	return writeMany(w, byteOrder, pointZ.X, pointZ.Y, pointZ.Z)
-}
-
-func writePointM(w io.Writer, byteOrder binary.ByteOrder, pointM PointM) error {
-	return writeMany(w, byteOrder, pointM.X, pointM.Y, pointM.M)
-}
-
-func writePointZM(w io.Writer, byteOrder binary.ByteOrder, pointZM PointZM) error {
-	return writeMany(w, byteOrder, pointZM.X, pointZM.Y, pointZM.Z, pointZM.M)
-}
-
 func writeLinearRing(w io.Writer, byteOrder binary.ByteOrder, linearRing []Point) error {
-	binary.Write(w, byteOrder, uint32(len(linearRing)))
-	for _, point := range linearRing {
-		if err := writePoint(w, byteOrder, point); err != nil {
-			return err
-		}
+	if err := binary.Write(w, byteOrder, uint32(len(linearRing))); err != nil {
+		return err
 	}
-	return nil
+	return binary.Write(w, byteOrder, &linearRing)
 }
 
 func writeLinearRingZ(w io.Writer, byteOrder binary.ByteOrder, linearRingZ []PointZ) error {
-	binary.Write(w, byteOrder, uint32(len(linearRingZ)))
-	for _, pointZ := range linearRingZ {
-		if err := writePointZ(w, byteOrder, pointZ); err != nil {
-			return err
-		}
+	if err := binary.Write(w, byteOrder, uint32(len(linearRingZ))); err != nil {
+		return err
 	}
-	return nil
+	return binary.Write(w, byteOrder, &linearRingZ)
 }
 
 func writeLinearRingM(w io.Writer, byteOrder binary.ByteOrder, linearRingM []PointM) error {
-	binary.Write(w, byteOrder, uint32(len(linearRingM)))
-	for _, pointM := range linearRingM {
-		if err := writePointM(w, byteOrder, pointM); err != nil {
-			return err
-		}
+	if err := binary.Write(w, byteOrder, uint32(len(linearRingM))); err != nil {
+		return err
 	}
-	return nil
+	return binary.Write(w, byteOrder, &linearRingM)
 }
 
 func writeLinearRingZM(w io.Writer, byteOrder binary.ByteOrder, linearRingZM []PointZM) error {
-	binary.Write(w, byteOrder, uint32(len(linearRingZM)))
-	for _, pointZM := range linearRingZM {
-		if err := writePointZM(w, byteOrder, pointZM); err != nil {
-			return err
-		}
+	if err := binary.Write(w, byteOrder, uint32(len(linearRingZM))); err != nil {
+		return err
 	}
-	return nil
+	return binary.Write(w, byteOrder, &linearRingZM)
 }
 
 func (point Point) wkbWrite(w io.Writer, byteOrder binary.ByteOrder) error {
-	return writePoint(w, byteOrder, point)
+	return binary.Write(w, byteOrder, &point)
 }
 
 func (pointZ PointZ) wkbWrite(w io.Writer, byteOrder binary.ByteOrder) error {
-	return writePointZ(w, byteOrder, pointZ)
+	return binary.Write(w, byteOrder, &pointZ)
 }
 
 func (pointM PointM) wkbWrite(w io.Writer, byteOrder binary.ByteOrder) error {
-	return writePointM(w, byteOrder, pointM)
+	return binary.Write(w, byteOrder, &pointM)
 }
 
 func (pointZM PointZM) wkbWrite(w io.Writer, byteOrder binary.ByteOrder) error {
-	return writePointZM(w, byteOrder, pointZM)
+	return binary.Write(w, byteOrder, &pointZM)
 }
 
 func (lineString LineString) wkbWrite(w io.Writer, byteOrder binary.ByteOrder) error {
