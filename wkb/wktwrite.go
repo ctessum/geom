@@ -23,7 +23,7 @@ func (pointZM PointZM) wktCoordinates() string {
 
 func (linearRing LinearRing) wktCoordinates() string {
 	coordinates := make([]string, len(linearRing))
-	for i, point := range(linearRing) {
+	for i, point := range linearRing {
 		coordinates[i] = point.wktCoordinates()
 	}
 	return strings.Join(coordinates, ",")
@@ -31,7 +31,7 @@ func (linearRing LinearRing) wktCoordinates() string {
 
 func (linearRingZ LinearRingZ) wktCoordinates() string {
 	coordinates := make([]string, len(linearRingZ))
-	for i, pointZ := range(linearRingZ) {
+	for i, pointZ := range linearRingZ {
 		coordinates[i] = pointZ.wktCoordinates()
 	}
 	return strings.Join(coordinates, ",")
@@ -39,7 +39,7 @@ func (linearRingZ LinearRingZ) wktCoordinates() string {
 
 func (linearRingM LinearRingM) wktCoordinates() string {
 	coordinates := make([]string, len(linearRingM))
-	for i, pointM := range(linearRingM) {
+	for i, pointM := range linearRingM {
 		coordinates[i] = pointM.wktCoordinates()
 	}
 	return strings.Join(coordinates, ",")
@@ -47,7 +47,7 @@ func (linearRingM LinearRingM) wktCoordinates() string {
 
 func (linearRingZM LinearRingZM) wktCoordinates() string {
 	coordinates := make([]string, len(linearRingZM))
-	for i, pointZM := range(linearRingZM) {
+	for i, pointZM := range linearRingZM {
 		coordinates[i] = pointZM.wktCoordinates()
 	}
 	return strings.Join(coordinates, ",")
@@ -55,7 +55,7 @@ func (linearRingZM LinearRingZM) wktCoordinates() string {
 
 func (linearRings LinearRings) wktCoordinates() string {
 	coordinates := make([]string, len(linearRings))
-	for i, linearRing := range(linearRings) {
+	for i, linearRing := range linearRings {
 		coordinates[i] = "(" + linearRing.wktCoordinates() + ")"
 	}
 	return strings.Join(coordinates, ",")
@@ -63,7 +63,7 @@ func (linearRings LinearRings) wktCoordinates() string {
 
 func (linearRingZs LinearRingZs) wktCoordinates() string {
 	coordinates := make([]string, len(linearRingZs))
-	for i, linearRingZ := range(linearRingZs) {
+	for i, linearRingZ := range linearRingZs {
 		coordinates[i] = "(" + linearRingZ.wktCoordinates() + ")"
 	}
 	return strings.Join(coordinates, ",")
@@ -71,7 +71,7 @@ func (linearRingZs LinearRingZs) wktCoordinates() string {
 
 func (linearRingMs LinearRingMs) wktCoordinates() string {
 	coordinates := make([]string, len(linearRingMs))
-	for i, linearRingM := range(linearRingMs) {
+	for i, linearRingM := range linearRingMs {
 		coordinates[i] = "(" + linearRingM.wktCoordinates() + ")"
 	}
 	return strings.Join(coordinates, ",")
@@ -79,7 +79,7 @@ func (linearRingMs LinearRingMs) wktCoordinates() string {
 
 func (linearRingZMs LinearRingZMs) wktCoordinates() string {
 	coordinates := make([]string, len(linearRingZMs))
-	for i, linearRingZM := range(linearRingZMs) {
+	for i, linearRingZM := range linearRingZMs {
 		coordinates[i] = "(" + linearRingZM.wktCoordinates() + ")"
 	}
 	return strings.Join(coordinates, ",")
@@ -119,7 +119,7 @@ func (lineStringZM LineStringZM) WKT() string {
 
 func (polygon Polygon) WKT() string {
 	ringWKTs := make([]string, len(polygon.Rings))
-	for i, ring := range(polygon.Rings) {
+	for i, ring := range polygon.Rings {
 		ringWKTs[i] = "(" + ring.wktCoordinates() + ")"
 	}
 	return polygon.wktGeometryType() + "(" + strings.Join(ringWKTs, ",") + ")"
@@ -127,7 +127,7 @@ func (polygon Polygon) WKT() string {
 
 func (polygonZ PolygonZ) WKT() string {
 	ringWKTs := make([]string, len(polygonZ.Rings))
-	for i, ringZ := range(polygonZ.Rings) {
+	for i, ringZ := range polygonZ.Rings {
 		ringWKTs[i] = "(" + ringZ.wktCoordinates() + ")"
 	}
 	return polygonZ.wktGeometryType() + "(" + strings.Join(ringWKTs, ",") + ")"
@@ -135,7 +135,7 @@ func (polygonZ PolygonZ) WKT() string {
 
 func (polygonM PolygonM) WKT() string {
 	ringWKTs := make([]string, len(polygonM.Rings))
-	for i, ringM := range(polygonM.Rings) {
+	for i, ringM := range polygonM.Rings {
 		ringWKTs[i] = "(" + ringM.wktCoordinates() + ")"
 	}
 	return polygonM.wktGeometryType() + "(" + strings.Join(ringWKTs, ",") + ")"
@@ -143,7 +143,7 @@ func (polygonM PolygonM) WKT() string {
 
 func (polygonZM PolygonZM) WKT() string {
 	ringWKTs := make([]string, len(polygonZM.Rings))
-	for i, ringZM := range(polygonZM.Rings) {
+	for i, ringZM := range polygonZM.Rings {
 		ringWKTs[i] = "(" + ringZM.wktCoordinates() + ")"
 	}
 	return polygonZM.wktGeometryType() + "(" + strings.Join(ringWKTs, ",") + ")"

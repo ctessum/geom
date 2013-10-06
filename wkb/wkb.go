@@ -113,7 +113,6 @@ func (PolygonZM) wkbGeometryType() uint32 {
 	return wkbPolygonZM
 }
 
-
 type wkbReader func(io.Reader, binary.ByteOrder) (Geom, error)
 
 var wkbReaders = map[uint32]wkbReader{
