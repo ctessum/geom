@@ -128,6 +128,10 @@ func (b *Bounds) ExtendLinearRingZMs(linearRingZMs LinearRingZMs) *Bounds {
 	return b
 }
 
+func (b1 *Bounds) Overlaps(b2 *Bounds) bool {
+	return b1.Min.X <= b2.Max.X && b1.Min.Y <= b2.Max.Y && b1.Max.X >= b2.Min.X && b1.Max.Y >= b2.Min.Y
+}
+
 type Point struct {
 	X float64
 	Y float64
