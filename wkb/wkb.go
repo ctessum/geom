@@ -1,6 +1,7 @@
 package geom
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"io"
@@ -335,6 +336,10 @@ func WKBRead(r io.Reader) (Geom, error) {
 
 }
 
+func WKBReadBytes(buf []byte) (Geom, error) {
+	return WKBRead(bytes.NewBuffer(buf))
+}
+
 func writeMany(w io.Writer, byteOrder binary.ByteOrder, data ...interface{}) error {
 	for _, datum := range data {
 		if err := binary.Write(w, byteOrder, datum); err != nil {
@@ -467,4 +472,12 @@ func WKBWrite(w io.Writer, byteOrder binary.ByteOrder, g WKBGeom) error {
 		return err
 	}
 	return g.wkbWrite(w, byteOrder)
+}
+
+func WKB(g WKBGeom, byteOrder binary.ByteOrder) ([]byte, error) {
+	w := bytes.NewBuffer(nil)
+	if err := WKBWrite(w, byteOrder, g); err != nil {
+		return nil, err
+	}
+	return w.Bytes(), nil
 }
