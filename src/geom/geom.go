@@ -4,7 +4,7 @@ import (
 	"math"
 )
 
-type Geom interface {
+type T interface {
 	Bounds() *Bounds
 }
 
