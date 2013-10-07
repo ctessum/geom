@@ -14,34 +14,34 @@ func pointZCoordinates(pointZ geom.PointZ) []float64 {
 	return []float64{pointZ.X, pointZ.Y, pointZ.Z}
 }
 
-func linearRingCoordinates(linearRing geom.LinearRing) [][]float64 {
-	coordinates := make([][]float64, len(linearRing))
-	for i, point := range linearRing {
+func pointsCoordinates(points []geom.Point) [][]float64 {
+	coordinates := make([][]float64, len(points))
+	for i, point := range points {
 		coordinates[i] = pointCoordinates(point)
 	}
 	return coordinates
 }
 
-func linearRingZCoordinates(linearRingZ geom.LinearRingZ) [][]float64 {
-	coordinates := make([][]float64, len(linearRingZ))
-	for i, pointZ := range linearRingZ {
+func pointZsCoordinates(pointZs []geom.PointZ) [][]float64 {
+	coordinates := make([][]float64, len(pointZs))
+	for i, pointZ := range pointZs {
 		coordinates[i] = pointZCoordinates(pointZ)
 	}
 	return coordinates
 }
 
-func linearRingsCoordinates(linearRings geom.LinearRings) [][][]float64 {
-	coordinates := make([][][]float64, len(linearRings))
-	for i, linearRing := range linearRings {
-		coordinates[i] = linearRingCoordinates(linearRing)
+func pointssCoordinates(pointss [][]geom.Point) [][][]float64 {
+	coordinates := make([][][]float64, len(pointss))
+	for i, points := range pointss {
+		coordinates[i] = pointsCoordinates(points)
 	}
 	return coordinates
 }
 
-func linearRingZsCoordinates(linearRingZs geom.LinearRingZs) [][][]float64 {
-	coordinates := make([][][]float64, len(linearRingZs))
-	for i, linearRingZ := range linearRingZs {
-		coordinates[i] = linearRingZCoordinates(linearRingZ)
+func pointZssCoordinates(pointZss [][]geom.PointZ) [][][]float64 {
+	coordinates := make([][][]float64, len(pointZss))
+	for i, pointZs := range pointZss {
+		coordinates[i] = pointZsCoordinates(pointZs)
 	}
 	return coordinates
 }
@@ -61,22 +61,22 @@ func ToGeoJSON(g geom.T) (*Geometry, error) {
 	case geom.LineString:
 		return &Geometry{
 			Type:        "LineString",
-			Coordinates: linearRingCoordinates(g.(geom.LineString).Points),
+			Coordinates: pointsCoordinates(g.(geom.LineString).Points),
 		}, nil
 	case geom.LineStringZ:
 		return &Geometry{
 			Type:        "LineString",
-			Coordinates: linearRingZCoordinates(g.(geom.LineStringZ).Points),
+			Coordinates: pointZsCoordinates(g.(geom.LineStringZ).Points),
 		}, nil
 	case geom.Polygon:
 		return &Geometry{
 			Type:        "Polygon",
-			Coordinates: linearRingsCoordinates(g.(geom.Polygon).Rings),
+			Coordinates: pointssCoordinates(g.(geom.Polygon).Rings),
 		}, nil
 	case geom.PolygonZ:
 		return &Geometry{
 			Type:        "Polygon",
-			Coordinates: linearRingZsCoordinates(g.(geom.PolygonZ).Rings),
+			Coordinates: pointZssCoordinates(g.(geom.PolygonZ).Rings),
 		}, nil
 	default:
 		return nil, &UnsupportedGeometryError{reflect.TypeOf(g).String()}

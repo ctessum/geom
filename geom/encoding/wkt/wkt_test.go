@@ -27,35 +27,35 @@ func TestWKT(t *testing.T) {
 			"POINTZM(1 2 3 4)",
 		},
 		{
-			geom.LineString{geom.LinearRing{{1, 2}, {3, 4}}},
+			geom.LineString{[]geom.Point{{1, 2}, {3, 4}}},
 			"LINESTRING(1 2,3 4)",
 		},
 		{
-			geom.LineStringZ{geom.LinearRingZ{{1, 2, 3}, {4, 5, 6}}},
+			geom.LineStringZ{[]geom.PointZ{{1, 2, 3}, {4, 5, 6}}},
 			"LINESTRINGZ(1 2 3,4 5 6)",
 		},
 		{
-			geom.LineStringM{geom.LinearRingM{{1, 2, 3}, {4, 5, 6}}},
+			geom.LineStringM{[]geom.PointM{{1, 2, 3}, {4, 5, 6}}},
 			"LINESTRINGM(1 2 3,4 5 6)",
 		},
 		{
-			geom.LineStringZM{geom.LinearRingZM{{1, 2, 3, 4}, {5, 6, 7, 8}}},
+			geom.LineStringZM{[]geom.PointZM{{1, 2, 3, 4}, {5, 6, 7, 8}}},
 			"LINESTRINGZM(1 2 3 4,5 6 7 8)",
 		},
 		{
-			geom.Polygon{geom.LinearRings{geom.LinearRing{{1, 2}, {3, 4}, {5, 6}, {1, 2}}}},
+			geom.Polygon{[][]geom.Point{{{1, 2}, {3, 4}, {5, 6}, {1, 2}}}},
 			"POLYGON((1 2,3 4,5 6,1 2))",
 		},
 		{
-			geom.PolygonZ{geom.LinearRingZs{geom.LinearRingZ{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {1, 2, 3}}}},
+			geom.PolygonZ{[][]geom.PointZ{{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {1, 2, 3}}}},
 			"POLYGONZ((1 2 3,4 5 6,7 8 9,1 2 3))",
 		},
 		{
-			geom.PolygonM{geom.LinearRingMs{geom.LinearRingM{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {1, 2, 3}}}},
+			geom.PolygonM{[][]geom.PointM{{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {1, 2, 3}}}},
 			"POLYGONM((1 2 3,4 5 6,7 8 9,1 2 3))",
 		},
 		{
-			geom.PolygonZM{geom.LinearRingZMs{geom.LinearRingZM{{1, 2, 3, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}, {1, 2, 3, 4}}}},
+			geom.PolygonZM{[][]geom.PointZM{{{1, 2, 3, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}, {1, 2, 3, 4}}}},
 			"POLYGONZM((1 2 3 4,5 6 7 8,9 10 11 12,1 2 3 4))",
 		},
 	}

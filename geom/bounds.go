@@ -68,58 +68,58 @@ func (b *Bounds) ExtendPointZM(pointZM PointZM) *Bounds {
 	return b
 }
 
-func (b *Bounds) ExtendLinearRing(linearRing LinearRing) *Bounds {
-	for _, point := range linearRing {
+func (b *Bounds) ExtendPoints(points []Point) *Bounds {
+	for _, point := range points {
 		b.ExtendPoint(point)
 	}
 	return b
 }
 
-func (b *Bounds) ExtendLinearRingZ(linearRingZ LinearRingZ) *Bounds {
-	for _, pointZ := range linearRingZ {
+func (b *Bounds) ExtendPointZs(pointZs []PointZ) *Bounds {
+	for _, pointZ := range pointZs {
 		b.ExtendPointZ(pointZ)
 	}
 	return b
 }
 
-func (b *Bounds) ExtendLinearRingM(linearRingM LinearRingM) *Bounds {
-	for _, pointM := range linearRingM {
+func (b *Bounds) ExtendPointMs(pointMs []PointM) *Bounds {
+	for _, pointM := range pointMs {
 		b.ExtendPointM(pointM)
 	}
 	return b
 }
 
-func (b *Bounds) ExtendLinearRingZM(linearRingZM LinearRingZM) *Bounds {
-	for _, pointZM := range linearRingZM {
+func (b *Bounds) ExtendPointZMs(pointZMs []PointZM) *Bounds {
+	for _, pointZM := range pointZMs {
 		b.ExtendPointZM(pointZM)
 	}
 	return b
 }
 
-func (b *Bounds) ExtendLinearRings(linearRings LinearRings) *Bounds {
-	for _, linearRing := range linearRings {
-		b.ExtendLinearRing(linearRing)
+func (b *Bounds) ExtendPointss(pointss [][]Point) *Bounds {
+	for _, points := range pointss {
+		b.ExtendPoints(points)
 	}
 	return b
 }
 
-func (b *Bounds) ExtendLinearRingZs(linearRingZs LinearRingZs) *Bounds {
-	for _, linearRingZ := range linearRingZs {
-		b.ExtendLinearRingZ(linearRingZ)
+func (b *Bounds) ExtendPointZss(pointZss [][]PointZ) *Bounds {
+	for _, pointZs := range pointZss {
+		b.ExtendPointZs(pointZs)
 	}
 	return b
 }
 
-func (b *Bounds) ExtendLinearRingMs(linearRingMs LinearRingMs) *Bounds {
-	for _, linearRingM := range linearRingMs {
-		b.ExtendLinearRingM(linearRingM)
+func (b *Bounds) ExtendPointMss(pointMss [][]PointM) *Bounds {
+	for _, pointMs := range pointMss {
+		b.ExtendPointMs(pointMs)
 	}
 	return b
 }
 
-func (b *Bounds) ExtendLinearRingZMs(linearRingZMs LinearRingZMs) *Bounds {
-	for _, linearRingZM := range linearRingZMs {
-		b.ExtendLinearRingZM(linearRingZM)
+func (b *Bounds) ExtendPointZMss(pointZMss [][]PointZM) *Bounds {
+	for _, pointZMs := range pointZMss {
+		b.ExtendPointZMs(pointZMs)
 	}
 	return b
 }

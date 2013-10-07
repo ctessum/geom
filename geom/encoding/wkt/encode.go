@@ -23,66 +23,66 @@ func pointZMWKTCoordinates(pointZM geom.PointZM) string {
 	return fmt.Sprintf("%g %g %g %g", pointZM.X, pointZM.Y, pointZM.Z, pointZM.M)
 }
 
-func linearRingWKCoordinates(linearRing geom.LinearRing) string {
-	wktCoordinates := make([]string, len(linearRing))
-	for i, point := range linearRing {
+func pointsWKCoordinates(points []geom.Point) string {
+	wktCoordinates := make([]string, len(points))
+	for i, point := range points {
 		wktCoordinates[i] = pointWKTCoordinates(point)
 	}
 	return strings.Join(wktCoordinates, ",")
 }
 
-func linearRingZWKCoordinates(linearRingZ geom.LinearRingZ) string {
-	wktCoordinates := make([]string, len(linearRingZ))
-	for i, pointZ := range linearRingZ {
+func pointZsWKCoordinates(pointZs []geom.PointZ) string {
+	wktCoordinates := make([]string, len(pointZs))
+	for i, pointZ := range pointZs {
 		wktCoordinates[i] = pointZWKTCoordinates(pointZ)
 	}
 	return strings.Join(wktCoordinates, ",")
 }
 
-func linearRingMWKCoordinates(linearRingM geom.LinearRingM) string {
-	wktCoordinates := make([]string, len(linearRingM))
-	for i, pointM := range linearRingM {
+func pointMsWKCoordinates(pointMs []geom.PointM) string {
+	wktCoordinates := make([]string, len(pointMs))
+	for i, pointM := range pointMs {
 		wktCoordinates[i] = pointMWKTCoordinates(pointM)
 	}
 	return strings.Join(wktCoordinates, ",")
 }
 
-func linearRingZMWKCoordinates(linearRingZM geom.LinearRingZM) string {
-	wktCoordinates := make([]string, len(linearRingZM))
-	for i, pointZM := range linearRingZM {
+func pointZMsWKCoordinates(pointZMs []geom.PointZM) string {
+	wktCoordinates := make([]string, len(pointZMs))
+	for i, pointZM := range pointZMs {
 		wktCoordinates[i] = pointZMWKTCoordinates(pointZM)
 	}
 	return strings.Join(wktCoordinates, ",")
 }
 
-func linearRingsWKTCoordinates(linearRings geom.LinearRings) string {
-	wktCoordinates := make([]string, len(linearRings))
-	for i, linearRing := range linearRings {
-		wktCoordinates[i] = "(" + linearRingWKCoordinates(linearRing) + ")"
+func pointssWKTCoordinates(pointss [][]geom.Point) string {
+	wktCoordinates := make([]string, len(pointss))
+	for i, points := range pointss {
+		wktCoordinates[i] = "(" + pointsWKCoordinates(points) + ")"
 	}
 	return strings.Join(wktCoordinates, ",")
 }
 
-func linearRingZsWKTCoordinates(linearRingZs geom.LinearRingZs) string {
-	wktCoordinates := make([]string, len(linearRingZs))
-	for i, linearRingZ := range linearRingZs {
-		wktCoordinates[i] = "(" + linearRingZWKCoordinates(linearRingZ) + ")"
+func pointZssWKTCoordinates(pointZss [][]geom.PointZ) string {
+	wktCoordinates := make([]string, len(pointZss))
+	for i, pointZs := range pointZss {
+		wktCoordinates[i] = "(" + pointZsWKCoordinates(pointZs) + ")"
 	}
 	return strings.Join(wktCoordinates, ",")
 }
 
-func linearRingMsWKTCoordinates(linearRingMs geom.LinearRingMs) string {
-	wktCoordinates := make([]string, len(linearRingMs))
-	for i, linearRingM := range linearRingMs {
-		wktCoordinates[i] = "(" + linearRingMWKCoordinates(linearRingM) + ")"
+func pointMssWKTCoordinates(pointMss [][]geom.PointM) string {
+	wktCoordinates := make([]string, len(pointMss))
+	for i, pointMs := range pointMss {
+		wktCoordinates[i] = "(" + pointMsWKCoordinates(pointMs) + ")"
 	}
 	return strings.Join(wktCoordinates, ",")
 }
 
-func linearRingZMsWKTCoordinates(linearRingZMs geom.LinearRingZMs) string {
-	wktCoordinates := make([]string, len(linearRingZMs))
-	for i, linearRingZM := range linearRingZMs {
-		wktCoordinates[i] = "(" + linearRingZMWKCoordinates(linearRingZM) + ")"
+func pointZMssWKTCoordinates(pointZMss [][]geom.PointZM) string {
+	wktCoordinates := make([]string, len(pointZMss))
+	for i, pointZMs := range pointZMss {
+		wktCoordinates[i] = "(" + pointZMsWKCoordinates(pointZMs) + ")"
 	}
 	return strings.Join(wktCoordinates, ",")
 }
@@ -104,35 +104,35 @@ func pointZMWKT(pointZM geom.PointZM) string {
 }
 
 func lineStringWKT(lineString geom.LineString) string {
-	return "LINESTRING(" + linearRingWKCoordinates(lineString.Points) + ")"
+	return "LINESTRING(" + pointsWKCoordinates(lineString.Points) + ")"
 }
 
 func lineStringZWKT(lineStringZ geom.LineStringZ) string {
-	return "LINESTRINGZ(" + linearRingZWKCoordinates(lineStringZ.Points) + ")"
+	return "LINESTRINGZ(" + pointZsWKCoordinates(lineStringZ.Points) + ")"
 }
 
 func lineStringMWKT(lineStringM geom.LineStringM) string {
-	return "LINESTRINGM(" + linearRingMWKCoordinates(lineStringM.Points) + ")"
+	return "LINESTRINGM(" + pointMsWKCoordinates(lineStringM.Points) + ")"
 }
 
 func lineStringZMWKT(lineStringZM geom.LineStringZM) string {
-	return "LINESTRINGZM(" + linearRingZMWKCoordinates(lineStringZM.Points) + ")"
+	return "LINESTRINGZM(" + pointZMsWKCoordinates(lineStringZM.Points) + ")"
 }
 
 func polygonWKT(polygon geom.Polygon) string {
-	return "POLYGON(" + linearRingsWKTCoordinates(polygon.Rings) + ")"
+	return "POLYGON(" + pointssWKTCoordinates(polygon.Rings) + ")"
 }
 
 func polygonZWKT(polygonZ geom.PolygonZ) string {
-	return "POLYGONZ(" + linearRingZsWKTCoordinates(polygonZ.Rings) + ")"
+	return "POLYGONZ(" + pointZssWKTCoordinates(polygonZ.Rings) + ")"
 }
 
 func polygonMWKT(polygonM geom.PolygonM) string {
-	return "POLYGONM(" + linearRingMsWKTCoordinates(polygonM.Rings) + ")"
+	return "POLYGONM(" + pointMssWKTCoordinates(polygonM.Rings) + ")"
 }
 
 func polygonZMWKT(polygonZM geom.PolygonZM) string {
-	return "POLYGONZM(" + linearRingZMsWKTCoordinates(polygonZM.Rings) + ")"
+	return "POLYGONZM(" + pointZMssWKTCoordinates(polygonZM.Rings) + ")"
 }
 
 func WKT(g geom.T) (string, error) {

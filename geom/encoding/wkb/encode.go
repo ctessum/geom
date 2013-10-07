@@ -34,76 +34,76 @@ func writePointZM(w io.Writer, byteOrder binary.ByteOrder, pointZM geom.PointZM)
 	return binary.Write(w, byteOrder, &pointZM)
 }
 
-func writeLinearRing(w io.Writer, byteOrder binary.ByteOrder, linearRing geom.LinearRing) error {
-	if err := binary.Write(w, byteOrder, uint32(len(linearRing))); err != nil {
+func writePoints(w io.Writer, byteOrder binary.ByteOrder, points []geom.Point) error {
+	if err := binary.Write(w, byteOrder, uint32(len(points))); err != nil {
 		return err
 	}
-	return binary.Write(w, byteOrder, &linearRing)
+	return binary.Write(w, byteOrder, &points)
 }
 
-func writeLinearRingZ(w io.Writer, byteOrder binary.ByteOrder, linearRingZ geom.LinearRingZ) error {
-	if err := binary.Write(w, byteOrder, uint32(len(linearRingZ))); err != nil {
+func writePointZs(w io.Writer, byteOrder binary.ByteOrder, pointZs []geom.PointZ) error {
+	if err := binary.Write(w, byteOrder, uint32(len(pointZs))); err != nil {
 		return err
 	}
-	return binary.Write(w, byteOrder, &linearRingZ)
+	return binary.Write(w, byteOrder, &pointZs)
 }
 
-func writeLinearRingM(w io.Writer, byteOrder binary.ByteOrder, linearRingM geom.LinearRingM) error {
-	if err := binary.Write(w, byteOrder, uint32(len(linearRingM))); err != nil {
+func writePointMs(w io.Writer, byteOrder binary.ByteOrder, pointMs []geom.PointM) error {
+	if err := binary.Write(w, byteOrder, uint32(len(pointMs))); err != nil {
 		return err
 	}
-	return binary.Write(w, byteOrder, &linearRingM)
+	return binary.Write(w, byteOrder, &pointMs)
 }
 
-func writeLinearRingZM(w io.Writer, byteOrder binary.ByteOrder, linearRingZM geom.LinearRingZM) error {
-	if err := binary.Write(w, byteOrder, uint32(len(linearRingZM))); err != nil {
+func writePointZMs(w io.Writer, byteOrder binary.ByteOrder, pointZMs []geom.PointZM) error {
+	if err := binary.Write(w, byteOrder, uint32(len(pointZMs))); err != nil {
 		return err
 	}
-	return binary.Write(w, byteOrder, &linearRingZM)
+	return binary.Write(w, byteOrder, &pointZMs)
 }
 
-func writeLinearRings(w io.Writer, byteOrder binary.ByteOrder, linearRings geom.LinearRings) error {
-	if err := binary.Write(w, byteOrder, uint32(len(linearRings))); err != nil {
+func writePointss(w io.Writer, byteOrder binary.ByteOrder, pointss [][]geom.Point) error {
+	if err := binary.Write(w, byteOrder, uint32(len(pointss))); err != nil {
 		return err
 	}
-	for _, linearRing := range linearRings {
-		if err := writeLinearRing(w, byteOrder, linearRing); err != nil {
+	for _, points := range pointss {
+		if err := writePoints(w, byteOrder, points); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func writeLinearRingZs(w io.Writer, byteOrder binary.ByteOrder, linearRingZs geom.LinearRingZs) error {
-	if err := binary.Write(w, byteOrder, uint32(len(linearRingZs))); err != nil {
+func writePointZss(w io.Writer, byteOrder binary.ByteOrder, pointZss [][]geom.PointZ) error {
+	if err := binary.Write(w, byteOrder, uint32(len(pointZss))); err != nil {
 		return err
 	}
-	for _, linearRingZ := range linearRingZs {
-		if err := writeLinearRingZ(w, byteOrder, linearRingZ); err != nil {
+	for _, pointZs := range pointZss {
+		if err := writePointZs(w, byteOrder, pointZs); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func writeLinearRingMs(w io.Writer, byteOrder binary.ByteOrder, linearRingMs geom.LinearRingMs) error {
-	if err := binary.Write(w, byteOrder, uint32(len(linearRingMs))); err != nil {
+func writePointMss(w io.Writer, byteOrder binary.ByteOrder, pointMss [][]geom.PointM) error {
+	if err := binary.Write(w, byteOrder, uint32(len(pointMss))); err != nil {
 		return err
 	}
-	for _, linearRingM := range linearRingMs {
-		if err := writeLinearRingM(w, byteOrder, linearRingM); err != nil {
+	for _, pointMs := range pointMss {
+		if err := writePointMs(w, byteOrder, pointMs); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func writeLinearRingZMs(w io.Writer, byteOrder binary.ByteOrder, linearRingZMs geom.LinearRingZMs) error {
-	if err := binary.Write(w, byteOrder, uint32(len(linearRingZMs))); err != nil {
+func writePointZMss(w io.Writer, byteOrder binary.ByteOrder, pointZMss [][]geom.PointZM) error {
+	if err := binary.Write(w, byteOrder, uint32(len(pointZMss))); err != nil {
 		return err
 	}
-	for _, linearRingZM := range linearRingZMs {
-		if err := writeLinearRingZM(w, byteOrder, linearRingZM); err != nil {
+	for _, pointZMs := range pointZMss {
+		if err := writePointZMs(w, byteOrder, pointZMs); err != nil {
 			return err
 		}
 	}
@@ -111,35 +111,35 @@ func writeLinearRingZMs(w io.Writer, byteOrder binary.ByteOrder, linearRingZMs g
 }
 
 func writeLineString(w io.Writer, byteOrder binary.ByteOrder, lineString geom.LineString) error {
-	return writeLinearRing(w, byteOrder, lineString.Points)
+	return writePoints(w, byteOrder, lineString.Points)
 }
 
 func writeLineStringZ(w io.Writer, byteOrder binary.ByteOrder, lineStringZ geom.LineStringZ) error {
-	return writeLinearRingZ(w, byteOrder, lineStringZ.Points)
+	return writePointZs(w, byteOrder, lineStringZ.Points)
 }
 
 func writeLineStringM(w io.Writer, byteOrder binary.ByteOrder, lineStringM geom.LineStringM) error {
-	return writeLinearRingM(w, byteOrder, lineStringM.Points)
+	return writePointMs(w, byteOrder, lineStringM.Points)
 }
 
 func writeLineStringZM(w io.Writer, byteOrder binary.ByteOrder, lineStringZM geom.LineStringZM) error {
-	return writeLinearRingZM(w, byteOrder, lineStringZM.Points)
+	return writePointZMs(w, byteOrder, lineStringZM.Points)
 }
 
 func writePolygon(w io.Writer, byteOrder binary.ByteOrder, polygon geom.Polygon) error {
-	return writeLinearRings(w, byteOrder, polygon.Rings)
+	return writePointss(w, byteOrder, polygon.Rings)
 }
 
 func writePolygonZ(w io.Writer, byteOrder binary.ByteOrder, polygonZ geom.PolygonZ) error {
-	return writeLinearRingZs(w, byteOrder, polygonZ.Rings)
+	return writePointZss(w, byteOrder, polygonZ.Rings)
 }
 
 func writePolygonM(w io.Writer, byteOrder binary.ByteOrder, polygonM geom.PolygonM) error {
-	return writeLinearRingMs(w, byteOrder, polygonM.Rings)
+	return writePointMss(w, byteOrder, polygonM.Rings)
 }
 
 func writePolygonZM(w io.Writer, byteOrder binary.ByteOrder, polygonZM geom.PolygonZM) error {
-	return writeLinearRingZMs(w, byteOrder, polygonZM.Rings)
+	return writePointZMss(w, byteOrder, polygonZM.Rings)
 }
 
 func Write(w io.Writer, byteOrder binary.ByteOrder, g geom.T) error {

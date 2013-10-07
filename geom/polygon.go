@@ -1,33 +1,33 @@
 package geom
 
 type Polygon struct {
-	Rings LinearRings
+	Rings [][]Point
 }
 
 func (polygon Polygon) Bounds() *Bounds {
-	return NewBounds().ExtendLinearRings(polygon.Rings)
+	return NewBounds().ExtendPointss(polygon.Rings)
 }
 
 type PolygonZ struct {
-	Rings LinearRingZs
+	Rings [][]PointZ
 }
 
 func (polygonZ PolygonZ) Bounds() *Bounds {
-	return NewBounds().ExtendLinearRingZs(polygonZ.Rings)
+	return NewBounds().ExtendPointZss(polygonZ.Rings)
 }
 
 type PolygonM struct {
-	Rings LinearRingMs
+	Rings [][]PointM
 }
 
 func (polygonM PolygonM) Bounds() *Bounds {
-	return NewBounds().ExtendLinearRingMs(polygonM.Rings)
+	return NewBounds().ExtendPointMss(polygonM.Rings)
 }
 
 type PolygonZM struct {
-	Rings LinearRingZMs
+	Rings [][]PointZM
 }
 
 func (polygonZM PolygonZM) Bounds() *Bounds {
-	return NewBounds().ExtendLinearRingZMs(polygonZM.Rings)
+	return NewBounds().ExtendPointZMss(polygonZM.Rings)
 }

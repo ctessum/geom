@@ -44,47 +44,47 @@ func unmarshalCoordinates3(jsonCoordinates interface{}) [][][]float64 {
 	return coordinates
 }
 
-func makeLinearRing(coordinates [][]float64) geom.LinearRing {
-	linearRing := make(geom.LinearRing, len(coordinates))
+func makeLinearRing(coordinates [][]float64) []geom.Point {
+	points := make([]geom.Point, len(coordinates))
 	for i, element := range coordinates {
 		if len(element) == 2 {
-			linearRing[i].X = element[0]
-			linearRing[i].Y = element[1]
+			points[i].X = element[0]
+			points[i].Y = element[1]
 		} else {
 			panic(&InvalidGeometryError{})
 		}
 	}
-	return linearRing
+	return points
 }
 
-func makeLinearRingZ(coordinates [][]float64) geom.LinearRingZ {
-	linearRingZ := make(geom.LinearRingZ, len(coordinates))
+func makeLinearRingZ(coordinates [][]float64) []geom.PointZ {
+	pointZs := make([]geom.PointZ, len(coordinates))
 	for i, element := range coordinates {
 		if len(element) == 3 {
-			linearRingZ[i].X = element[0]
-			linearRingZ[i].Y = element[1]
-			linearRingZ[i].Z = element[2]
+			pointZs[i].X = element[0]
+			pointZs[i].Y = element[1]
+			pointZs[i].Z = element[2]
 		} else {
 			panic(&InvalidGeometryError{})
 		}
 	}
-	return linearRingZ
+	return pointZs
 }
 
-func makeLinearRings(coordinates [][][]float64) geom.LinearRings {
-	linearRings := make(geom.LinearRings, len(coordinates))
+func makeLinearRings(coordinates [][][]float64) [][]geom.Point {
+	pointss := make([][]geom.Point, len(coordinates))
 	for i, element := range coordinates {
-		linearRings[i] = makeLinearRing(element)
+		pointss[i] = makeLinearRing(element)
 	}
-	return linearRings
+	return pointss
 }
 
-func makeLinearRingZs(coordinates [][][]float64) geom.LinearRingZs {
-	linearRingZs := make(geom.LinearRingZs, len(coordinates))
+func makeLinearRingZs(coordinates [][][]float64) [][]geom.PointZ {
+	pointZss := make([][]geom.PointZ, len(coordinates))
 	for i, element := range coordinates {
-		linearRingZs[i] = makeLinearRingZ(element)
+		pointZss[i] = makeLinearRingZ(element)
 	}
-	return linearRingZs
+	return pointZss
 }
 
 func doFromGeoJSON(g *Geometry) geom.T {

@@ -20,19 +20,19 @@ func TestGeoJSON(t *testing.T) {
 			[]byte(`{"type":"Point","coordinates":[1,2,3]}`),
 		},
 		{
-			geom.LineString{geom.LinearRing{{1, 2}, {3, 4}}},
+			geom.LineString{[]geom.Point{{1, 2}, {3, 4}}},
 			[]byte(`{"type":"LineString","coordinates":[[1,2],[3,4]]}`),
 		},
 		{
-			geom.LineStringZ{geom.LinearRingZ{{1, 2, 3}, {3, 4, 5}}},
+			geom.LineStringZ{[]geom.PointZ{{1, 2, 3}, {3, 4, 5}}},
 			[]byte(`{"type":"LineString","coordinates":[[1,2,3],[3,4,5]]}`),
 		},
 		{
-			geom.Polygon{geom.LinearRings{{{1, 2}, {3, 4}, {5, 6}}}},
+			geom.Polygon{[][]geom.Point{{{1, 2}, {3, 4}, {5, 6}}}},
 			[]byte(`{"type":"Polygon","coordinates":[[[1,2],[3,4],[5,6]]]}`),
 		},
 		{
-			geom.PolygonZ{geom.LinearRingZs{{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}}},
+			geom.PolygonZ{[][]geom.PointZ{{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}}},
 			[]byte(`{"type":"Polygon","coordinates":[[[1,2,3],[4,5,6],[7,8,9]]]}`),
 		},
 	}

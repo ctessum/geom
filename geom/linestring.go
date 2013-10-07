@@ -1,33 +1,33 @@
 package geom
 
 type LineString struct {
-	Points LinearRing
+	Points []Point
 }
 
 func (lineString LineString) Bounds() *Bounds {
-	return lineString.Points.Bounds()
+	return NewBounds().ExtendPoints(lineString.Points)
 }
 
 type LineStringZ struct {
-	Points LinearRingZ
+	Points []PointZ
 }
 
 func (lineStringZ LineStringZ) Bounds() *Bounds {
-	return lineStringZ.Points.Bounds()
+	return NewBounds().ExtendPointZs(lineStringZ.Points)
 }
 
 type LineStringM struct {
-	Points LinearRingM
+	Points []PointM
 }
 
 func (lineStringM LineStringM) Bounds() *Bounds {
-	return lineStringM.Points.Bounds()
+	return NewBounds().ExtendPointMs(lineStringM.Points)
 }
 
 type LineStringZM struct {
-	Points LinearRingZM
+	Points []PointZM
 }
 
 func (lineStringZM LineStringZM) Bounds() *Bounds {
-	return lineStringZM.Points.Bounds()
+	return NewBounds().ExtendPointZMs(lineStringZM.Points)
 }

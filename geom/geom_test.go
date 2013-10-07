@@ -28,23 +28,23 @@ func TestBounds(t *testing.T) {
 			&Bounds{Point{1, 2}, Point{1, 2}},
 		},
 		{
-			LineString{LinearRing{{1, 2}, {3, 4}}},
+			LineString{[]Point{{1, 2}, {3, 4}}},
 			&Bounds{Point{1, 2}, Point{3, 4}},
 		},
 		{
-			LineStringZ{LinearRingZ{{1, 2, 3}, {4, 5, 6}}},
+			LineStringZ{[]PointZ{{1, 2, 3}, {4, 5, 6}}},
 			&Bounds{Point{1, 2}, Point{4, 5}},
 		},
 		{
-			LineStringM{LinearRingM{{1, 2, 3}, {4, 5, 6}}},
+			LineStringM{[]PointM{{1, 2, 3}, {4, 5, 6}}},
 			&Bounds{Point{1, 2}, Point{4, 5}},
 		},
 		{
-			LineStringZM{LinearRingZM{{1, 2, 3, 4}, {5, 6, 7, 8}}},
+			LineStringZM{[]PointZM{{1, 2, 3, 4}, {5, 6, 7, 8}}},
 			&Bounds{Point{1, 2}, Point{5, 6}},
 		},
 		{
-			Polygon{LinearRings{LinearRing{{1, 2}, {3, 4}, {5, 6}}}},
+			Polygon{[][]Point{{{1, 2}, {3, 4}, {5, 6}}}},
 			&Bounds{Point{1, 2}, Point{5, 6}},
 		},
 	}
