@@ -1,7 +1,7 @@
 package wkt
 
 import (
-	"geom"
+	"github.com/twpayne/gogeom/geom"
 	"testing"
 )
 

@@ -1,7 +1,7 @@
 package geojson
 
 import (
-	"geom"
+	"github.com/twpayne/gogeom/geom"
 	"reflect"
 	"testing"
 )

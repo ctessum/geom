@@ -1,7 +1,7 @@
 package wkb
 
 import (
-	"geom"
+	"github.com/twpayne/gogeom/geom"
 	"reflect"
 	"testing"
 )

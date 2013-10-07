@@ -2,7 +2,7 @@ package geojson
 
 import (
 	"encoding/json"
-	"geom"
+	"github.com/twpayne/gogeom/geom"
 )
 
 func unmarshalCoordinates(jsonCoordinates interface{}) []float64 {

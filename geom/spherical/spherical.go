@@ -1,7 +1,7 @@
 package spherical
 
 import (
-	"geom"
+	"github.com/twpayne/gogeom/geom"
 	"math"
 )
 

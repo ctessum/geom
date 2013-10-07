@@ -2,7 +2,7 @@ package wkt
 
 import (
 	"fmt"
-	"geom"
+	"github.com/twpayne/gogeom/geom"
 	"reflect"
 	"strings"
 )

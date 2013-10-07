@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"geom"
+	"github.com/twpayne/gogeom/geom"
 	"io"
 )
 
