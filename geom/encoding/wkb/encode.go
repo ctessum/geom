@@ -224,4 +224,3 @@ func Marshal(g geom.T, byteOrder binary.ByteOrder) ([]byte, error) {
 	}
 	return w.Bytes(), nil
 }
-
