@@ -43,6 +43,17 @@ func (lineString{{.Z}}{{.M}} LineString{{.Z}}{{.M}}) Bounds() *Bounds {
 }
 {{end}}`
 
+const polygon = `package geom
+{{range .Instances}}
+type Polygon{{.Z}}{{.M}} struct {
+	Rings [][]Point{{.Z}}{{.M}}
+}
+
+func (polygon{{.Z}}{{.M}} Polygon{{.Z}}{{.M}}) Bounds() *Bounds {
+	return NewBounds().ExtendPoint{{.Z}}{{.M}}ss(polygon{{.Z}}{{.M}}.Rings)
+}
+{{end}}`
+
 var types = []struct {
 	filename  string
 	name      string
@@ -51,6 +62,7 @@ var types = []struct {
 }{
 	{"geom/point.go", "Point", point, dims},
 	{"geom/linestring.go", "LineString", lineString, dims},
+	{"geom/polygon.go", "Polygon", polygon, dims},
 }
 
 func main() {
