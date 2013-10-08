@@ -2,6 +2,8 @@ package wkb
 
 import (
 	"encoding/binary"
+	"fmt"
+	"github.com/twpayne/gogeom/geom"
 	"reflect"
 )
 
@@ -57,6 +59,14 @@ var (
 	XDR = binary.BigEndian
 	NDR = binary.LittleEndian
 )
+
+type UnexpectedGeometryError struct {
+	Geom geom.T
+}
+
+func (e UnexpectedGeometryError) Error() string {
+	return fmt.Sprintf("wkb: unexpected geometry %v", e.Geom)
+}
 
 type UnsupportedGeometryError struct {
 	Type reflect.Type
