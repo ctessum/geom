@@ -26,6 +26,10 @@ func init() {
 	wkbReaders[wkbPolygonZ] = polygonZReader
 	wkbReaders[wkbPolygonM] = polygonMReader
 	wkbReaders[wkbPolygonZM] = polygonZMReader
+	wkbReaders[wkbMultiPoint] = multiPointReader
+	wkbReaders[wkbMultiPointZ] = multiPointZReader
+	wkbReaders[wkbMultiPointM] = multiPointMReader
+	wkbReaders[wkbMultiPointZM] = multiPointZMReader
 }
 
 func readPoints(r io.Reader, byteOrder binary.ByteOrder) ([]geom.Point, error) {
@@ -202,6 +206,86 @@ func polygonZMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
 		}
 	}
 	return geom.PolygonZM{ringZMs}, nil
+}
+
+func multiPointReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
+	var numPoints uint32
+	if err := binary.Read(r, byteOrder, &numPoints); err != nil {
+		return nil, err
+	}
+	points := make([]geom.Point, numPoints)
+	for i := uint32(0); i < numPoints; i++ {
+		if g, err := Read(r); err == nil {
+			var ok bool
+			points[i], ok = g.(geom.Point)
+			if !ok {
+				return nil, &UnexpectedGeometryError{g}
+			}
+		} else {
+			return nil, err
+		}
+	}
+	return geom.MultiPoint{points}, nil
+}
+
+func multiPointZReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
+	var numPoints uint32
+	if err := binary.Read(r, byteOrder, &numPoints); err != nil {
+		return nil, err
+	}
+	pointZs := make([]geom.PointZ, numPoints)
+	for i := uint32(0); i < numPoints; i++ {
+		if g, err := Read(r); err == nil {
+			var ok bool
+			pointZs[i], ok = g.(geom.PointZ)
+			if !ok {
+				return nil, &UnexpectedGeometryError{g}
+			}
+		} else {
+			return nil, err
+		}
+	}
+	return geom.MultiPointZ{pointZs}, nil
+}
+
+func multiPointMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
+	var numPoints uint32
+	if err := binary.Read(r, byteOrder, &numPoints); err != nil {
+		return nil, err
+	}
+	pointMs := make([]geom.PointM, numPoints)
+	for i := uint32(0); i < numPoints; i++ {
+		if g, err := Read(r); err == nil {
+			var ok bool
+			pointMs[i], ok = g.(geom.PointM)
+			if !ok {
+				return nil, &UnexpectedGeometryError{g}
+			}
+		} else {
+			return nil, err
+		}
+	}
+	return geom.MultiPointM{pointMs}, nil
+}
+
+func multiPointZMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
+	var numPoints uint32
+	if err := binary.Read(r, byteOrder, &numPoints); err != nil {
+		return nil, err
+	}
+	pointZMs := make([]geom.PointZM, numPoints)
+	for i := uint32(0); i < numPoints; i++ {
+		if g, err := Read(r); err == nil {
+			var ok bool
+			pointZMs[i], ok = g.(geom.PointZM)
+			if !ok {
+				return nil, &UnexpectedGeometryError{g}
+			}
+		} else {
+			return nil, err
+		}
+	}
+	return geom.MultiPointZM{pointZMs}, nil
 }
 
 func Read(r io.Reader) (geom.T, error) {

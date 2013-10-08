@@ -142,6 +142,54 @@ func writePolygonZM(w io.Writer, byteOrder binary.ByteOrder, polygonZM geom.Poly
 	return writePointZMss(w, byteOrder, polygonZM.Rings)
 }
 
+func writeMultiPoint(w io.Writer, byteOrder binary.ByteOrder, multiPoint geom.MultiPoint) error {
+	if err := binary.Write(w, byteOrder, uint32(len(multiPoint.Points))); err != nil {
+		return err
+	}
+	for _, point := range multiPoint.Points {
+		if err := Write(w, byteOrder, point); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func writeMultiPointZ(w io.Writer, byteOrder binary.ByteOrder, multiPointZ geom.MultiPointZ) error {
+	if err := binary.Write(w, byteOrder, uint32(len(multiPointZ.Points))); err != nil {
+		return err
+	}
+	for _, pointZ := range multiPointZ.Points {
+		if err := Write(w, byteOrder, pointZ); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func writeMultiPointM(w io.Writer, byteOrder binary.ByteOrder, multiPointM geom.MultiPointM) error {
+	if err := binary.Write(w, byteOrder, uint32(len(multiPointM.Points))); err != nil {
+		return err
+	}
+	for _, pointM := range multiPointM.Points {
+		if err := Write(w, byteOrder, pointM); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func writeMultiPointZM(w io.Writer, byteOrder binary.ByteOrder, multiPointZM geom.MultiPointZM) error {
+	if err := binary.Write(w, byteOrder, uint32(len(multiPointZM.Points))); err != nil {
+		return err
+	}
+	for _, pointZM := range multiPointZM.Points {
+		if err := Write(w, byteOrder, pointZM); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func Write(w io.Writer, byteOrder binary.ByteOrder, g geom.T) error {
 	var wkbByteOrder uint8
 	switch byteOrder {
@@ -181,6 +229,14 @@ func Write(w io.Writer, byteOrder binary.ByteOrder, g geom.T) error {
 		wkbGeometryType = wkbPolygonM
 	case geom.PolygonZM:
 		wkbGeometryType = wkbPolygonZM
+	case geom.MultiPoint:
+		wkbGeometryType = wkbMultiPoint
+	case geom.MultiPointZ:
+		wkbGeometryType = wkbMultiPointZ
+	case geom.MultiPointM:
+		wkbGeometryType = wkbMultiPointM
+	case geom.MultiPointZM:
+		wkbGeometryType = wkbMultiPointZM
 	default:
 		return &UnsupportedGeometryError{reflect.TypeOf(g)}
 	}
@@ -212,6 +268,14 @@ func Write(w io.Writer, byteOrder binary.ByteOrder, g geom.T) error {
 		return writePolygonM(w, byteOrder, g.(geom.PolygonM))
 	case geom.PolygonZM:
 		return writePolygonZM(w, byteOrder, g.(geom.PolygonZM))
+	case geom.MultiPoint:
+		return writeMultiPoint(w, byteOrder, g.(geom.MultiPoint))
+	case geom.MultiPointZ:
+		return writeMultiPointZ(w, byteOrder, g.(geom.MultiPointZ))
+	case geom.MultiPointM:
+		return writeMultiPointM(w, byteOrder, g.(geom.MultiPointM))
+	case geom.MultiPointZM:
+		return writeMultiPointZM(w, byteOrder, g.(geom.MultiPointZM))
 	default:
 		return &UnsupportedGeometryError{reflect.TypeOf(g)}
 	}
