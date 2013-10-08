@@ -32,6 +32,17 @@ func (point{{.Z}}{{.M}} Point{{.Z}}{{.M}}) Bounds() *Bounds {
 }
 {{end}}`
 
+const lineString = `package geom
+{{range .Instances}}
+type LineString{{.Z}}{{.M}} struct {
+	Points []Point{{.Z}}{{.M}}
+}
+
+func (lineString{{.Z}}{{.M}} LineString{{.Z}}{{.M}}) Bounds() *Bounds {
+	return NewBounds().ExtendPoint{{.Z}}{{.M}}s(lineString{{.Z}}{{.M}}.Points)
+}
+{{end}}`
+
 var types = []struct {
 	filename  string
 	name      string
@@ -39,6 +50,7 @@ var types = []struct {
 	Instances []dim
 }{
 	{"geom/point.go", "Point", point, dims},
+	{"geom/linestring.go", "LineString", lineString, dims},
 }
 
 func main() {
