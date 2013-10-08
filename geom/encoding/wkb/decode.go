@@ -10,19 +10,22 @@ import (
 
 type wkbReader func(io.Reader, binary.ByteOrder) (geom.T, error)
 
-var wkbReaders = map[uint32]wkbReader{
-	wkbPoint:        pointReader,
-	wkbPointZ:       pointZReader,
-	wkbPointM:       pointMReader,
-	wkbPointZM:      pointZMReader,
-	wkbLineString:   lineStringReader,
-	wkbLineStringZ:  lineStringZReader,
-	wkbLineStringM:  lineStringMReader,
-	wkbLineStringZM: lineStringZMReader,
-	wkbPolygon:      polygonReader,
-	wkbPolygonZ:     polygonZReader,
-	wkbPolygonM:     polygonMReader,
-	wkbPolygonZM:    polygonZMReader,
+var wkbReaders map[uint32]wkbReader
+
+func init() {
+	wkbReaders = make(map[uint32]wkbReader)
+	wkbReaders[wkbPoint] = pointReader
+	wkbReaders[wkbPointZ] = pointZReader
+	wkbReaders[wkbPointM] = pointMReader
+	wkbReaders[wkbPointZM] = pointZMReader
+	wkbReaders[wkbLineString] = lineStringReader
+	wkbReaders[wkbLineStringZ] = lineStringZReader
+	wkbReaders[wkbLineStringM] = lineStringMReader
+	wkbReaders[wkbLineStringZM] = lineStringZMReader
+	wkbReaders[wkbPolygon] = polygonReader
+	wkbReaders[wkbPolygonZ] = polygonZReader
+	wkbReaders[wkbPolygonM] = polygonMReader
+	wkbReaders[wkbPolygonZM] = polygonZMReader
 }
 
 func readPoints(r io.Reader, byteOrder binary.ByteOrder) ([]geom.Point, error) {
