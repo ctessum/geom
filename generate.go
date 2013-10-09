@@ -169,6 +169,47 @@ func (multiPoint{{.ZM}} MultiPoint{{.ZM}}) Bounds() *Bounds {
 }
 {{end}}`
 
+const multiPointWKB = `package wkb
+
+import (
+	"encoding/binary"
+	"github.com/twpayne/gogeom/geom"
+	"io"
+)
+{{range .Dims}}
+func multiPoint{{.ZM}}Reader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
+	var numPoints uint32
+	if err := binary.Read(r, byteOrder, &numPoints); err != nil {
+		return nil, err
+	}
+	point{{.ZM}}s := make([]geom.Point{{.ZM}}, numPoints)
+	for i := uint32(0); i < numPoints; i++ {
+		if g, err := Read(r); err == nil {
+			var ok bool
+			point{{.ZM}}s[i], ok = g.(geom.Point{{.ZM}})
+			if !ok {
+				return nil, &UnexpectedGeometryError{g}
+			}
+		} else {
+			return nil, err
+		}
+	}
+	return geom.MultiPoint{{.ZM}}{point{{.ZM}}s}, nil
+}
+
+func writeMultiPoint{{.ZM}}(w io.Writer, byteOrder binary.ByteOrder, multiPoint{{.ZM}} geom.MultiPoint{{.ZM}}) error {
+	if err := binary.Write(w, byteOrder, uint32(len(multiPoint{{.ZM}}.Points))); err != nil {
+		return err
+	}
+	for _, point{{.ZM}} := range multiPoint{{.ZM}}.Points {
+		if err := Write(w, byteOrder, point{{.ZM}}); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+{{end}}`
+
 var types = []struct {
 	filename string
 	name     string
@@ -182,6 +223,7 @@ var types = []struct {
 	{"geom/encoding/wkb/point.go", "PointWKB", pointWKB, dims},
 	{"geom/encoding/wkb/linestring.go", "LineStringWKB", lineStringWKB, dims},
 	{"geom/encoding/wkb/polygon.go", "PolygonWKB", polygonWKB, dims},
+	{"geom/encoding/wkb/multipoint.go", "MultiPointWKB", multiPointWKB, dims},
 }
 
 func main() {
