@@ -80,38 +80,6 @@ func readPointZMs(r io.Reader, byteOrder binary.ByteOrder) ([]geom.PointZM, erro
 	return pointZMs, nil
 }
 
-func pointReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
-	point := geom.Point{}
-	if err := binary.Read(r, byteOrder, &point); err != nil {
-		return nil, err
-	}
-	return point, nil
-}
-
-func pointZReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
-	pointZ := geom.PointZ{}
-	if err := binary.Read(r, byteOrder, &pointZ); err != nil {
-		return nil, err
-	}
-	return pointZ, nil
-}
-
-func pointMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
-	pointM := geom.PointM{}
-	if err := binary.Read(r, byteOrder, &pointM); err != nil {
-		return nil, err
-	}
-	return pointM, nil
-}
-
-func pointZMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
-	pointZM := geom.PointZM{}
-	if err := binary.Read(r, byteOrder, &pointZM); err != nil {
-		return nil, err
-	}
-	return pointZM, nil
-}
-
 func lineStringReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
 	points, err := readPoints(r, byteOrder)
 	if err != nil {

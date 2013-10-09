@@ -32,6 +32,47 @@ func (point{{.Z}}{{.M}} Point{{.Z}}{{.M}}) Bounds() *Bounds {
 }
 {{end}}`
 
+const pointWKB = `package wkb
+
+import (
+	"encoding/binary"
+	"github.com/twpayne/gogeom/geom"
+	"io"
+)
+{{range .Instances}}
+func point{{.Z}}{{.M}}Reader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
+	point{{.Z}}{{.M}} := geom.Point{{.Z}}{{.M}}{}
+	if err := binary.Read(r, byteOrder, &point{{.Z}}{{.M}}); err != nil {
+		return nil, err
+	}
+	return point{{.Z}}{{.M}}, nil
+}
+
+func writePoint{{.Z}}{{.M}}(w io.Writer, byteOrder binary.ByteOrder, point{{.Z}}{{.M}} geom.Point{{.Z}}{{.M}}) error {
+	return binary.Write(w, byteOrder, &point{{.Z}}{{.M}})
+}
+
+func writePoint{{.Z}}{{.M}}s(w io.Writer, byteOrder binary.ByteOrder, point{{.Z}}{{.M}}s []geom.Point{{.Z}}{{.M}}) error {
+	if err := binary.Write(w, byteOrder, uint32(len(point{{.Z}}{{.M}}s))); err != nil {
+		return err
+	}
+	return binary.Write(w, byteOrder, &point{{.Z}}{{.M}}s)
+}
+
+func writePoint{{.Z}}{{.M}}ss(w io.Writer, byteOrder binary.ByteOrder, point{{.Z}}{{.M}}ss [][]geom.Point{{.Z}}{{.M}}) error {
+	if err := binary.Write(w, byteOrder, uint32(len(point{{.Z}}{{.M}}ss))); err != nil {
+		return err
+	}
+	for _, point{{.Z}}{{.M}}s := range point{{.Z}}{{.M}}ss {
+		if err := writePoint{{.Z}}{{.M}}s(w, byteOrder, point{{.Z}}{{.M}}s); err != nil {
+			return err
+		}
+	}
+	return nil
+
+}
+{{end}}`
+
 const lineString = `package geom
 {{range .Instances}}
 type LineString{{.Z}}{{.M}} struct {
@@ -75,6 +116,7 @@ var types = []struct {
 	{"geom/linestring.go", "LineString", lineString, dims},
 	{"geom/polygon.go", "Polygon", polygon, dims},
 	{"geom/multipoint.go", "MultiPoint", multiPoint, dims},
+	{"geom/encoding/wkb/point.go", "Point", pointWKB, dims},
 }
 
 func main() {
