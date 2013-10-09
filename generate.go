@@ -7,28 +7,29 @@ import (
 )
 
 type dim struct {
-	Z string
-	M string
+	Z  string
+	M  string
+	ZM string
 }
 
 var dims = []dim{
-	{Z: "", M: ""},
-	{Z: "Z", M: ""},
-	{Z: "", M: "M"},
-	{Z: "Z", M: "M"},
+	{Z: "", M: "", ZM: ""},
+	{Z: "Z", M: "", ZM: "Z"},
+	{Z: "", M: "M", ZM: "M"},
+	{Z: "Z", M: "M", ZM: "ZM"},
 }
 
 const point = `package geom
 {{range .Instances}}
-type Point{{.Z}}{{.M}} struct {
+type Point{{.ZM}} struct {
 	X float64
 	Y float64{{with .Z}}
 	Z float64{{end}}{{with .M}}
 	M float64{{end}}
 }
 
-func (point{{.Z}}{{.M}} Point{{.Z}}{{.M}}) Bounds() *Bounds {
-	return NewBoundsPoint{{.Z}}{{.M}}(point{{.Z}}{{.M}})
+func (point{{.ZM}} Point{{.ZM}}) Bounds() *Bounds {
+	return NewBoundsPoint{{.ZM}}(point{{.ZM}})
 }
 {{end}}`
 
@@ -40,31 +41,31 @@ import (
 	"io"
 )
 {{range .Instances}}
-func point{{.Z}}{{.M}}Reader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
-	point{{.Z}}{{.M}} := geom.Point{{.Z}}{{.M}}{}
-	if err := binary.Read(r, byteOrder, &point{{.Z}}{{.M}}); err != nil {
+func point{{.ZM}}Reader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
+	point{{.ZM}} := geom.Point{{.ZM}}{}
+	if err := binary.Read(r, byteOrder, &point{{.ZM}}); err != nil {
 		return nil, err
 	}
-	return point{{.Z}}{{.M}}, nil
+	return point{{.ZM}}, nil
 }
 
-func writePoint{{.Z}}{{.M}}(w io.Writer, byteOrder binary.ByteOrder, point{{.Z}}{{.M}} geom.Point{{.Z}}{{.M}}) error {
-	return binary.Write(w, byteOrder, &point{{.Z}}{{.M}})
+func writePoint{{.ZM}}(w io.Writer, byteOrder binary.ByteOrder, point{{.ZM}} geom.Point{{.ZM}}) error {
+	return binary.Write(w, byteOrder, &point{{.ZM}})
 }
 
-func writePoint{{.Z}}{{.M}}s(w io.Writer, byteOrder binary.ByteOrder, point{{.Z}}{{.M}}s []geom.Point{{.Z}}{{.M}}) error {
-	if err := binary.Write(w, byteOrder, uint32(len(point{{.Z}}{{.M}}s))); err != nil {
+func writePoint{{.ZM}}s(w io.Writer, byteOrder binary.ByteOrder, point{{.ZM}}s []geom.Point{{.ZM}}) error {
+	if err := binary.Write(w, byteOrder, uint32(len(point{{.ZM}}s))); err != nil {
 		return err
 	}
-	return binary.Write(w, byteOrder, &point{{.Z}}{{.M}}s)
+	return binary.Write(w, byteOrder, &point{{.ZM}}s)
 }
 
-func writePoint{{.Z}}{{.M}}ss(w io.Writer, byteOrder binary.ByteOrder, point{{.Z}}{{.M}}ss [][]geom.Point{{.Z}}{{.M}}) error {
-	if err := binary.Write(w, byteOrder, uint32(len(point{{.Z}}{{.M}}ss))); err != nil {
+func writePoint{{.ZM}}ss(w io.Writer, byteOrder binary.ByteOrder, point{{.ZM}}ss [][]geom.Point{{.ZM}}) error {
+	if err := binary.Write(w, byteOrder, uint32(len(point{{.ZM}}ss))); err != nil {
 		return err
 	}
-	for _, point{{.Z}}{{.M}}s := range point{{.Z}}{{.M}}ss {
-		if err := writePoint{{.Z}}{{.M}}s(w, byteOrder, point{{.Z}}{{.M}}s); err != nil {
+	for _, point{{.ZM}}s := range point{{.ZM}}ss {
+		if err := writePoint{{.ZM}}s(w, byteOrder, point{{.ZM}}s); err != nil {
 			return err
 		}
 	}
@@ -75,34 +76,34 @@ func writePoint{{.Z}}{{.M}}ss(w io.Writer, byteOrder binary.ByteOrder, point{{.Z
 
 const lineString = `package geom
 {{range .Instances}}
-type LineString{{.Z}}{{.M}} struct {
-	Points []Point{{.Z}}{{.M}}
+type LineString{{.ZM}} struct {
+	Points []Point{{.ZM}}
 }
 
-func (lineString{{.Z}}{{.M}} LineString{{.Z}}{{.M}}) Bounds() *Bounds {
-	return NewBounds().ExtendPoint{{.Z}}{{.M}}s(lineString{{.Z}}{{.M}}.Points)
+func (lineString{{.ZM}} LineString{{.ZM}}) Bounds() *Bounds {
+	return NewBounds().ExtendPoint{{.ZM}}s(lineString{{.ZM}}.Points)
 }
 {{end}}`
 
 const polygon = `package geom
 {{range .Instances}}
-type Polygon{{.Z}}{{.M}} struct {
-	Rings [][]Point{{.Z}}{{.M}}
+type Polygon{{.ZM}} struct {
+	Rings [][]Point{{.ZM}}
 }
 
-func (polygon{{.Z}}{{.M}} Polygon{{.Z}}{{.M}}) Bounds() *Bounds {
-	return NewBounds().ExtendPoint{{.Z}}{{.M}}ss(polygon{{.Z}}{{.M}}.Rings)
+func (polygon{{.ZM}} Polygon{{.ZM}}) Bounds() *Bounds {
+	return NewBounds().ExtendPoint{{.ZM}}ss(polygon{{.ZM}}.Rings)
 }
 {{end}}`
 
 const multiPoint = `package geom
 {{range .Instances}}
-type MultiPoint{{.Z}}{{.M}} struct {
-	Points []Point{{.Z}}{{.M}}
+type MultiPoint{{.ZM}} struct {
+	Points []Point{{.ZM}}
 }
 
-func (multiPoint{{.Z}}{{.M}} MultiPoint{{.Z}}{{.M}}) Bounds() *Bounds {
-	return NewBounds().ExtendPoint{{.Z}}{{.M}}s(multiPoint{{.Z}}{{.M}}.Points)
+func (multiPoint{{.ZM}} MultiPoint{{.ZM}}) Bounds() *Bounds {
+	return NewBounds().ExtendPoint{{.ZM}}s(multiPoint{{.ZM}}.Points)
 }
 {{end}}`
 
