@@ -54,6 +54,17 @@ func (polygon{{.Z}}{{.M}} Polygon{{.Z}}{{.M}}) Bounds() *Bounds {
 }
 {{end}}`
 
+const multiPoint = `package geom
+{{range .Instances}}
+type MultiPoint{{.Z}}{{.M}} struct {
+	Points []Point{{.Z}}{{.M}}
+}
+
+func (multiPoint{{.Z}}{{.M}} MultiPoint{{.Z}}{{.M}}) Bounds() *Bounds {
+	return NewBounds().ExtendPoint{{.Z}}{{.M}}s(multiPoint{{.Z}}{{.M}}.Points)
+}
+{{end}}`
+
 var types = []struct {
 	filename  string
 	name      string
@@ -63,6 +74,7 @@ var types = []struct {
 	{"geom/point.go", "Point", point, dims},
 	{"geom/linestring.go", "LineString", lineString, dims},
 	{"geom/polygon.go", "Polygon", polygon, dims},
+	{"geom/multipoint.go", "MultiPoint", multiPoint, dims},
 }
 
 func main() {
