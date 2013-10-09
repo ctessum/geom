@@ -97,6 +97,27 @@ func (lineString{{.ZM}} LineString{{.ZM}}) Bounds() *Bounds {
 }
 {{end}}`
 
+const lineStringWKB = `package wkb
+
+import (
+	"encoding/binary"
+	"github.com/twpayne/gogeom/geom"
+	"io"
+)
+{{range .Instances}}
+func lineString{{.ZM}}Reader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
+	point{{.ZM}}s, err := readPoint{{.ZM}}s(r, byteOrder)
+	if err != nil {
+		return nil, err
+	}
+	return geom.LineString{{.ZM}}{point{{.ZM}}s}, nil
+}
+
+func writeLineString{{.ZM}}(w io.Writer, byteOrder binary.ByteOrder, lineString{{.ZM}} geom.LineString{{.ZM}}) error {
+	return writePoint{{.ZM}}s(w, byteOrder, lineString{{.ZM}}.Points)
+}
+{{end}}`
+
 const polygon = `package geom
 {{range .Instances}}
 type Polygon{{.ZM}} struct {
@@ -130,6 +151,7 @@ var types = []struct {
 	{"geom/polygon.go", "Polygon", polygon, dims},
 	{"geom/multipoint.go", "MultiPoint", multiPoint, dims},
 	{"geom/encoding/wkb/point.go", "Point", pointWKB, dims},
+	{"geom/encoding/wkb/linestring.go", "LineString", lineStringWKB, dims},
 }
 
 func main() {

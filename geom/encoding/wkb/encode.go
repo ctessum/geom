@@ -18,22 +18,6 @@ func writeMany(w io.Writer, byteOrder binary.ByteOrder, data ...interface{}) err
 	return nil
 }
 
-func writeLineString(w io.Writer, byteOrder binary.ByteOrder, lineString geom.LineString) error {
-	return writePoints(w, byteOrder, lineString.Points)
-}
-
-func writeLineStringZ(w io.Writer, byteOrder binary.ByteOrder, lineStringZ geom.LineStringZ) error {
-	return writePointZs(w, byteOrder, lineStringZ.Points)
-}
-
-func writeLineStringM(w io.Writer, byteOrder binary.ByteOrder, lineStringM geom.LineStringM) error {
-	return writePointMs(w, byteOrder, lineStringM.Points)
-}
-
-func writeLineStringZM(w io.Writer, byteOrder binary.ByteOrder, lineStringZM geom.LineStringZM) error {
-	return writePointZMs(w, byteOrder, lineStringZM.Points)
-}
-
 func writePolygon(w io.Writer, byteOrder binary.ByteOrder, polygon geom.Polygon) error {
 	return writePointss(w, byteOrder, polygon.Rings)
 }
