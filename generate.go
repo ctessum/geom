@@ -86,6 +86,39 @@ func writePoint{{.ZM}}ss(w io.Writer, byteOrder binary.ByteOrder, point{{.ZM}}ss
 }
 {{end}}`
 
+const pointWKT = `package wkt
+
+import (
+	"fmt"
+	"github.com/twpayne/gogeom/geom"
+	"strings"
+)
+{{range .Dims}}
+func point{{.ZM}}WKTCoordinates(point{{.ZM}} geom.Point{{.ZM}}) string {
+        return fmt.Sprintf("%g %g{{if .Z}} %g{{end}}{{if .M}} %g{{end}}", point{{.ZM}}.X, point{{.ZM}}.Y{{if .Z}}, point{{.ZM}}.Z{{end}}{{if .M}}, point{{.ZM}}.M{{end}})
+}
+
+func point{{.ZM}}sWKCoordinates(point{{.ZM}}s []geom.Point{{.ZM}}) string {
+        wktCoordinates := make([]string, len(point{{.ZM}}s))
+        for i, point{{.ZM}} := range point{{.ZM}}s {
+                wktCoordinates[i] = point{{.ZM}}WKTCoordinates(point{{.ZM}})
+        }
+        return strings.Join(wktCoordinates, ",")
+}
+
+func point{{.ZM}}ssWKTCoordinates(point{{.ZM}}ss [][]geom.Point{{.ZM}}) string {
+        wktCoordinates := make([]string, len(point{{.ZM}}ss))
+        for i, point{{.ZM}}s := range point{{.ZM}}ss {
+                wktCoordinates[i] = "(" + point{{.ZM}}sWKCoordinates(point{{.ZM}}s) + ")"
+        }
+        return strings.Join(wktCoordinates, ",")
+}
+
+func point{{.ZM}}WKT(point{{.ZM}} geom.Point{{.ZM}}) string {
+        return "POINT{{.ZM}}(" + point{{.ZM}}WKTCoordinates(point{{.ZM}}) + ")"
+}
+{{end}}`
+
 const lineString = `package geom
 {{range .Dims}}
 type LineString{{.ZM}} struct {
@@ -115,6 +148,17 @@ func lineString{{.ZM}}Reader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, e
 
 func writeLineString{{.ZM}}(w io.Writer, byteOrder binary.ByteOrder, lineString{{.ZM}} geom.LineString{{.ZM}}) error {
 	return writePoint{{.ZM}}s(w, byteOrder, lineString{{.ZM}}.Points)
+}
+{{end}}`
+
+const lineStringWKT = `package wkt
+
+import (
+	"github.com/twpayne/gogeom/geom"
+)
+{{range .Dims}}
+func lineString{{.ZM}}WKT(lineString{{.ZM}} geom.LineString{{.ZM}}) string {
+	return "LINESTRING{{.ZM}}(" + point{{.ZM}}sWKCoordinates(lineString{{.ZM}}.Points) + ")"
 }
 {{end}}`
 
@@ -155,6 +199,17 @@ func polygon{{.ZM}}Reader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, erro
 
 func writePolygon{{.ZM}}(w io.Writer, byteOrder binary.ByteOrder, polygon{{.ZM}} geom.Polygon{{.ZM}}) error {
 	return writePoint{{.ZM}}ss(w, byteOrder, polygon{{.ZM}}.Rings)
+}
+{{end}}`
+
+const polygonWKT = `package wkt
+
+import (
+	"github.com/twpayne/gogeom/geom"
+)
+{{range .Dims}}
+func polygon{{.ZM}}WKT(polygon{{.ZM}} geom.Polygon{{.ZM}}) string {
+	return "POLYGON{{.ZM}}(" + point{{.ZM}}ssWKTCoordinates(polygon{{.ZM}}.Rings) + ")"
 }
 {{end}}`
 
@@ -224,6 +279,9 @@ var types = []struct {
 	{"geom/encoding/wkb/linestring.go", "LineStringWKB", lineStringWKB, dims},
 	{"geom/encoding/wkb/polygon.go", "PolygonWKB", polygonWKB, dims},
 	{"geom/encoding/wkb/multipoint.go", "MultiPointWKB", multiPointWKB, dims},
+	{"geom/encoding/wkt/point.go", "PointWKT", pointWKT, dims},
+	{"geom/encoding/wkt/linestring.go", "LineStringWKT", lineStringWKT, dims},
+	{"geom/encoding/wkt/polygon.go", "PolygonWKT", polygonWKT, dims},
 }
 
 func main() {
