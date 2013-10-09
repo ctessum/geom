@@ -4,18 +4,30 @@ import (
 	"github.com/twpayne/gogeom/geom"
 )
 
-func polygonWKT(polygon geom.Polygon) string {
-	return "POLYGON(" + pointssWKTCoordinates(polygon.Rings) + ")"
+func appendPolygonWKT(dst []byte, polygon *geom.Polygon) []byte {
+	dst = append(dst, []byte("POLYGON(")...)
+	dst = appendPointssCoords(dst, polygon.Rings)
+	dst = append(dst, ')')
+	return dst
 }
 
-func polygonZWKT(polygonZ geom.PolygonZ) string {
-	return "POLYGONZ(" + pointZssWKTCoordinates(polygonZ.Rings) + ")"
+func appendPolygonZWKT(dst []byte, polygonZ *geom.PolygonZ) []byte {
+	dst = append(dst, []byte("POLYGONZ(")...)
+	dst = appendPointZssCoords(dst, polygonZ.Rings)
+	dst = append(dst, ')')
+	return dst
 }
 
-func polygonMWKT(polygonM geom.PolygonM) string {
-	return "POLYGONM(" + pointMssWKTCoordinates(polygonM.Rings) + ")"
+func appendPolygonMWKT(dst []byte, polygonM *geom.PolygonM) []byte {
+	dst = append(dst, []byte("POLYGONM(")...)
+	dst = appendPointMssCoords(dst, polygonM.Rings)
+	dst = append(dst, ')')
+	return dst
 }
 
-func polygonZMWKT(polygonZM geom.PolygonZM) string {
-	return "POLYGONZM(" + pointZMssWKTCoordinates(polygonZM.Rings) + ")"
+func appendPolygonZMWKT(dst []byte, polygonZM *geom.PolygonZM) []byte {
+	dst = append(dst, []byte("POLYGONZM(")...)
+	dst = appendPointZMssCoords(dst, polygonZM.Rings)
+	dst = append(dst, ')')
+	return dst
 }

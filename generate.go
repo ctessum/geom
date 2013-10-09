@@ -89,33 +89,48 @@ func writePoint{{.ZM}}ss(w io.Writer, byteOrder binary.ByteOrder, point{{.ZM}}ss
 const pointWKT = `package wkt
 
 import (
-	"fmt"
 	"github.com/twpayne/gogeom/geom"
-	"strings"
+	"strconv"
 )
 {{range .Dims}}
-func point{{.ZM}}WKTCoordinates(point{{.ZM}} geom.Point{{.ZM}}) string {
-        return fmt.Sprintf("%g %g{{if .Z}} %g{{end}}{{if .M}} %g{{end}}", point{{.ZM}}.X, point{{.ZM}}.Y{{if .Z}}, point{{.ZM}}.Z{{end}}{{if .M}}, point{{.ZM}}.M{{end}})
+func appendPoint{{.ZM}}Coords(dst []byte, point{{.ZM}} *geom.Point{{.ZM}}) []byte {
+	dst = strconv.AppendFloat(dst, point{{.ZM}}.X, 'g', -1, 64)
+	dst = append(dst, ' ')
+	dst = strconv.AppendFloat(dst, point{{.ZM}}.Y, 'g', -1, 64){{if .Z}}
+	dst = append(dst, ' ')
+	dst = strconv.AppendFloat(dst, point{{.ZM}}.Z, 'g', -1, 64){{end}}{{if .M}}
+	dst = append(dst, ' ')
+	dst = strconv.AppendFloat(dst, point{{.ZM}}.M, 'g', -1, 64){{end}}
+	return dst
 }
 
-func point{{.ZM}}sWKCoordinates(point{{.ZM}}s []geom.Point{{.ZM}}) string {
-        wktCoordinates := make([]string, len(point{{.ZM}}s))
-        for i, point{{.ZM}} := range point{{.ZM}}s {
-                wktCoordinates[i] = point{{.ZM}}WKTCoordinates(point{{.ZM}})
-        }
-        return strings.Join(wktCoordinates, ",")
+func appendPoint{{.ZM}}sCoords(dst []byte, point{{.ZM}}s []geom.Point{{.ZM}}) []byte {
+	for i, point{{.ZM}} := range point{{.ZM}}s {
+		if i != 0 {
+			dst = append(dst, ',')
+		}
+		dst = appendPoint{{.ZM}}Coords(dst, &point{{.ZM}})
+	}
+	return dst
 }
 
-func point{{.ZM}}ssWKTCoordinates(point{{.ZM}}ss [][]geom.Point{{.ZM}}) string {
-        wktCoordinates := make([]string, len(point{{.ZM}}ss))
-        for i, point{{.ZM}}s := range point{{.ZM}}ss {
-                wktCoordinates[i] = "(" + point{{.ZM}}sWKCoordinates(point{{.ZM}}s) + ")"
-        }
-        return strings.Join(wktCoordinates, ",")
+func appendPoint{{.ZM}}ssCoords(dst []byte, point{{.ZM}}ss [][]geom.Point{{.ZM}}) []byte {
+	for i, point{{.ZM}}s := range point{{.ZM}}ss {
+		if i != 0 {
+			dst = append(dst, ',')
+		}
+		dst = append(dst, '(')
+		dst = appendPoint{{.ZM}}sCoords(dst, point{{.ZM}}s)
+		dst = append(dst, ')')
+	}
+	return dst
 }
 
-func point{{.ZM}}WKT(point{{.ZM}} geom.Point{{.ZM}}) string {
-        return "POINT{{.ZM}}(" + point{{.ZM}}WKTCoordinates(point{{.ZM}}) + ")"
+func appendPoint{{.ZM}}WKT(dst []byte, point{{.ZM}} *geom.Point{{.ZM}}) []byte {
+	dst = append(dst, []byte("POINT{{.ZM}}(")...)
+	dst = appendPoint{{.ZM}}Coords(dst, point{{.ZM}})
+	dst = append(dst, ')')
+	return dst
 }
 {{end}}`
 
@@ -157,8 +172,11 @@ import (
 	"github.com/twpayne/gogeom/geom"
 )
 {{range .Dims}}
-func lineString{{.ZM}}WKT(lineString{{.ZM}} geom.LineString{{.ZM}}) string {
-	return "LINESTRING{{.ZM}}(" + point{{.ZM}}sWKCoordinates(lineString{{.ZM}}.Points) + ")"
+func appendLineString{{.ZM}}WKT(dst []byte, lineString{{.ZM}} *geom.LineString{{.ZM}}) []byte {
+	dst = append(dst, []byte("LINESTRING{{.ZM}}(")...)
+	dst = appendPoint{{.ZM}}sCoords(dst, lineString{{.ZM}}.Points)
+	dst = append(dst, ')')
+	return dst
 }
 {{end}}`
 
@@ -208,8 +226,11 @@ import (
 	"github.com/twpayne/gogeom/geom"
 )
 {{range .Dims}}
-func polygon{{.ZM}}WKT(polygon{{.ZM}} geom.Polygon{{.ZM}}) string {
-	return "POLYGON{{.ZM}}(" + point{{.ZM}}ssWKTCoordinates(polygon{{.ZM}}.Rings) + ")"
+func appendPolygon{{.ZM}}WKT(dst []byte, polygon{{.ZM}} *geom.Polygon{{.ZM}}) []byte {
+	dst = append(dst, []byte("POLYGON{{.ZM}}(")...)
+	dst = appendPoint{{.ZM}}ssCoords(dst, polygon{{.ZM}}.Rings)
+	dst = append(dst, ')')
+	return dst
 }
 {{end}}`
 

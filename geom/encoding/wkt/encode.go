@@ -5,33 +5,45 @@ import (
 	"reflect"
 )
 
-func WKT(g geom.T) (string, error) {
+func WKT(g geom.T) ([]byte, error) {
 	switch g.(type) {
 	case geom.Point:
-		return pointWKT(g.(geom.Point)), nil
+		point := g.(geom.Point)
+		return appendPointWKT(nil, &point), nil
 	case geom.PointZ:
-		return pointZWKT(g.(geom.PointZ)), nil
+		pointZ := g.(geom.PointZ)
+		return appendPointZWKT(nil, &pointZ), nil
 	case geom.PointM:
-		return pointMWKT(g.(geom.PointM)), nil
+		pointM := g.(geom.PointM)
+		return appendPointMWKT(nil, &pointM), nil
 	case geom.PointZM:
-		return pointZMWKT(g.(geom.PointZM)), nil
+		pointZM := g.(geom.PointZM)
+		return appendPointZMWKT(nil, &pointZM), nil
 	case geom.LineString:
-		return lineStringWKT(g.(geom.LineString)), nil
+		lineString := g.(geom.LineString)
+		return appendLineStringWKT(nil, &lineString), nil
 	case geom.LineStringZ:
-		return lineStringZWKT(g.(geom.LineStringZ)), nil
+		lineStringZ := g.(geom.LineStringZ)
+		return appendLineStringZWKT(nil, &lineStringZ), nil
 	case geom.LineStringM:
-		return lineStringMWKT(g.(geom.LineStringM)), nil
+		lineStringM := g.(geom.LineStringM)
+		return appendLineStringMWKT(nil, &lineStringM), nil
 	case geom.LineStringZM:
-		return lineStringZMWKT(g.(geom.LineStringZM)), nil
+		lineStringZM := g.(geom.LineStringZM)
+		return appendLineStringZMWKT(nil, &lineStringZM), nil
 	case geom.Polygon:
-		return polygonWKT(g.(geom.Polygon)), nil
+		polygon := g.(geom.Polygon)
+		return appendPolygonWKT(nil, &polygon), nil
 	case geom.PolygonZ:
-		return polygonZWKT(g.(geom.PolygonZ)), nil
+		polygonZ := g.(geom.PolygonZ)
+		return appendPolygonZWKT(nil, &polygonZ), nil
 	case geom.PolygonM:
-		return polygonMWKT(g.(geom.PolygonM)), nil
+		polygonM := g.(geom.PolygonM)
+		return appendPolygonMWKT(nil, &polygonM), nil
 	case geom.PolygonZM:
-		return polygonZMWKT(g.(geom.PolygonZM)), nil
+		polygonZM := g.(geom.PolygonZM)
+		return appendPolygonZMWKT(nil, &polygonZM), nil
 	default:
-		return "", &UnsupportedGeometryError{reflect.TypeOf(g)}
+		return nil, &UnsupportedGeometryError{reflect.TypeOf(g)}
 	}
 }

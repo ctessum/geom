@@ -1,103 +1,158 @@
 package wkt
 
 import (
-	"fmt"
 	"github.com/twpayne/gogeom/geom"
-	"strings"
+	"strconv"
 )
 
-func pointWKTCoordinates(point geom.Point) string {
-        return fmt.Sprintf("%g %g", point.X, point.Y)
+func appendPointCoords(dst []byte, point *geom.Point) []byte {
+	dst = strconv.AppendFloat(dst, point.X, 'g', -1, 64)
+	dst = append(dst, ' ')
+	dst = strconv.AppendFloat(dst, point.Y, 'g', -1, 64)
+	return dst
 }
 
-func pointsWKCoordinates(points []geom.Point) string {
-        wktCoordinates := make([]string, len(points))
-        for i, point := range points {
-                wktCoordinates[i] = pointWKTCoordinates(point)
-        }
-        return strings.Join(wktCoordinates, ",")
+func appendPointsCoords(dst []byte, points []geom.Point) []byte {
+	for i, point := range points {
+		if i != 0 {
+			dst = append(dst, ',')
+		}
+		dst = appendPointCoords(dst, &point)
+	}
+	return dst
 }
 
-func pointssWKTCoordinates(pointss [][]geom.Point) string {
-        wktCoordinates := make([]string, len(pointss))
-        for i, points := range pointss {
-                wktCoordinates[i] = "(" + pointsWKCoordinates(points) + ")"
-        }
-        return strings.Join(wktCoordinates, ",")
+func appendPointssCoords(dst []byte, pointss [][]geom.Point) []byte {
+	for i, points := range pointss {
+		if i != 0 {
+			dst = append(dst, ',')
+		}
+		dst = append(dst, '(')
+		dst = appendPointsCoords(dst, points)
+		dst = append(dst, ')')
+	}
+	return dst
 }
 
-func pointWKT(point geom.Point) string {
-        return "POINT(" + pointWKTCoordinates(point) + ")"
+func appendPointWKT(dst []byte, point *geom.Point) []byte {
+	dst = append(dst, []byte("POINT(")...)
+	dst = appendPointCoords(dst, point)
+	dst = append(dst, ')')
+	return dst
 }
 
-func pointZWKTCoordinates(pointZ geom.PointZ) string {
-        return fmt.Sprintf("%g %g %g", pointZ.X, pointZ.Y, pointZ.Z)
+func appendPointZCoords(dst []byte, pointZ *geom.PointZ) []byte {
+	dst = strconv.AppendFloat(dst, pointZ.X, 'g', -1, 64)
+	dst = append(dst, ' ')
+	dst = strconv.AppendFloat(dst, pointZ.Y, 'g', -1, 64)
+	dst = append(dst, ' ')
+	dst = strconv.AppendFloat(dst, pointZ.Z, 'g', -1, 64)
+	return dst
 }
 
-func pointZsWKCoordinates(pointZs []geom.PointZ) string {
-        wktCoordinates := make([]string, len(pointZs))
-        for i, pointZ := range pointZs {
-                wktCoordinates[i] = pointZWKTCoordinates(pointZ)
-        }
-        return strings.Join(wktCoordinates, ",")
+func appendPointZsCoords(dst []byte, pointZs []geom.PointZ) []byte {
+	for i, pointZ := range pointZs {
+		if i != 0 {
+			dst = append(dst, ',')
+		}
+		dst = appendPointZCoords(dst, &pointZ)
+	}
+	return dst
 }
 
-func pointZssWKTCoordinates(pointZss [][]geom.PointZ) string {
-        wktCoordinates := make([]string, len(pointZss))
-        for i, pointZs := range pointZss {
-                wktCoordinates[i] = "(" + pointZsWKCoordinates(pointZs) + ")"
-        }
-        return strings.Join(wktCoordinates, ",")
+func appendPointZssCoords(dst []byte, pointZss [][]geom.PointZ) []byte {
+	for i, pointZs := range pointZss {
+		if i != 0 {
+			dst = append(dst, ',')
+		}
+		dst = append(dst, '(')
+		dst = appendPointZsCoords(dst, pointZs)
+		dst = append(dst, ')')
+	}
+	return dst
 }
 
-func pointZWKT(pointZ geom.PointZ) string {
-        return "POINTZ(" + pointZWKTCoordinates(pointZ) + ")"
+func appendPointZWKT(dst []byte, pointZ *geom.PointZ) []byte {
+	dst = append(dst, []byte("POINTZ(")...)
+	dst = appendPointZCoords(dst, pointZ)
+	dst = append(dst, ')')
+	return dst
 }
 
-func pointMWKTCoordinates(pointM geom.PointM) string {
-        return fmt.Sprintf("%g %g %g", pointM.X, pointM.Y, pointM.M)
+func appendPointMCoords(dst []byte, pointM *geom.PointM) []byte {
+	dst = strconv.AppendFloat(dst, pointM.X, 'g', -1, 64)
+	dst = append(dst, ' ')
+	dst = strconv.AppendFloat(dst, pointM.Y, 'g', -1, 64)
+	dst = append(dst, ' ')
+	dst = strconv.AppendFloat(dst, pointM.M, 'g', -1, 64)
+	return dst
 }
 
-func pointMsWKCoordinates(pointMs []geom.PointM) string {
-        wktCoordinates := make([]string, len(pointMs))
-        for i, pointM := range pointMs {
-                wktCoordinates[i] = pointMWKTCoordinates(pointM)
-        }
-        return strings.Join(wktCoordinates, ",")
+func appendPointMsCoords(dst []byte, pointMs []geom.PointM) []byte {
+	for i, pointM := range pointMs {
+		if i != 0 {
+			dst = append(dst, ',')
+		}
+		dst = appendPointMCoords(dst, &pointM)
+	}
+	return dst
 }
 
-func pointMssWKTCoordinates(pointMss [][]geom.PointM) string {
-        wktCoordinates := make([]string, len(pointMss))
-        for i, pointMs := range pointMss {
-                wktCoordinates[i] = "(" + pointMsWKCoordinates(pointMs) + ")"
-        }
-        return strings.Join(wktCoordinates, ",")
+func appendPointMssCoords(dst []byte, pointMss [][]geom.PointM) []byte {
+	for i, pointMs := range pointMss {
+		if i != 0 {
+			dst = append(dst, ',')
+		}
+		dst = append(dst, '(')
+		dst = appendPointMsCoords(dst, pointMs)
+		dst = append(dst, ')')
+	}
+	return dst
 }
 
-func pointMWKT(pointM geom.PointM) string {
-        return "POINTM(" + pointMWKTCoordinates(pointM) + ")"
+func appendPointMWKT(dst []byte, pointM *geom.PointM) []byte {
+	dst = append(dst, []byte("POINTM(")...)
+	dst = appendPointMCoords(dst, pointM)
+	dst = append(dst, ')')
+	return dst
 }
 
-func pointZMWKTCoordinates(pointZM geom.PointZM) string {
-        return fmt.Sprintf("%g %g %g %g", pointZM.X, pointZM.Y, pointZM.Z, pointZM.M)
+func appendPointZMCoords(dst []byte, pointZM *geom.PointZM) []byte {
+	dst = strconv.AppendFloat(dst, pointZM.X, 'g', -1, 64)
+	dst = append(dst, ' ')
+	dst = strconv.AppendFloat(dst, pointZM.Y, 'g', -1, 64)
+	dst = append(dst, ' ')
+	dst = strconv.AppendFloat(dst, pointZM.Z, 'g', -1, 64)
+	dst = append(dst, ' ')
+	dst = strconv.AppendFloat(dst, pointZM.M, 'g', -1, 64)
+	return dst
 }
 
-func pointZMsWKCoordinates(pointZMs []geom.PointZM) string {
-        wktCoordinates := make([]string, len(pointZMs))
-        for i, pointZM := range pointZMs {
-                wktCoordinates[i] = pointZMWKTCoordinates(pointZM)
-        }
-        return strings.Join(wktCoordinates, ",")
+func appendPointZMsCoords(dst []byte, pointZMs []geom.PointZM) []byte {
+	for i, pointZM := range pointZMs {
+		if i != 0 {
+			dst = append(dst, ',')
+		}
+		dst = appendPointZMCoords(dst, &pointZM)
+	}
+	return dst
 }
 
-func pointZMssWKTCoordinates(pointZMss [][]geom.PointZM) string {
-        wktCoordinates := make([]string, len(pointZMss))
-        for i, pointZMs := range pointZMss {
-                wktCoordinates[i] = "(" + pointZMsWKCoordinates(pointZMs) + ")"
-        }
-        return strings.Join(wktCoordinates, ",")
+func appendPointZMssCoords(dst []byte, pointZMss [][]geom.PointZM) []byte {
+	for i, pointZMs := range pointZMss {
+		if i != 0 {
+			dst = append(dst, ',')
+		}
+		dst = append(dst, '(')
+		dst = appendPointZMsCoords(dst, pointZMs)
+		dst = append(dst, ')')
+	}
+	return dst
 }
 
-func pointZMWKT(pointZM geom.PointZM) string {
-        return "POINTZM(" + pointZMWKTCoordinates(pointZM) + ")"
+func appendPointZMWKT(dst []byte, pointZM *geom.PointZM) []byte {
+	dst = append(dst, []byte("POINTZM(")...)
+	dst = appendPointZMCoords(dst, pointZM)
+	dst = append(dst, ')')
+	return dst
 }
