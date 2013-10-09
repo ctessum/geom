@@ -18,22 +18,6 @@ func writeMany(w io.Writer, byteOrder binary.ByteOrder, data ...interface{}) err
 	return nil
 }
 
-func writePolygon(w io.Writer, byteOrder binary.ByteOrder, polygon geom.Polygon) error {
-	return writePointss(w, byteOrder, polygon.Rings)
-}
-
-func writePolygonZ(w io.Writer, byteOrder binary.ByteOrder, polygonZ geom.PolygonZ) error {
-	return writePointZss(w, byteOrder, polygonZ.Rings)
-}
-
-func writePolygonM(w io.Writer, byteOrder binary.ByteOrder, polygonM geom.PolygonM) error {
-	return writePointMss(w, byteOrder, polygonM.Rings)
-}
-
-func writePolygonZM(w io.Writer, byteOrder binary.ByteOrder, polygonZM geom.PolygonZM) error {
-	return writePointZMss(w, byteOrder, polygonZM.Rings)
-}
-
 func writeMultiPoint(w io.Writer, byteOrder binary.ByteOrder, multiPoint geom.MultiPoint) error {
 	if err := binary.Write(w, byteOrder, uint32(len(multiPoint.Points))); err != nil {
 		return err

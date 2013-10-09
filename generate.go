@@ -129,6 +129,35 @@ func (polygon{{.ZM}} Polygon{{.ZM}}) Bounds() *Bounds {
 }
 {{end}}`
 
+const polygonWKB = `package wkb
+
+import (
+	"encoding/binary"
+	"github.com/twpayne/gogeom/geom"
+	"io"
+)
+{{range .Instances}}
+func polygon{{.ZM}}Reader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
+	var numRings uint32
+	if err := binary.Read(r, byteOrder, &numRings); err != nil {
+		return nil, err
+	}
+	ring{{.ZM}}s := make([][]geom.Point{{.ZM}}, numRings)
+	for i := uint32(0); i < numRings; i++ {
+		if point{{.ZM}}s, err := readPoint{{.ZM}}s(r, byteOrder); err != nil {
+			return nil, err
+		} else {
+			ring{{.ZM}}s[i] = point{{.ZM}}s
+		}
+	}
+	return geom.Polygon{{.ZM}}{ring{{.ZM}}s}, nil
+}
+
+func writePolygon{{.ZM}}(w io.Writer, byteOrder binary.ByteOrder, polygon{{.ZM}} geom.Polygon{{.ZM}}) error {
+	return writePoint{{.ZM}}ss(w, byteOrder, polygon{{.ZM}}.Rings)
+}
+{{end}}`
+
 const multiPoint = `package geom
 {{range .Instances}}
 type MultiPoint{{.ZM}} struct {
@@ -152,6 +181,7 @@ var types = []struct {
 	{"geom/multipoint.go", "MultiPoint", multiPoint, dims},
 	{"geom/encoding/wkb/point.go", "Point", pointWKB, dims},
 	{"geom/encoding/wkb/linestring.go", "LineString", lineStringWKB, dims},
+	{"geom/encoding/wkb/polygon.go", "Polygon", polygonWKB, dims},
 }
 
 func main() {
