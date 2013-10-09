@@ -179,9 +179,9 @@ var types = []struct {
 	{"geom/linestring.go", "LineString", lineString, dims},
 	{"geom/polygon.go", "Polygon", polygon, dims},
 	{"geom/multipoint.go", "MultiPoint", multiPoint, dims},
-	{"geom/encoding/wkb/point.go", "Point", pointWKB, dims},
-	{"geom/encoding/wkb/linestring.go", "LineString", lineStringWKB, dims},
-	{"geom/encoding/wkb/polygon.go", "Polygon", polygonWKB, dims},
+	{"geom/encoding/wkb/point.go", "PointWKB", pointWKB, dims},
+	{"geom/encoding/wkb/linestring.go", "LineStringWKB", lineStringWKB, dims},
+	{"geom/encoding/wkb/polygon.go", "PolygonWKB", polygonWKB, dims},
 }
 
 func main() {
