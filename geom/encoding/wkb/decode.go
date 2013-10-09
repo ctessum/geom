@@ -32,54 +32,6 @@ func init() {
 	wkbReaders[wkbMultiPointZM] = multiPointZMReader
 }
 
-func readPoints(r io.Reader, byteOrder binary.ByteOrder) ([]geom.Point, error) {
-	var numPoints uint32
-	if err := binary.Read(r, byteOrder, &numPoints); err != nil {
-		return nil, err
-	}
-	points := make([]geom.Point, numPoints)
-	if err := binary.Read(r, byteOrder, &points); err != nil {
-		return nil, err
-	}
-	return points, nil
-}
-
-func readPointZs(r io.Reader, byteOrder binary.ByteOrder) ([]geom.PointZ, error) {
-	var numPoints uint32
-	if err := binary.Read(r, byteOrder, &numPoints); err != nil {
-		return nil, err
-	}
-	pointZs := make([]geom.PointZ, numPoints)
-	if err := binary.Read(r, byteOrder, &pointZs); err != nil {
-		return nil, err
-	}
-	return pointZs, nil
-}
-
-func readPointMs(r io.Reader, byteOrder binary.ByteOrder) ([]geom.PointM, error) {
-	var numPoints uint32
-	if err := binary.Read(r, byteOrder, &numPoints); err != nil {
-		return nil, err
-	}
-	pointMs := make([]geom.PointM, numPoints)
-	if err := binary.Read(r, byteOrder, &pointMs); err != nil {
-		return nil, err
-	}
-	return pointMs, nil
-}
-
-func readPointZMs(r io.Reader, byteOrder binary.ByteOrder) ([]geom.PointZM, error) {
-	var numPoints uint32
-	if err := binary.Read(r, byteOrder, &numPoints); err != nil {
-		return nil, err
-	}
-	pointZMs := make([]geom.PointZM, numPoints)
-	if err := binary.Read(r, byteOrder, &pointZMs); err != nil {
-		return nil, err
-	}
-	return pointZMs, nil
-}
-
 func lineStringReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
 	points, err := readPoints(r, byteOrder)
 	if err != nil {

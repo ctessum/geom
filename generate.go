@@ -49,6 +49,18 @@ func point{{.ZM}}Reader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error)
 	return point{{.ZM}}, nil
 }
 
+func readPoint{{.ZM}}s(r io.Reader, byteOrder binary.ByteOrder) ([]geom.Point{{.ZM}}, error) {
+	var numPoints uint32
+	if err := binary.Read(r, byteOrder, &numPoints); err != nil {
+		return nil, err
+	}
+	point{{.ZM}}s := make([]geom.Point{{.ZM}}, numPoints)
+	if err := binary.Read(r, byteOrder, &point{{.ZM}}s); err != nil {
+		return nil, err
+	}
+	return point{{.ZM}}s, nil
+}
+
 func writePoint{{.ZM}}(w io.Writer, byteOrder binary.ByteOrder, point{{.ZM}} geom.Point{{.ZM}}) error {
 	return binary.Write(w, byteOrder, &point{{.ZM}})
 }

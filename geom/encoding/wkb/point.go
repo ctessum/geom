@@ -14,6 +14,18 @@ func pointReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
 	return point, nil
 }
 
+func readPoints(r io.Reader, byteOrder binary.ByteOrder) ([]geom.Point, error) {
+	var numPoints uint32
+	if err := binary.Read(r, byteOrder, &numPoints); err != nil {
+		return nil, err
+	}
+	points := make([]geom.Point, numPoints)
+	if err := binary.Read(r, byteOrder, &points); err != nil {
+		return nil, err
+	}
+	return points, nil
+}
+
 func writePoint(w io.Writer, byteOrder binary.ByteOrder, point geom.Point) error {
 	return binary.Write(w, byteOrder, &point)
 }
@@ -44,6 +56,18 @@ func pointZReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
 		return nil, err
 	}
 	return pointZ, nil
+}
+
+func readPointZs(r io.Reader, byteOrder binary.ByteOrder) ([]geom.PointZ, error) {
+	var numPoints uint32
+	if err := binary.Read(r, byteOrder, &numPoints); err != nil {
+		return nil, err
+	}
+	pointZs := make([]geom.PointZ, numPoints)
+	if err := binary.Read(r, byteOrder, &pointZs); err != nil {
+		return nil, err
+	}
+	return pointZs, nil
 }
 
 func writePointZ(w io.Writer, byteOrder binary.ByteOrder, pointZ geom.PointZ) error {
@@ -78,6 +102,18 @@ func pointMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
 	return pointM, nil
 }
 
+func readPointMs(r io.Reader, byteOrder binary.ByteOrder) ([]geom.PointM, error) {
+	var numPoints uint32
+	if err := binary.Read(r, byteOrder, &numPoints); err != nil {
+		return nil, err
+	}
+	pointMs := make([]geom.PointM, numPoints)
+	if err := binary.Read(r, byteOrder, &pointMs); err != nil {
+		return nil, err
+	}
+	return pointMs, nil
+}
+
 func writePointM(w io.Writer, byteOrder binary.ByteOrder, pointM geom.PointM) error {
 	return binary.Write(w, byteOrder, &pointM)
 }
@@ -108,6 +144,18 @@ func pointZMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
 		return nil, err
 	}
 	return pointZM, nil
+}
+
+func readPointZMs(r io.Reader, byteOrder binary.ByteOrder) ([]geom.PointZM, error) {
+	var numPoints uint32
+	if err := binary.Read(r, byteOrder, &numPoints); err != nil {
+		return nil, err
+	}
+	pointZMs := make([]geom.PointZM, numPoints)
+	if err := binary.Read(r, byteOrder, &pointZMs); err != nil {
+		return nil, err
+	}
+	return pointZMs, nil
 }
 
 func writePointZM(w io.Writer, byteOrder binary.ByteOrder, pointZM geom.PointZM) error {
