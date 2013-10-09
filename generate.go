@@ -20,7 +20,7 @@ var dims = []dim{
 }
 
 const point = `package geom
-{{range .Instances}}
+{{range .Dims}}
 type Point{{.ZM}} struct {
 	X float64
 	Y float64{{with .Z}}
@@ -40,7 +40,7 @@ import (
 	"github.com/twpayne/gogeom/geom"
 	"io"
 )
-{{range .Instances}}
+{{range .Dims}}
 func point{{.ZM}}Reader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
 	point{{.ZM}} := geom.Point{{.ZM}}{}
 	if err := binary.Read(r, byteOrder, &point{{.ZM}}); err != nil {
@@ -87,7 +87,7 @@ func writePoint{{.ZM}}ss(w io.Writer, byteOrder binary.ByteOrder, point{{.ZM}}ss
 {{end}}`
 
 const lineString = `package geom
-{{range .Instances}}
+{{range .Dims}}
 type LineString{{.ZM}} struct {
 	Points []Point{{.ZM}}
 }
@@ -104,7 +104,7 @@ import (
 	"github.com/twpayne/gogeom/geom"
 	"io"
 )
-{{range .Instances}}
+{{range .Dims}}
 func lineString{{.ZM}}Reader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
 	point{{.ZM}}s, err := readPoint{{.ZM}}s(r, byteOrder)
 	if err != nil {
@@ -119,7 +119,7 @@ func writeLineString{{.ZM}}(w io.Writer, byteOrder binary.ByteOrder, lineString{
 {{end}}`
 
 const polygon = `package geom
-{{range .Instances}}
+{{range .Dims}}
 type Polygon{{.ZM}} struct {
 	Rings [][]Point{{.ZM}}
 }
@@ -136,7 +136,7 @@ import (
 	"github.com/twpayne/gogeom/geom"
 	"io"
 )
-{{range .Instances}}
+{{range .Dims}}
 func polygon{{.ZM}}Reader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
 	var numRings uint32
 	if err := binary.Read(r, byteOrder, &numRings); err != nil {
@@ -159,7 +159,7 @@ func writePolygon{{.ZM}}(w io.Writer, byteOrder binary.ByteOrder, polygon{{.ZM}}
 {{end}}`
 
 const multiPoint = `package geom
-{{range .Instances}}
+{{range .Dims}}
 type MultiPoint{{.ZM}} struct {
 	Points []Point{{.ZM}}
 }
@@ -170,10 +170,10 @@ func (multiPoint{{.ZM}} MultiPoint{{.ZM}}) Bounds() *Bounds {
 {{end}}`
 
 var types = []struct {
-	filename  string
-	name      string
-	template  string
-	Instances []dim
+	filename string
+	name     string
+	template string
+	Dims     []dim
 }{
 	{"geom/point.go", "Point", point, dims},
 	{"geom/linestring.go", "LineString", lineString, dims},
