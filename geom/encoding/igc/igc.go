@@ -37,11 +37,7 @@ type parser struct {
 }
 
 func newParser() *parser {
-	p := new(parser)
-	p.year = 2000
-	p.month = 1
-	p.day = 1
-	return p
+	return new(parser)
 }
 
 func (p *parser) parseB(line string) error {
