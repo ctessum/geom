@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/twpayne/gogeom/geom"
 	"io"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -48,20 +47,20 @@ func newParser() *parser {
 func (p *parser) parseB(line string) error {
 	var err error
 	var hour, minute, second int
-	if hour, err = strconv.Atoi(line[1:3]); err != nil {
+	if hour, err = parseDec(line, 1, 3); err != nil {
 		return err
 	}
-	if minute, err = strconv.Atoi(line[3:5]); err != nil {
+	if minute, err = parseDec(line, 3, 5); err != nil {
 		return err
 	}
-	if second, err = strconv.Atoi(line[5:7]); err != nil {
+	if second, err = parseDec(line, 5, 7); err != nil {
 		return err
 	}
 	var latDeg, latMin int
-	if latDeg, err = strconv.Atoi(line[7:9]); err != nil {
+	if latDeg, err = parseDec(line, 7, 9); err != nil {
 		return err
 	}
-	if latMin, err = strconv.Atoi(line[9:14]); err != nil {
+	if latMin, err = parseDec(line, 9, 14); err != nil {
 		return err
 	}
 	lat := float64(latDeg) + float64(latMin)/60000.
@@ -73,11 +72,11 @@ func (p *parser) parseB(line string) error {
 		return fmt.Errorf("unexpected character %v", c)
 	}
 	var lngDeg, lngMin int
-	lngDeg, err = strconv.Atoi(line[15:18])
+	lngDeg, err = parseDec(line, 15, 18)
 	if err != nil {
 		return err
 	}
-	lngMin, err = strconv.Atoi(line[18:23])
+	lngMin, err = parseDec(line, 18, 23)
 	if err != nil {
 		return err
 	}
@@ -107,13 +106,13 @@ func (p *parser) parseH(line string) error {
 func (p *parser) parseHFDTE(line string) error {
 	var err error
 	var day, month, year int
-	if day, err = strconv.Atoi(line[5:7]); err != nil {
+	if day, err = parseDec(line, 5, 7); err != nil {
 		return err
 	}
-	if month, err = strconv.Atoi(line[7:9]); err != nil {
+	if month, err = parseDec(line, 7, 9); err != nil {
 		return err
 	}
-	if year, err = strconv.Atoi(line[9:11]); err != nil {
+	if year, err = parseDec(line, 9, 11); err != nil {
 		return err
 	}
 	// FIXME check for invalid dates
