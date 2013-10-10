@@ -51,3 +51,24 @@ func TestErrors(t *testing.T) {
 		}
 	}
 }
+
+func TestI(t *testing.T) {
+
+	var testCases = []struct {
+		line string
+		want parser
+	}{
+		{"I033638FXA3940SIU4141TDS", parser{tdsStart: 40, tdsStop: 41}},
+		{"I033637LAD3839LOD4040TDS", parser{ladStart: 35, ladStop: 37, lodStart: 37, lodStop: 39, tdsStart: 39, tdsStop: 40}},
+	}
+
+	for _, tc := range testCases {
+		p := newParser()
+		if err := p.parseLine(tc.line); err != nil {
+			t.Errorf("p.parseLine(%v) = %v, want nil", tc.line, err)
+		}
+		if !reflect.DeepEqual(p, &tc.want) {
+			t.Errorf("after p.parseLine(%v), got p == %v, want %v", tc.line, p, &tc.want)
+		}
+	}
+}

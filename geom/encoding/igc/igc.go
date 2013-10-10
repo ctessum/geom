@@ -32,8 +32,11 @@ func parseDec(s string, start, stop int) (int, error) {
 }
 
 type parser struct {
-	pointMs          []geom.PointM
-	year, month, day int
+	pointMs           []geom.PointM
+	year, month, day  int
+	ladStart, ladStop int
+	lodStart, lodStop int
+	tdsStart, tdsStop int
 }
 
 func newParser() *parser {
@@ -122,12 +125,46 @@ func (p *parser) parseHFDTE(line string) error {
 	return nil
 }
 
+func (p *parser) parseI(line string) error {
+	var err error
+	var n int
+	if len(line) < 3 {
+		return fmt.Errorf("line too short")
+	}
+	if n, err = parseDec(line, 1, 3); err != nil {
+		return err
+	}
+	if len(line) < 7*n+3 {
+		return fmt.Errorf("line too short")
+	}
+	for i := 0; i < n; i++ {
+		var start, stop int
+		if start, err = parseDec(line, 7*i+3, 7*i+5); err != nil {
+			return err
+		}
+		if stop, err = parseDec(line, 7*i+5, 7*i+7); err != nil {
+			return err
+		}
+		switch line[7*i+7 : 7*i+10] {
+		case "LAD":
+			p.ladStart, p.ladStop = start-1, stop
+		case "LOD":
+			p.lodStart, p.lodStop = start-1, stop
+		case "TDS":
+			p.tdsStart, p.tdsStop = start-1, stop
+		}
+	}
+	return nil
+}
+
 func (p *parser) parseLine(line string) error {
 	switch line[0] {
 	case 'B':
 		return p.parseB(line)
 	case 'H':
 		return p.parseH(line)
+	case 'I':
+		return p.parseI(line)
 	default:
 		return nil
 	}
