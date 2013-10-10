@@ -1,0 +1,46 @@
+package wkt
+
+import (
+	"github.com/twpayne/gogeom/geom"
+	"strconv"
+){{range .Dims}}
+
+func appendPoint{{.ZM}}Coords(dst []byte, point{{.ZM}} *geom.Point{{.ZM}}) []byte {
+	dst = strconv.AppendFloat(dst, point{{.ZM}}.X, 'g', -1, 64)
+	dst = append(dst, ' ')
+	dst = strconv.AppendFloat(dst, point{{.ZM}}.Y, 'g', -1, 64){{if .Z}}
+	dst = append(dst, ' ')
+	dst = strconv.AppendFloat(dst, point{{.ZM}}.Z, 'g', -1, 64){{end}}{{if .M}}
+	dst = append(dst, ' ')
+	dst = strconv.AppendFloat(dst, point{{.ZM}}.M, 'g', -1, 64){{end}}
+	return dst
+}
+
+func appendPoint{{.ZM}}sCoords(dst []byte, point{{.ZM}}s []geom.Point{{.ZM}}) []byte {
+	for i, point{{.ZM}} := range point{{.ZM}}s {
+		if i != 0 {
+			dst = append(dst, ',')
+		}
+		dst = appendPoint{{.ZM}}Coords(dst, &point{{.ZM}})
+	}
+	return dst
+}
+
+func appendPoint{{.ZM}}ssCoords(dst []byte, point{{.ZM}}ss [][]geom.Point{{.ZM}}) []byte {
+	for i, point{{.ZM}}s := range point{{.ZM}}ss {
+		if i != 0 {
+			dst = append(dst, ',')
+		}
+		dst = append(dst, '(')
+		dst = appendPoint{{.ZM}}sCoords(dst, point{{.ZM}}s)
+		dst = append(dst, ')')
+	}
+	return dst
+}
+
+func appendPoint{{.ZM}}WKT(dst []byte, point{{.ZM}} *geom.Point{{.ZM}}) []byte {
+	dst = append(dst, []byte("POINT{{.ZM}}(")...)
+	dst = appendPoint{{.ZM}}Coords(dst, point{{.ZM}})
+	dst = append(dst, ')')
+	return dst
+}{{end}}

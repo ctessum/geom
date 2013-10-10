@@ -1,0 +1,12 @@
+package wkt
+
+import (
+	"github.com/twpayne/gogeom/geom"
+){{range .Dims}}
+
+func appendPolygon{{.ZM}}WKT(dst []byte, polygon{{.ZM}} *geom.Polygon{{.ZM}}) []byte {
+	dst = append(dst, []byte("POLYGON{{.ZM}}(")...)
+	dst = appendPoint{{.ZM}}ssCoords(dst, polygon{{.ZM}}.Rings)
+	dst = append(dst, ')')
+	return dst
+}{{end}}

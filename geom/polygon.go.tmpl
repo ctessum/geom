@@ -1,0 +1,9 @@
+package geom{{range .Dims}}
+
+type Polygon{{.ZM}} struct {
+	Rings [][]Point{{.ZM}}
+}
+
+func (polygon{{.ZM}} Polygon{{.ZM}}) Bounds() *Bounds {
+	return NewBounds().ExtendPoint{{.ZM}}ss(polygon{{.ZM}}.Rings)
+}{{end}}

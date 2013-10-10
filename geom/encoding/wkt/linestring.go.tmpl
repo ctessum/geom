@@ -1,0 +1,12 @@
+package wkt
+
+import (
+	"github.com/twpayne/gogeom/geom"
+){{range .Dims}}
+
+func appendLineString{{.ZM}}WKT(dst []byte, lineString{{.ZM}} *geom.LineString{{.ZM}}) []byte {
+	dst = append(dst, []byte("LINESTRING{{.ZM}}(")...)
+	dst = appendPoint{{.ZM}}sCoords(dst, lineString{{.ZM}}.Points)
+	dst = append(dst, ')')
+	return dst
+}{{end}}

@@ -1,0 +1,9 @@
+package geom{{range .Dims}}
+
+type LineString{{.ZM}} struct {
+	Points []Point{{.ZM}}
+}
+
+func (lineString{{.ZM}} LineString{{.ZM}}) Bounds() *Bounds {
+	return NewBounds().ExtendPoint{{.ZM}}s(lineString{{.ZM}}.Points)
+}{{end}}

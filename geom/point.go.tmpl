@@ -1,0 +1,12 @@
+package geom{{range .Dims}}
+
+type Point{{.ZM}} struct {
+	X float64
+	Y float64{{with .Z}}
+	Z float64{{end}}{{with .M}}
+	M float64{{end}}
+}
+
+func (point{{.ZM}} Point{{.ZM}}) Bounds() *Bounds {
+	return NewBoundsPoint{{.ZM}}(point{{.ZM}})
+}{{end}}

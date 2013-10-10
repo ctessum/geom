@@ -1,0 +1,9 @@
+package geom{{range .Dims}}
+
+type MultiPoint{{.ZM}} struct {
+	Points []Point{{.ZM}}
+}
+
+func (multiPoint{{.ZM}} MultiPoint{{.ZM}}) Bounds() *Bounds {
+	return NewBounds().ExtendPoint{{.ZM}}s(multiPoint{{.ZM}}.Points)
+}{{end}}
