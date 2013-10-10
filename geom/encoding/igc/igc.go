@@ -20,6 +20,18 @@ func (es Errors) Error() string {
 	return strings.Join(ss, "\n")
 }
 
+func parseDec(s string, start, stop int) (int, error) {
+	result := 0
+	for i := start; i < stop; i++ {
+		if c := s[i]; '0' <= c && c <= '9' {
+			result = 10*result + int(c) - '0'
+		} else {
+			return 0, fmt.Errorf("invalid")
+		}
+	}
+	return result, nil
+}
+
 type parser struct {
 	pointMs          []geom.PointM
 	year, month, day int
