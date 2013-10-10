@@ -137,7 +137,7 @@ func (p *parser) parseLine(line string) error {
 	}
 }
 
-func Read(r io.Reader) ([]geom.PointM, error) {
+func doParse(r io.Reader) (*parser, Errors) {
 	errors := make(Errors)
 	p := newParser()
 	s := bufio.NewScanner(r)
@@ -148,6 +148,11 @@ func Read(r io.Reader) ([]geom.PointM, error) {
 			errors[line] = err
 		}
 	}
+	return p, errors
+}
+
+func Read(r io.Reader) ([]geom.PointM, error) {
+	p, errors := doParse(r)
 	if len(errors) == 0 {
 		return p.pointMs, nil
 	} else {
