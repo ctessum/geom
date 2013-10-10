@@ -55,14 +55,14 @@ func (p *parser) parseB(line string) error {
 	if second, err = parseDec(line, 5, 7); err != nil {
 		return err
 	}
-	var latDeg, latMin int
+	var latDeg, latMMin int
 	if latDeg, err = parseDec(line, 7, 9); err != nil {
 		return err
 	}
-	if latMin, err = parseDec(line, 9, 14); err != nil {
+	if latMMin, err = parseDec(line, 9, 14); err != nil {
 		return err
 	}
-	lat := float64(latDeg) + float64(latMin)/60000.
+	lat := float64(latDeg) + float64(latMMin)/60000.
 	switch c := line[14]; c {
 	case 'N':
 	case 'S':
@@ -70,16 +70,16 @@ func (p *parser) parseB(line string) error {
 	default:
 		return fmt.Errorf("unexpected character %v", c)
 	}
-	var lngDeg, lngMin int
+	var lngDeg, lngMMin int
 	lngDeg, err = parseDec(line, 15, 18)
 	if err != nil {
 		return err
 	}
-	lngMin, err = parseDec(line, 18, 23)
+	lngMMin, err = parseDec(line, 18, 23)
 	if err != nil {
 		return err
 	}
-	lng := float64(lngDeg) + float64(lngMin)/60000.
+	lng := float64(lngDeg) + float64(lngMMin)/60000.
 	switch c := line[23]; c {
 	case 'E':
 	case 'W':
