@@ -23,6 +23,7 @@ var dims = []dim{
 func main() {
 
 	var filenames = []string{
+		"geom/bounds.go",
 		"geom/point.go",
 		"geom/linestring.go",
 		"geom/polygon.go",
