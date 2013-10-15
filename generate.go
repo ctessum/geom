@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io"
 	"log"
 	"os"
 	"text/template"
@@ -18,6 +17,26 @@ var dims = []dim{
 	{Z: "Z", M: "", ZM: "Z"},
 	{Z: "", M: "M", ZM: "M"},
 	{Z: "Z", M: "M", ZM: "ZM"},
+}
+
+var vars = struct {
+	Dims []dim
+}{dims}
+
+func generate(filename string) error {
+	t, err := template.ParseFiles(filename + ".tmpl")
+	if err != nil {
+		return err
+	}
+	w, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer w.Close()
+	if err := t.Execute(w, vars); err != nil {
+		return err
+	}
+	return nil
 }
 
 func main() {
@@ -37,22 +56,9 @@ func main() {
 		"geom/encoding/wkt/polygon.go",
 	}
 
-	var vars = struct {
-		Dims []dim
-	}{dims}
-
 	for _, filename := range filenames {
-		t, err := template.ParseFiles(filename + ".tmpl")
-		if err != nil {
-			log.Fatalf("parsing template %s: %s", filename, err)
-		}
-		var w io.WriteCloser
-		if w, err = os.Create(filename); err != nil {
-			log.Fatalf("creating %s: %s", filename, err)
-		}
-		defer w.Close()
-		if err := t.Execute(w, vars); err != nil {
-			log.Fatalf("executing %s: %s", filename, err)
+		if err := generate(filename); err != nil {
+			log.Fatalf("%s: %s", filename, err)
 		}
 	}
 
