@@ -47,6 +47,22 @@ func TestBounds(t *testing.T) {
 			Polygon{[][]Point{{{1, 2}, {3, 4}, {5, 6}}}},
 			&Bounds{Point{1, 2}, Point{5, 6}},
 		},
+		{
+			MultiPoint{[]Point{{1, 2}, {3, 4}}},
+			&Bounds{Point{1, 2}, Point{3, 4}},
+		},
+		{
+			MultiPointZ{[]PointZ{{1, 2, 3}, {4, 5, 6}}},
+			&Bounds{Point{1, 2}, Point{4, 5}},
+		},
+		{
+			MultiPointM{[]PointM{{1, 2, 3}, {4, 5, 6}}},
+			&Bounds{Point{1, 2}, Point{4, 5}},
+		},
+		{
+			MultiPointZM{[]PointZM{{1, 2, 3, 4}, {5, 6, 7, 8}}},
+			&Bounds{Point{1, 2}, Point{5, 6}},
+		},
 	}
 
 	for _, tc := range testCases {
