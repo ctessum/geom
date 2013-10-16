@@ -52,6 +52,7 @@ func main() {
 		"geom/polygon.go",
 		"geom/multipoint.go",
 		"geom/similar.go",
+		"geom/encoding/wkb/wkb.go",
 		"geom/encoding/wkb/point.go",
 		"geom/encoding/wkb/linestring.go",
 		"geom/encoding/wkb/polygon.go",
