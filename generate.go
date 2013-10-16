@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 	"text/template"
@@ -41,6 +42,9 @@ func generate(filename string) error {
 
 func main() {
 
+	var clean = flag.Bool("clean", false, "")
+	flag.Parse()
+
 	var filenames = []string{
 		"geom/bounds.go",
 		"geom/point.go",
@@ -57,9 +61,15 @@ func main() {
 		"geom/encoding/wkt/polygon.go",
 	}
 
-	for _, filename := range filenames {
-		if err := generate(filename); err != nil {
-			log.Fatalf("%s: %s", filename, err)
+	if *clean {
+		for _, filename := range filenames {
+			os.Remove(filename)
+		}
+	} else {
+		for _, filename := range filenames {
+			if err := generate(filename); err != nil {
+				log.Fatalf("%s: %s", filename, err)
+			}
 		}
 	}
 
