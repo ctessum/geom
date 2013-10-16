@@ -17,8 +17,8 @@ func Test(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		if got, err := Marshal(c.g, wkb.NDR); err != nil || got != c.ndr {
-			t.Errorf("Marshal(%#v, %#v) == %#v, %#v, want %#v, nil", c.g, wkb.NDR, got, err, c.ndr)
+		if got, err := Encode(c.g, wkb.NDR); err != nil || got != c.ndr {
+			t.Errorf("Encode(%#v, %#v) == %#v, %#v, want %#v, nil", c.g, wkb.NDR, got, err, c.ndr)
 		}
 	}
 }

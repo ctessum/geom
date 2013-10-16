@@ -131,7 +131,7 @@ func Read(r io.Reader) (geom.T, error) {
 
 }
 
-func Unmarshal(buf []byte) (geom.T, error) {
+func Decode(buf []byte) (geom.T, error) {
 	return Read(bytes.NewBuffer(buf))
 }
 
@@ -235,7 +235,7 @@ func Write(w io.Writer, byteOrder binary.ByteOrder, g geom.T) error {
 	}
 }
 
-func Marshal(g geom.T, byteOrder binary.ByteOrder) ([]byte, error) {
+func Encode(g geom.T, byteOrder binary.ByteOrder) ([]byte, error) {
 	w := bytes.NewBuffer(nil)
 	if err := Write(w, byteOrder, g); err != nil {
 		return nil, err

@@ -97,24 +97,24 @@ func TestWKB(t *testing.T) {
 
 	for _, tc := range testCases {
 
-		// test XDR reading
-		if got, err := Unmarshal(tc.xdr); err != nil || !reflect.DeepEqual(got, tc.g) {
-			t.Errorf("Unmarshal(%q) == %q, %s, want %q, nil", tc.xdr, got, err, tc.g)
+		// test XDR decoding
+		if got, err := Decode(tc.xdr); err != nil || !reflect.DeepEqual(got, tc.g) {
+			t.Errorf("Decode(%q) == %q, %s, want %q, nil", tc.xdr, got, err, tc.g)
 		}
 
-		// test XDR writing
-		if got, err := Marshal(tc.g, XDR); err != nil || !reflect.DeepEqual(got, tc.xdr) {
-			t.Errorf("Marshal(%q, %q) == %q, %q, want %q, nil", tc.g, XDR, got, err, tc.xdr)
+		// test XDR encoding
+		if got, err := Encode(tc.g, XDR); err != nil || !reflect.DeepEqual(got, tc.xdr) {
+			t.Errorf("Encode(%q, %q) == %q, %q, want %q, nil", tc.g, XDR, got, err, tc.xdr)
 		}
 
-		// test NDR reading
-		if got, err := Unmarshal(tc.ndr); err != nil || !reflect.DeepEqual(got, tc.g) {
-			t.Errorf("Unmarshal(%q) == %q, %s, want %q, nil", tc.ndr, got, err, tc.g)
+		// test NDR decoding
+		if got, err := Decode(tc.ndr); err != nil || !reflect.DeepEqual(got, tc.g) {
+			t.Errorf("Decode(%q) == %q, %s, want %q, nil", tc.ndr, got, err, tc.g)
 		}
 
-		// test NDR writing
-		if got, err := Marshal(tc.g, NDR); err != nil || !reflect.DeepEqual(got, tc.ndr) {
-			t.Errorf("Marshal(%q, %q) == %q, %q, want %q, nil", tc.g, NDR, got, err, tc.ndr)
+		// test NDR encoding
+		if got, err := Encode(tc.g, NDR); err != nil || !reflect.DeepEqual(got, tc.ndr) {
+			t.Errorf("Encode(%q, %q) == %q, %q, want %q, nil", tc.g, NDR, got, err, tc.ndr)
 		}
 
 	}

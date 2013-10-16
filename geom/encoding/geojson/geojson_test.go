@@ -37,16 +37,16 @@ func TestGeoJSON(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
-		if got, err := Marshal(tc.g); err != nil || !reflect.DeepEqual(got, tc.geoJSON) {
-			t.Errorf("Marshal(%q) == %q, %q, want %q, nil", tc.g, got, err, tc.geoJSON)
+		if got, err := Encode(tc.g); err != nil || !reflect.DeepEqual(got, tc.geoJSON) {
+			t.Errorf("Encode(%q) == %q, %q, want %q, nil", tc.g, got, err, tc.geoJSON)
 		}
-		if got, err := Unmarshal(tc.geoJSON); err != nil || !reflect.DeepEqual(got, tc.g) {
-			t.Errorf("Unmarshal(%q) == %q, %q, want %q, nil", tc.geoJSON, got, err, tc.g)
+		if got, err := Decode(tc.geoJSON); err != nil || !reflect.DeepEqual(got, tc.g) {
+			t.Errorf("Decode(%q) == %q, %q, want %q, nil", tc.geoJSON, got, err, tc.g)
 		}
 	}
 }
 
-func TestGeoJSONUnmarshallErrors(t *testing.T) {
+func TestGeoJSONDecode(t *testing.T) {
 	testCases := [][]byte{
 		[]byte(`{}`),
 		[]byte(`{"type":""}`),
@@ -69,8 +69,8 @@ func TestGeoJSONUnmarshallErrors(t *testing.T) {
 		[]byte(`{"coordinates":[[[1,2],[3,4,5]]],"type":"Polygon"}`),
 	}
 	for _, tc := range testCases {
-		if got, err := Unmarshal(tc); err == nil {
-			t.Errorf("Unmarshal(%q) == %q, nil, want err != nil", tc, got)
+		if got, err := Decode(tc); err == nil {
+			t.Errorf("Decode(%q) == %q, nil, want err != nil", tc, got)
 		}
 	}
 }

@@ -61,8 +61,8 @@ func TestWKT(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
-		if got, err := WKT(tc.g); err != nil || !reflect.DeepEqual(got, tc.wkt) {
-			t.Errorf("WKT(%q) == %q, %q, want %q, nil", tc.g, got, err, tc.wkt)
+		if got, err := Encode(tc.g); err != nil || !reflect.DeepEqual(got, tc.wkt) {
+			t.Errorf("Encode(%q) == %q, %q, want %q, nil", tc.g, got, err, tc.wkt)
 		}
 	}
 }

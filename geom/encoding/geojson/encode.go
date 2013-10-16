@@ -83,7 +83,7 @@ func ToGeoJSON(g geom.T) (*Geometry, error) {
 	}
 }
 
-func Marshal(g geom.T) ([]byte, error) {
+func Encode(g geom.T) ([]byte, error) {
 	if object, err := ToGeoJSON(g); err == nil {
 		return json.Marshal(object)
 	} else {

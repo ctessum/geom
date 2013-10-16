@@ -5,7 +5,7 @@ import (
 	"github.com/twpayne/gogeom/geom"
 )
 
-func unmarshalCoordinates(jsonCoordinates interface{}) []float64 {
+func decodeCoordinates(jsonCoordinates interface{}) []float64 {
 	array, ok := jsonCoordinates.([]interface{})
 	if !ok {
 		panic(&InvalidGeometryError{})
@@ -20,26 +20,26 @@ func unmarshalCoordinates(jsonCoordinates interface{}) []float64 {
 	return coordinates
 }
 
-func unmarshalCoordinates2(jsonCoordinates interface{}) [][]float64 {
+func decodeCoordinates2(jsonCoordinates interface{}) [][]float64 {
 	array, ok := jsonCoordinates.([]interface{})
 	if !ok {
 		panic(&InvalidGeometryError{})
 	}
 	coordinates := make([][]float64, len(array))
 	for i, element := range array {
-		coordinates[i] = unmarshalCoordinates(element)
+		coordinates[i] = decodeCoordinates(element)
 	}
 	return coordinates
 }
 
-func unmarshalCoordinates3(jsonCoordinates interface{}) [][][]float64 {
+func decodeCoordinates3(jsonCoordinates interface{}) [][][]float64 {
 	array, ok := jsonCoordinates.([]interface{})
 	if !ok {
 		panic(&InvalidGeometryError{})
 	}
 	coordinates := make([][][]float64, len(array))
 	for i, element := range array {
-		coordinates[i] = unmarshalCoordinates2(element)
+		coordinates[i] = decodeCoordinates2(element)
 	}
 	return coordinates
 }
@@ -90,7 +90,7 @@ func makeLinearRingZs(coordinates [][][]float64) [][]geom.PointZ {
 func doFromGeoJSON(g *Geometry) geom.T {
 	switch g.Type {
 	case "Point":
-		coordinates := unmarshalCoordinates(g.Coordinates)
+		coordinates := decodeCoordinates(g.Coordinates)
 		switch len(coordinates) {
 		case 2:
 			return geom.Point{coordinates[0], coordinates[1]}
@@ -100,7 +100,7 @@ func doFromGeoJSON(g *Geometry) geom.T {
 			panic(&InvalidGeometryError{})
 		}
 	case "LineString":
-		coordinates := unmarshalCoordinates2(g.Coordinates)
+		coordinates := decodeCoordinates2(g.Coordinates)
 		if len(coordinates) == 0 {
 			panic(&InvalidGeometryError{})
 		}
@@ -113,7 +113,7 @@ func doFromGeoJSON(g *Geometry) geom.T {
 			panic(&InvalidGeometryError{})
 		}
 	case "Polygon":
-		coordinates := unmarshalCoordinates3(g.Coordinates)
+		coordinates := decodeCoordinates3(g.Coordinates)
 		if len(coordinates) == 0 || len(coordinates[0]) == 0 {
 			panic(&InvalidGeometryError{})
 		}
@@ -140,7 +140,7 @@ func FromGeoJSON(geom *Geometry) (g geom.T, err error) {
 	return doFromGeoJSON(geom), nil
 }
 
-func Unmarshal(data []byte) (geom.T, error) {
+func Decode(data []byte) (geom.T, error) {
 	var geom Geometry
 	if err := json.Unmarshal(data, &geom); err == nil {
 		return FromGeoJSON(&geom)
