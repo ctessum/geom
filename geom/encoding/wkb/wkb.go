@@ -100,6 +100,10 @@ func init() {
 	wkbReaders[wkbMultiPointZ] = multiPointZReader
 	wkbReaders[wkbMultiPointM] = multiPointMReader
 	wkbReaders[wkbMultiPointZM] = multiPointZMReader
+	wkbReaders[wkbMultiLineString] = multiLineStringReader
+	wkbReaders[wkbMultiLineStringZ] = multiLineStringZReader
+	wkbReaders[wkbMultiLineStringM] = multiLineStringMReader
+	wkbReaders[wkbMultiLineStringZM] = multiLineStringZMReader
 }
 
 func Read(r io.Reader) (geom.T, error) {
@@ -191,6 +195,14 @@ func Write(w io.Writer, byteOrder binary.ByteOrder, g geom.T) error {
 		wkbGeometryType = wkbMultiPointM
 	case geom.MultiPointZM:
 		wkbGeometryType = wkbMultiPointZM
+	case geom.MultiLineString:
+		wkbGeometryType = wkbMultiLineString
+	case geom.MultiLineStringZ:
+		wkbGeometryType = wkbMultiLineStringZ
+	case geom.MultiLineStringM:
+		wkbGeometryType = wkbMultiLineStringM
+	case geom.MultiLineStringZM:
+		wkbGeometryType = wkbMultiLineStringZM
 	default:
 		return &UnsupportedGeometryError{reflect.TypeOf(g)}
 	}
@@ -230,6 +242,14 @@ func Write(w io.Writer, byteOrder binary.ByteOrder, g geom.T) error {
 		return writeMultiPointM(w, byteOrder, g.(geom.MultiPointM))
 	case geom.MultiPointZM:
 		return writeMultiPointZM(w, byteOrder, g.(geom.MultiPointZM))
+	case geom.MultiLineString:
+		return writeMultiLineString(w, byteOrder, g.(geom.MultiLineString))
+	case geom.MultiLineStringZ:
+		return writeMultiLineStringZ(w, byteOrder, g.(geom.MultiLineStringZ))
+	case geom.MultiLineStringM:
+		return writeMultiLineStringM(w, byteOrder, g.(geom.MultiLineStringM))
+	case geom.MultiLineStringZM:
+		return writeMultiLineStringZM(w, byteOrder, g.(geom.MultiLineStringZM))
 	default:
 		return &UnsupportedGeometryError{reflect.TypeOf(g)}
 	}

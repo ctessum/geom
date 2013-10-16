@@ -1,0 +1,39 @@
+package wkb
+
+import (
+	"encoding/binary"
+	"github.com/twpayne/gogeom/geom"
+	"io"
+){{range .Dims}}
+
+func multiLineString{{.ZM}}Reader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
+	var numLineStrings uint32
+	if err := binary.Read(r, byteOrder, &numLineStrings); err != nil {
+		return nil, err
+	}
+	lineString{{.ZM}}s := make([]geom.LineString{{.ZM}}, numLineStrings)
+	for i := uint32(0); i < numLineStrings; i++ {
+		if g, err := Read(r); err == nil {
+			var ok bool
+			lineString{{.ZM}}s[i], ok = g.(geom.LineString{{.ZM}})
+			if !ok {
+				return nil, &UnexpectedGeometryError{g}
+			}
+		} else {
+			return nil, err
+		}
+	}
+	return geom.MultiLineString{{.ZM}}{lineString{{.ZM}}s}, nil
+}
+
+func writeMultiLineString{{.ZM}}(w io.Writer, byteOrder binary.ByteOrder, multiLineString{{.ZM}} geom.MultiLineString{{.ZM}}) error {
+	if err := binary.Write(w, byteOrder, uint32(len(multiLineString{{.ZM}}.LineStrings))); err != nil {
+		return err
+	}
+	for _, lineString{{.ZM}} := range multiLineString{{.ZM}}.LineStrings {
+		if err := Write(w, byteOrder, lineString{{.ZM}}); err != nil {
+			return err
+		}
+	}
+	return nil
+}{{end}}

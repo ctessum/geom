@@ -1,0 +1,13 @@
+package geom{{range .Dims}}
+
+type MultiLineString{{.ZM}} struct {
+	LineStrings []LineString{{.ZM}}
+}
+
+func (multiLineString{{.ZM}} MultiLineString{{.ZM}}) Bounds() *Bounds {
+	bounds := NewBounds()
+	for _, lineString{{.ZM}} := range multiLineString{{.ZM}}.LineStrings {
+		bounds.ExtendPoint{{.ZM}}s(lineString{{.ZM}}.Points)
+	}
+	return bounds
+}{{end}}

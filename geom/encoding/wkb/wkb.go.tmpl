@@ -87,7 +87,8 @@ func init() {
 	wkbReaders[wkbPoint{{.ZM}}] = point{{.ZM}}Reader{{end}}{{range .Dims}}
 	wkbReaders[wkbLineString{{.ZM}}] = lineString{{.ZM}}Reader{{end}}{{range .Dims}}
 	wkbReaders[wkbPolygon{{.ZM}}] = polygon{{.ZM}}Reader{{end}}{{range .Dims}}
-	wkbReaders[wkbMultiPoint{{.ZM}}] = multiPoint{{.ZM}}Reader{{end}}
+	wkbReaders[wkbMultiPoint{{.ZM}}] = multiPoint{{.ZM}}Reader{{end}}{{range .Dims}}
+	wkbReaders[wkbMultiLineString{{.ZM}}] = multiLineString{{.ZM}}Reader{{end}}
 }
 
 func Read(r io.Reader) (geom.T, error) {
@@ -155,6 +156,8 @@ func Write(w io.Writer, byteOrder binary.ByteOrder, g geom.T) error {
 		wkbGeometryType = wkbPolygon{{.ZM}}
 {{end}}{{range .Dims}}	case geom.MultiPoint{{.ZM}}:
 		wkbGeometryType = wkbMultiPoint{{.ZM}}
+{{end}}{{range .Dims}}	case geom.MultiLineString{{.ZM}}:
+		wkbGeometryType = wkbMultiLineString{{.ZM}}
 {{end}}	default:
 		return &UnsupportedGeometryError{reflect.TypeOf(g)}
 	}
@@ -170,6 +173,8 @@ func Write(w io.Writer, byteOrder binary.ByteOrder, g geom.T) error {
 		return writePolygon{{.ZM}}(w, byteOrder, g.(geom.Polygon{{.ZM}}))
 {{end}}{{range .Dims}}	case geom.MultiPoint{{.ZM}}:
 		return writeMultiPoint{{.ZM}}(w, byteOrder, g.(geom.MultiPoint{{.ZM}}))
+{{end}}{{range .Dims}}	case geom.MultiLineString{{.ZM}}:
+		return writeMultiLineString{{.ZM}}(w, byteOrder, g.(geom.MultiLineString{{.ZM}}))
 {{end}}	default:
 		return &UnsupportedGeometryError{reflect.TypeOf(g)}
 	}
