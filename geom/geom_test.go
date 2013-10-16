@@ -51,7 +51,7 @@ func TestBounds(t *testing.T) {
 
 	for _, tc := range testCases {
 		if got := tc.g.Bounds(); !reflect.DeepEqual(got, tc.bounds) {
-			t.Errorf("%q.Bounds() == %q, want %q", tc.g, got, tc.bounds)
+			t.Errorf("%#v.Bounds() == %#v, want %#v", tc.g, got, tc.bounds)
 		}
 	}
 
@@ -59,6 +59,6 @@ func TestBounds(t *testing.T) {
 
 func TestBoundsEmpty(t *testing.T) {
 	if got := NewBounds().Empty(); got != true {
-		t.Errorf("NewBounds.Empty() == %q, want true", got)
+		t.Errorf("NewBounds.Empty() == %#v, want true", got)
 	}
 }

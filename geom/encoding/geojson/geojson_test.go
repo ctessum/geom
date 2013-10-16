@@ -38,10 +38,10 @@ func TestGeoJSON(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		if got, err := Encode(tc.g); err != nil || !reflect.DeepEqual(got, tc.geoJSON) {
-			t.Errorf("Encode(%q) == %q, %q, want %q, nil", tc.g, got, err, tc.geoJSON)
+			t.Errorf("Encode(%#v) == %#v, %#v, want %#v, nil", tc.g, got, err, tc.geoJSON)
 		}
 		if got, err := Decode(tc.geoJSON); err != nil || !reflect.DeepEqual(got, tc.g) {
-			t.Errorf("Decode(%q) == %q, %q, want %q, nil", tc.geoJSON, got, err, tc.g)
+			t.Errorf("Decode(%#v) == %#v, %#v, want %#v, nil", tc.geoJSON, got, err, tc.g)
 		}
 	}
 }
@@ -70,7 +70,7 @@ func TestGeoJSONDecode(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		if got, err := Decode(tc); err == nil {
-			t.Errorf("Decode(%q) == %q, nil, want err != nil", tc, got)
+			t.Errorf("Decode(%#v) == %#v, nil, want err != nil", tc, got)
 		}
 	}
 }

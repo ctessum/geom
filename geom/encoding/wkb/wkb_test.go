@@ -99,22 +99,22 @@ func TestWKB(t *testing.T) {
 
 		// test XDR decoding
 		if got, err := Decode(tc.xdr); err != nil || !reflect.DeepEqual(got, tc.g) {
-			t.Errorf("Decode(%q) == %q, %s, want %q, nil", tc.xdr, got, err, tc.g)
+			t.Errorf("Decode(%#v) == %#v, %s, want %#v, nil", tc.xdr, got, err, tc.g)
 		}
 
 		// test XDR encoding
 		if got, err := Encode(tc.g, XDR); err != nil || !reflect.DeepEqual(got, tc.xdr) {
-			t.Errorf("Encode(%q, %q) == %q, %q, want %q, nil", tc.g, XDR, got, err, tc.xdr)
+			t.Errorf("Encode(%#v, %#v) == %#v, %#v, want %#v, nil", tc.g, XDR, got, err, tc.xdr)
 		}
 
 		// test NDR decoding
 		if got, err := Decode(tc.ndr); err != nil || !reflect.DeepEqual(got, tc.g) {
-			t.Errorf("Decode(%q) == %q, %s, want %q, nil", tc.ndr, got, err, tc.g)
+			t.Errorf("Decode(%#v) == %#v, %s, want %#v, nil", tc.ndr, got, err, tc.g)
 		}
 
 		// test NDR encoding
 		if got, err := Encode(tc.g, NDR); err != nil || !reflect.DeepEqual(got, tc.ndr) {
-			t.Errorf("Encode(%q, %q) == %q, %q, want %q, nil", tc.g, NDR, got, err, tc.ndr)
+			t.Errorf("Encode(%#v, %#v) == %#v, %#v, want %#v, nil", tc.g, NDR, got, err, tc.ndr)
 		}
 
 	}
