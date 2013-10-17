@@ -1,0 +1,13 @@
+package geom{{range .Dims}}
+
+type MultiPolygon{{.ZM}} struct {
+	Polygons []Polygon{{.ZM}}
+}
+
+func (multiPolygon{{.ZM}} MultiPolygon{{.ZM}}) Bounds() *Bounds {
+	bounds := NewBounds()
+	for _, polygon{{.ZM}} := range multiPolygon{{.ZM}}.Polygons {
+		bounds.ExtendPoint{{.ZM}}ss(polygon{{.ZM}}.Rings)
+	}
+	return bounds
+}{{end}}

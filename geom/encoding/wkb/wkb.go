@@ -104,6 +104,10 @@ func init() {
 	wkbReaders[wkbMultiLineStringZ] = multiLineStringZReader
 	wkbReaders[wkbMultiLineStringM] = multiLineStringMReader
 	wkbReaders[wkbMultiLineStringZM] = multiLineStringZMReader
+	wkbReaders[wkbMultiPolygon] = multiPolygonReader
+	wkbReaders[wkbMultiPolygonZ] = multiPolygonZReader
+	wkbReaders[wkbMultiPolygonM] = multiPolygonMReader
+	wkbReaders[wkbMultiPolygonZM] = multiPolygonZMReader
 }
 
 func Read(r io.Reader) (geom.T, error) {
@@ -203,6 +207,14 @@ func Write(w io.Writer, byteOrder binary.ByteOrder, g geom.T) error {
 		wkbGeometryType = wkbMultiLineStringM
 	case geom.MultiLineStringZM:
 		wkbGeometryType = wkbMultiLineStringZM
+	case geom.MultiPolygon:
+		wkbGeometryType = wkbMultiPolygon
+	case geom.MultiPolygonZ:
+		wkbGeometryType = wkbMultiPolygonZ
+	case geom.MultiPolygonM:
+		wkbGeometryType = wkbMultiPolygonM
+	case geom.MultiPolygonZM:
+		wkbGeometryType = wkbMultiPolygonZM
 	default:
 		return &UnsupportedGeometryError{reflect.TypeOf(g)}
 	}
@@ -250,6 +262,14 @@ func Write(w io.Writer, byteOrder binary.ByteOrder, g geom.T) error {
 		return writeMultiLineStringM(w, byteOrder, g.(geom.MultiLineStringM))
 	case geom.MultiLineStringZM:
 		return writeMultiLineStringZM(w, byteOrder, g.(geom.MultiLineStringZM))
+	case geom.MultiPolygon:
+		return writeMultiPolygon(w, byteOrder, g.(geom.MultiPolygon))
+	case geom.MultiPolygonZ:
+		return writeMultiPolygonZ(w, byteOrder, g.(geom.MultiPolygonZ))
+	case geom.MultiPolygonM:
+		return writeMultiPolygonM(w, byteOrder, g.(geom.MultiPolygonM))
+	case geom.MultiPolygonZM:
+		return writeMultiPolygonZM(w, byteOrder, g.(geom.MultiPolygonZM))
 	default:
 		return &UnsupportedGeometryError{reflect.TypeOf(g)}
 	}
