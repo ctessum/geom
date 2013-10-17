@@ -46,6 +46,7 @@ func main() {
 	flag.Parse()
 
 	var filenames = []string{
+		"geom/geom.go",
 		"geom/bounds.go",
 		"geom/point.go",
 		"geom/linestring.go",
