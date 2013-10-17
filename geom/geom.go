@@ -1,5 +1,5 @@
 package geom
 
 type T interface {
-	Bounds() *Bounds
+	Bounds(*Bounds) *Bounds
 }

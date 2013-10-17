@@ -5,8 +5,12 @@ type Point struct {
 	Y float64
 }
 
-func (point Point) Bounds() *Bounds {
-	return NewBoundsPoint(point)
+func (point Point) Bounds(b *Bounds) *Bounds {
+	if b == nil {
+		return NewBoundsPoint(point)
+	} else {
+		return b.ExtendPoint(point)
+	}
 }
 
 type PointZ struct {
@@ -15,8 +19,12 @@ type PointZ struct {
 	Z float64
 }
 
-func (pointZ PointZ) Bounds() *Bounds {
-	return NewBoundsPointZ(pointZ)
+func (pointZ PointZ) Bounds(b *Bounds) *Bounds {
+	if b == nil {
+		return NewBoundsPointZ(pointZ)
+	} else {
+		return b.ExtendPointZ(pointZ)
+	}
 }
 
 type PointM struct {
@@ -25,8 +33,12 @@ type PointM struct {
 	M float64
 }
 
-func (pointM PointM) Bounds() *Bounds {
-	return NewBoundsPointM(pointM)
+func (pointM PointM) Bounds(b *Bounds) *Bounds {
+	if b == nil {
+		return NewBoundsPointM(pointM)
+	} else {
+		return b.ExtendPointM(pointM)
+	}
 }
 
 type PointZM struct {
@@ -36,6 +48,10 @@ type PointZM struct {
 	M float64
 }
 
-func (pointZM PointZM) Bounds() *Bounds {
-	return NewBoundsPointZM(pointZM)
+func (pointZM PointZM) Bounds(b *Bounds) *Bounds {
+	if b == nil {
+		return NewBoundsPointZM(pointZM)
+	} else {
+		return b.ExtendPointZM(pointZM)
+	}
 }

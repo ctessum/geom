@@ -4,6 +4,9 @@ type LineString{{.ZM}} struct {
 	Points []Point{{.ZM}}
 }
 
-func (lineString{{.ZM}} LineString{{.ZM}}) Bounds() *Bounds {
-	return NewBounds().ExtendPoint{{.ZM}}s(lineString{{.ZM}}.Points)
+func (lineString{{.ZM}} LineString{{.ZM}}) Bounds(b *Bounds) *Bounds {
+	if b == nil {
+		b = NewBounds()
+	}
+	return b.ExtendPoint{{.ZM}}s(lineString{{.ZM}}.Points)
 }{{end}}

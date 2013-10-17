@@ -7,6 +7,10 @@ type Point{{.ZM}} struct {
 	M float64{{end}}
 }
 
-func (point{{.ZM}} Point{{.ZM}}) Bounds() *Bounds {
-	return NewBoundsPoint{{.ZM}}(point{{.ZM}})
+func (point{{.ZM}} Point{{.ZM}}) Bounds(b *Bounds) *Bounds {
+	if b == nil {
+		return NewBoundsPoint{{.ZM}}(point{{.ZM}})
+	} else {
+		return b.ExtendPoint{{.ZM}}(point{{.ZM}})
+	}
 }{{end}}

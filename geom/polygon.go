@@ -4,30 +4,42 @@ type Polygon struct {
 	Rings [][]Point
 }
 
-func (polygon Polygon) Bounds() *Bounds {
-	return NewBounds().ExtendPointss(polygon.Rings)
+func (polygon Polygon) Bounds(b *Bounds) *Bounds {
+	if b == nil {
+		b = NewBounds()
+	}
+	return b.ExtendPointss(polygon.Rings)
 }
 
 type PolygonZ struct {
 	Rings [][]PointZ
 }
 
-func (polygonZ PolygonZ) Bounds() *Bounds {
-	return NewBounds().ExtendPointZss(polygonZ.Rings)
+func (polygonZ PolygonZ) Bounds(b *Bounds) *Bounds {
+	if b == nil {
+		b = NewBounds()
+	}
+	return b.ExtendPointZss(polygonZ.Rings)
 }
 
 type PolygonM struct {
 	Rings [][]PointM
 }
 
-func (polygonM PolygonM) Bounds() *Bounds {
-	return NewBounds().ExtendPointMss(polygonM.Rings)
+func (polygonM PolygonM) Bounds(b *Bounds) *Bounds {
+	if b == nil {
+		b = NewBounds()
+	}
+	return b.ExtendPointMss(polygonM.Rings)
 }
 
 type PolygonZM struct {
 	Rings [][]PointZM
 }
 
-func (polygonZM PolygonZM) Bounds() *Bounds {
-	return NewBounds().ExtendPointZMss(polygonZM.Rings)
+func (polygonZM PolygonZM) Bounds(b *Bounds) *Bounds {
+	if b == nil {
+		b = NewBounds()
+	}
+	return b.ExtendPointZMss(polygonZM.Rings)
 }

@@ -4,6 +4,9 @@ type Polygon{{.ZM}} struct {
 	Rings [][]Point{{.ZM}}
 }
 
-func (polygon{{.ZM}} Polygon{{.ZM}}) Bounds() *Bounds {
-	return NewBounds().ExtendPoint{{.ZM}}ss(polygon{{.ZM}}.Rings)
+func (polygon{{.ZM}} Polygon{{.ZM}}) Bounds(b *Bounds) *Bounds {
+	if b == nil {
+		b = NewBounds()
+	}
+	return b.ExtendPoint{{.ZM}}ss(polygon{{.ZM}}.Rings)
 }{{end}}

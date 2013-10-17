@@ -4,46 +4,54 @@ type MultiLineString struct {
 	LineStrings []LineString
 }
 
-func (multiLineString MultiLineString) Bounds() *Bounds {
-	bounds := NewBounds()
-	for _, lineString := range multiLineString.LineStrings {
-		bounds.ExtendPoints(lineString.Points)
+func (multiLineString MultiLineString) Bounds(b *Bounds) *Bounds {
+	if b == nil {
+		b = NewBounds()
 	}
-	return bounds
+	for _, lineString := range multiLineString.LineStrings {
+		b = lineString.Bounds(b)
+	}
+	return b
 }
 
 type MultiLineStringZ struct {
 	LineStrings []LineStringZ
 }
 
-func (multiLineStringZ MultiLineStringZ) Bounds() *Bounds {
-	bounds := NewBounds()
-	for _, lineStringZ := range multiLineStringZ.LineStrings {
-		bounds.ExtendPointZs(lineStringZ.Points)
+func (multiLineStringZ MultiLineStringZ) Bounds(b *Bounds) *Bounds {
+	if b == nil {
+		b = NewBounds()
 	}
-	return bounds
+	for _, lineStringZ := range multiLineStringZ.LineStrings {
+		b = lineStringZ.Bounds(b)
+	}
+	return b
 }
 
 type MultiLineStringM struct {
 	LineStrings []LineStringM
 }
 
-func (multiLineStringM MultiLineStringM) Bounds() *Bounds {
-	bounds := NewBounds()
-	for _, lineStringM := range multiLineStringM.LineStrings {
-		bounds.ExtendPointMs(lineStringM.Points)
+func (multiLineStringM MultiLineStringM) Bounds(b *Bounds) *Bounds {
+	if b == nil {
+		b = NewBounds()
 	}
-	return bounds
+	for _, lineStringM := range multiLineStringM.LineStrings {
+		b = lineStringM.Bounds(b)
+	}
+	return b
 }
 
 type MultiLineStringZM struct {
 	LineStrings []LineStringZM
 }
 
-func (multiLineStringZM MultiLineStringZM) Bounds() *Bounds {
-	bounds := NewBounds()
-	for _, lineStringZM := range multiLineStringZM.LineStrings {
-		bounds.ExtendPointZMs(lineStringZM.Points)
+func (multiLineStringZM MultiLineStringZM) Bounds(b *Bounds) *Bounds {
+	if b == nil {
+		b = NewBounds()
 	}
-	return bounds
+	for _, lineStringZM := range multiLineStringZM.LineStrings {
+		b = lineStringZM.Bounds(b)
+	}
+	return b
 }

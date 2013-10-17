@@ -4,10 +4,12 @@ type MultiPolygon{{.ZM}} struct {
 	Polygons []Polygon{{.ZM}}
 }
 
-func (multiPolygon{{.ZM}} MultiPolygon{{.ZM}}) Bounds() *Bounds {
-	bounds := NewBounds()
-	for _, polygon{{.ZM}} := range multiPolygon{{.ZM}}.Polygons {
-		bounds.ExtendPoint{{.ZM}}ss(polygon{{.ZM}}.Rings)
+func (multiPolygon{{.ZM}} MultiPolygon{{.ZM}}) Bounds(b *Bounds) *Bounds {
+	if b == nil {
+		b = NewBounds()
 	}
-	return bounds
+	for _, polygon{{.ZM}} := range multiPolygon{{.ZM}}.Polygons {
+		b = polygon{{.ZM}}.Bounds(b)
+	}
+	return b
 }{{end}}

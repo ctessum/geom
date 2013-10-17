@@ -4,10 +4,12 @@ type MultiLineString{{.ZM}} struct {
 	LineStrings []LineString{{.ZM}}
 }
 
-func (multiLineString{{.ZM}} MultiLineString{{.ZM}}) Bounds() *Bounds {
-	bounds := NewBounds()
-	for _, lineString{{.ZM}} := range multiLineString{{.ZM}}.LineStrings {
-		bounds.ExtendPoint{{.ZM}}s(lineString{{.ZM}}.Points)
+func (multiLineString{{.ZM}} MultiLineString{{.ZM}}) Bounds(b *Bounds) *Bounds {
+	if b == nil {
+		b = NewBounds()
 	}
-	return bounds
+	for _, lineString{{.ZM}} := range multiLineString{{.ZM}}.LineStrings {
+		b = lineString{{.ZM}}.Bounds(b)
+	}
+	return b
 }{{end}}
