@@ -7,6 +7,10 @@ type Point{{.ZM}} struct {
 	M float64{{end}}
 }
 
+func NewPoint{{.ZM}}(x, y{{with .Z}}, z{{end}}{{with .M}}, m{{end}} float64) *Point{{.ZM}} {
+	return &Point{{.ZM}}{x, y{{with .Z}}, z{{end}}{{with .M}}, m{{end}}}
+}
+
 func (point{{.ZM}} Point{{.ZM}}) Bounds(b *Bounds) *Bounds {
 	if b == nil {
 		return NewBoundsPoint{{.ZM}}(point{{.ZM}})
