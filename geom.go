@@ -187,8 +187,12 @@ func (r1 *Rect) containsRect(r2 *Rect) bool {
 
 func (r1 *Rect) enlarge(r2 *Rect) {
 	for i := 0; i < Dim; i++ {
-		r1.p[i] = math.Min(r1.p[i], r2.p[i])
-		r1.q[i] = math.Max(r1.q[i], r2.q[i])
+		if r1.p[i] > r2.p[i] {
+			r1.p[i] = r2.p[i]
+		}
+		if r1.q[i] < r2.q[i] {
+			r1.q[i] = r2.q[i]
+		}
 	}
 }
 
