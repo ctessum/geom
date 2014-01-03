@@ -23,7 +23,7 @@ type Rtree struct {
 	height      int
 }
 
-// NewTree creates a new R-tree instance.  
+// NewTree creates a new R-tree instance.
 func NewTree(MinChildren, MaxChildren int) *Rtree {
 	rt := Rtree{MinChildren: MinChildren, MaxChildren: MaxChildren}
 	rt.height = 1
@@ -133,8 +133,9 @@ func (tree *Rtree) chooseNode(n *node, e entry, level int) *node {
 	// find the entry whose bb needs least enlargement to include obj
 	diff := math.MaxFloat64
 	var chosen entry
+	var bb Rect
 	for _, en := range n.entries {
-		bb := boundingBox(en.bb, e.bb)
+		initBoundingBox(&bb, en.bb, e.bb)
 		d := bb.size() - en.bb.size()
 		if d < diff || (d == diff && en.bb.size() < chosen.bb.size()) {
 			diff = d
@@ -290,9 +291,11 @@ func assignGroup(e entry, left, right *node) {
 func (n *node) pickSeeds() (int, int) {
 	left, right := 0, 1
 	maxWastedSpace := -1.0
+	var bb Rect
 	for i, e1 := range n.entries {
 		for j, e2 := range n.entries[i+1:] {
-			d := boundingBox(e1.bb, e2.bb).size() - e1.bb.size() - e2.bb.size()
+			initBoundingBox(&bb, e1.bb, e2.bb)
+			d := bb.size() - e1.bb.size() - e2.bb.size()
 			if d > maxWastedSpace {
 				maxWastedSpace = d
 				left, right = i, j+i+1

@@ -185,6 +185,13 @@ func (r1 *Rect) containsRect(r2 *Rect) bool {
 	return true
 }
 
+func (r1 *Rect) enlarge(r2 *Rect) {
+	for i := 0; i < Dim; i++ {
+		r1.p[i] = math.Min(r1.p[i], r2.p[i])
+		r1.q[i] = math.Max(r1.q[i], r2.q[i])
+	}
+}
+
 // intersect computes the intersection of two rectangles.  If no intersection
 // exists, the intersection is nil.
 func intersect(r1, r2 *Rect) bool {
@@ -235,14 +242,15 @@ func (p Point) ToRect(tol float64) *Rect {
 	return &r
 }
 
+func initBoundingBox(r, r1, r2 *Rect) {
+	*r = *r1
+	r.enlarge(r2)
+}
+
 // boundingBox constructs the smallest rectangle containing both r1 and r2.
 func boundingBox(r1, r2 *Rect) *Rect {
 	var r Rect
-	for i := 0; i < Dim; i++ {
-		r.p[i] = math.Min(r1.p[i], r2.p[i])
-		r.q[i] = math.Max(r1.q[i], r2.q[i])
-	}
-
+	initBoundingBox(&r, r1, r2)
 	return &r
 }
 
@@ -253,7 +261,7 @@ func boundingBoxN(rects ...*Rect) *Rect {
 	}
 	bb := boundingBox(rects[0], rects[1])
 	for _, rect := range rects[2:] {
-		bb = boundingBox(bb, rect)
+		bb.enlarge(rect)
 	}
 	return bb
 }
