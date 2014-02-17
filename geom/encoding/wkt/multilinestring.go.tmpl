@@ -1,0 +1,21 @@
+package wkt
+
+import (
+	"github.com/twpayne/gogeom/geom"
+){{range .Dims}}
+
+func appendMultiLineString{{.ZM}}WKT(dst []byte,
+	multiLineString{{.ZM}} *geom.MultiLineString{{.ZM}}) []byte {
+	dst = append(dst, []byte("MULTILINESTRING{{.ZM}}((")...)
+	for i, ls := range multiLineString{{.ZM}}.LineStrings {
+		dst = appendPoint{{.ZM}}sCoords(dst, ls.Points)
+		if i != len(multiLineString{{.ZM}}.LineStrings)-1 {
+			dst = append(dst, ')')
+			dst = append(dst, ',')
+			dst = append(dst, ')')
+		}
+	}
+	dst = append(dst, ')')
+	dst = append(dst, ')')
+	return dst
+}{{end}}

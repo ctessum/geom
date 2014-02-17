@@ -66,6 +66,7 @@ func main() {
 		"geom/encoding/wkb/geometrycollection.go",
 		"geom/encoding/wkt/point.go",
 		"geom/encoding/wkt/linestring.go",
+		"geom/encoding/wkt/multilinestring.go",
 		"geom/encoding/wkt/polygon.go",
 	}
 

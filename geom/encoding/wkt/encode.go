@@ -31,6 +31,18 @@ func Encode(g geom.T) ([]byte, error) {
 	case geom.LineStringZM:
 		lineStringZM := g.(geom.LineStringZM)
 		return appendLineStringZMWKT(nil, &lineStringZM), nil
+	case geom.MultiLineString:
+		multiLineString := g.(geom.MultiLineString)
+		return appendMultiLineStringWKT(nil, &multiLineString), nil
+	case geom.MultiLineStringZ:
+		multiLineStringZ := g.(geom.MultiLineStringZ)
+		return appendMultiLineStringZWKT(nil, &multiLineStringZ), nil
+	case geom.MultiLineStringM:
+		multiLineStringM := g.(geom.MultiLineStringM)
+		return appendMultiLineStringMWKT(nil, &multiLineStringM), nil
+	case geom.MultiLineStringZM:
+		multiLineStringZM := g.(geom.MultiLineStringZM)
+		return appendMultiLineStringZMWKT(nil, &multiLineStringZM), nil
 	case geom.Polygon:
 		polygon := g.(geom.Polygon)
 		return appendPolygonWKT(nil, &polygon), nil
