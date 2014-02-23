@@ -23,7 +23,7 @@ func multiPointReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
 			return nil, err
 		}
 	}
-	return geom.MultiPoint{points}, nil
+	return geom.MultiPoint{Points: points}, nil
 }
 
 func writeMultiPoint(w io.Writer, byteOrder binary.ByteOrder, multiPoint geom.MultiPoint) error {
@@ -55,7 +55,7 @@ func multiPointZReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) 
 			return nil, err
 		}
 	}
-	return geom.MultiPointZ{pointZs}, nil
+	return geom.MultiPointZ{Points: pointZs}, nil
 }
 
 func writeMultiPointZ(w io.Writer, byteOrder binary.ByteOrder, multiPointZ geom.MultiPointZ) error {
@@ -87,7 +87,7 @@ func multiPointMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) 
 			return nil, err
 		}
 	}
-	return geom.MultiPointM{pointMs}, nil
+	return geom.MultiPointM{Points: pointMs}, nil
 }
 
 func writeMultiPointM(w io.Writer, byteOrder binary.ByteOrder, multiPointM geom.MultiPointM) error {
@@ -119,7 +119,7 @@ func multiPointZMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error)
 			return nil, err
 		}
 	}
-	return geom.MultiPointZM{pointZMs}, nil
+	return geom.MultiPointZM{Points: pointZMs}, nil
 }
 
 func writeMultiPointZM(w io.Writer, byteOrder binary.ByteOrder, multiPointZM geom.MultiPointZM) error {

@@ -23,7 +23,7 @@ func multiPolygon{{.ZM}}Reader(r io.Reader, byteOrder binary.ByteOrder) (geom.T,
 			return nil, err
 		}
 	}
-	return geom.MultiPolygon{{.ZM}}{polygon{{.ZM}}s}, nil
+	return geom.MultiPolygon{{.ZM}}{Polygons: polygon{{.ZM}}s}, nil
 }
 
 func writeMultiPolygon{{.ZM}}(w io.Writer, byteOrder binary.ByteOrder, multiPolygon{{.ZM}} geom.MultiPolygon{{.ZM}}) error {

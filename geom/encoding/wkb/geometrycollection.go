@@ -23,7 +23,7 @@ func geometryCollectionReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, 
 			return nil, err
 		}
 	}
-	return geom.GeometryCollection{geoms}, nil
+	return geom.GeometryCollection{Geoms: geoms}, nil
 }
 
 func writeGeometryCollection(w io.Writer, byteOrder binary.ByteOrder, geometryCollection geom.GeometryCollection) error {
@@ -55,7 +55,7 @@ func geometryCollectionZReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T,
 			return nil, err
 		}
 	}
-	return geom.GeometryCollectionZ{geomZs}, nil
+	return geom.GeometryCollectionZ{Geoms: geomZs}, nil
 }
 
 func writeGeometryCollectionZ(w io.Writer, byteOrder binary.ByteOrder, geometryCollectionZ geom.GeometryCollectionZ) error {
@@ -87,7 +87,7 @@ func geometryCollectionMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T,
 			return nil, err
 		}
 	}
-	return geom.GeometryCollectionM{geomMs}, nil
+	return geom.GeometryCollectionM{Geoms: geomMs}, nil
 }
 
 func writeGeometryCollectionM(w io.Writer, byteOrder binary.ByteOrder, geometryCollectionM geom.GeometryCollectionM) error {
@@ -119,7 +119,7 @@ func geometryCollectionZMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T
 			return nil, err
 		}
 	}
-	return geom.GeometryCollectionZM{geomZMs}, nil
+	return geom.GeometryCollectionZM{Geoms: geomZMs}, nil
 }
 
 func writeGeometryCollectionZM(w io.Writer, byteOrder binary.ByteOrder, geometryCollectionZM geom.GeometryCollectionZM) error {

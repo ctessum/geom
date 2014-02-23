@@ -11,7 +11,7 @@ func lineStringReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
 	if err != nil {
 		return nil, err
 	}
-	return geom.LineString{points}, nil
+	return geom.LineString{Points: points}, nil
 }
 
 func writeLineString(w io.Writer, byteOrder binary.ByteOrder, lineString geom.LineString) error {
@@ -23,7 +23,7 @@ func lineStringZReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) 
 	if err != nil {
 		return nil, err
 	}
-	return geom.LineStringZ{pointZs}, nil
+	return geom.LineStringZ{Points: pointZs}, nil
 }
 
 func writeLineStringZ(w io.Writer, byteOrder binary.ByteOrder, lineStringZ geom.LineStringZ) error {
@@ -35,7 +35,7 @@ func lineStringMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) 
 	if err != nil {
 		return nil, err
 	}
-	return geom.LineStringM{pointMs}, nil
+	return geom.LineStringM{Points: pointMs}, nil
 }
 
 func writeLineStringM(w io.Writer, byteOrder binary.ByteOrder, lineStringM geom.LineStringM) error {
@@ -47,7 +47,7 @@ func lineStringZMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error)
 	if err != nil {
 		return nil, err
 	}
-	return geom.LineStringZM{pointZMs}, nil
+	return geom.LineStringZM{Points: pointZMs}, nil
 }
 
 func writeLineStringZM(w io.Writer, byteOrder binary.ByteOrder, lineStringZM geom.LineStringZM) error {

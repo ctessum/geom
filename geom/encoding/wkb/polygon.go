@@ -19,7 +19,7 @@ func polygonReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
 			rings[i] = points
 		}
 	}
-	return geom.Polygon{rings}, nil
+	return geom.Polygon{Rings: rings}, nil
 }
 
 func writePolygon(w io.Writer, byteOrder binary.ByteOrder, polygon geom.Polygon) error {
@@ -39,7 +39,7 @@ func polygonZReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
 			ringZs[i] = pointZs
 		}
 	}
-	return geom.PolygonZ{ringZs}, nil
+	return geom.PolygonZ{Rings: ringZs}, nil
 }
 
 func writePolygonZ(w io.Writer, byteOrder binary.ByteOrder, polygonZ geom.PolygonZ) error {
@@ -59,7 +59,7 @@ func polygonMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
 			ringMs[i] = pointMs
 		}
 	}
-	return geom.PolygonM{ringMs}, nil
+	return geom.PolygonM{Rings: ringMs}, nil
 }
 
 func writePolygonM(w io.Writer, byteOrder binary.ByteOrder, polygonM geom.PolygonM) error {
@@ -79,7 +79,7 @@ func polygonZMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
 			ringZMs[i] = pointZMs
 		}
 	}
-	return geom.PolygonZM{ringZMs}, nil
+	return geom.PolygonZM{Rings: ringZMs}, nil
 }
 
 func writePolygonZM(w io.Writer, byteOrder binary.ByteOrder, polygonZM geom.PolygonZM) error {

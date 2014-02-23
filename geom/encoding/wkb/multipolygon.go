@@ -23,7 +23,7 @@ func multiPolygonReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error)
 			return nil, err
 		}
 	}
-	return geom.MultiPolygon{polygons}, nil
+	return geom.MultiPolygon{Polygons: polygons}, nil
 }
 
 func writeMultiPolygon(w io.Writer, byteOrder binary.ByteOrder, multiPolygon geom.MultiPolygon) error {
@@ -55,7 +55,7 @@ func multiPolygonZReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error
 			return nil, err
 		}
 	}
-	return geom.MultiPolygonZ{polygonZs}, nil
+	return geom.MultiPolygonZ{Polygons: polygonZs}, nil
 }
 
 func writeMultiPolygonZ(w io.Writer, byteOrder binary.ByteOrder, multiPolygonZ geom.MultiPolygonZ) error {
@@ -87,7 +87,7 @@ func multiPolygonMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error
 			return nil, err
 		}
 	}
-	return geom.MultiPolygonM{polygonMs}, nil
+	return geom.MultiPolygonM{Polygons: polygonMs}, nil
 }
 
 func writeMultiPolygonM(w io.Writer, byteOrder binary.ByteOrder, multiPolygonM geom.MultiPolygonM) error {
@@ -119,7 +119,7 @@ func multiPolygonZMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, erro
 			return nil, err
 		}
 	}
-	return geom.MultiPolygonZM{polygonZMs}, nil
+	return geom.MultiPolygonZM{Polygons: polygonZMs}, nil
 }
 
 func writeMultiPolygonZM(w io.Writer, byteOrder binary.ByteOrder, multiPolygonZM geom.MultiPolygonZM) error {

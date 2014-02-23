@@ -23,7 +23,7 @@ func geometryCollection{{.ZM}}Reader(r io.Reader, byteOrder binary.ByteOrder) (g
 			return nil, err
 		}
 	}
-	return geom.GeometryCollection{{.ZM}}{geom{{.ZM}}s}, nil
+	return geom.GeometryCollection{{.ZM}}{Geoms: geom{{.ZM}}s}, nil
 }
 
 func writeGeometryCollection{{.ZM}}(w io.Writer, byteOrder binary.ByteOrder, geometryCollection{{.ZM}} geom.GeometryCollection{{.ZM}}) error {

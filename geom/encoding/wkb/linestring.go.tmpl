@@ -11,7 +11,7 @@ func lineString{{.ZM}}Reader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, e
 	if err != nil {
 		return nil, err
 	}
-	return geom.LineString{{.ZM}}{point{{.ZM}}s}, nil
+	return geom.LineString{{.ZM}}{Points: point{{.ZM}}s}, nil
 }
 
 func writeLineString{{.ZM}}(w io.Writer, byteOrder binary.ByteOrder, lineString{{.ZM}} geom.LineString{{.ZM}}) error {

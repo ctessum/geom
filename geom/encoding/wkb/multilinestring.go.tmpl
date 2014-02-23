@@ -23,7 +23,7 @@ func multiLineString{{.ZM}}Reader(r io.Reader, byteOrder binary.ByteOrder) (geom
 			return nil, err
 		}
 	}
-	return geom.MultiLineString{{.ZM}}{lineString{{.ZM}}s}, nil
+	return geom.MultiLineString{{.ZM}}{LineStrings: lineString{{.ZM}}s}, nil
 }
 
 func writeMultiLineString{{.ZM}}(w io.Writer, byteOrder binary.ByteOrder, multiLineString{{.ZM}} geom.MultiLineString{{.ZM}}) error {

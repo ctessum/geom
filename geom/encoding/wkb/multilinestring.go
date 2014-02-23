@@ -23,7 +23,7 @@ func multiLineStringReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, err
 			return nil, err
 		}
 	}
-	return geom.MultiLineString{lineStrings}, nil
+	return geom.MultiLineString{LineStrings: lineStrings}, nil
 }
 
 func writeMultiLineString(w io.Writer, byteOrder binary.ByteOrder, multiLineString geom.MultiLineString) error {
@@ -55,7 +55,7 @@ func multiLineStringZReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, er
 			return nil, err
 		}
 	}
-	return geom.MultiLineStringZ{lineStringZs}, nil
+	return geom.MultiLineStringZ{LineStrings: lineStringZs}, nil
 }
 
 func writeMultiLineStringZ(w io.Writer, byteOrder binary.ByteOrder, multiLineStringZ geom.MultiLineStringZ) error {
@@ -87,7 +87,7 @@ func multiLineStringMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, er
 			return nil, err
 		}
 	}
-	return geom.MultiLineStringM{lineStringMs}, nil
+	return geom.MultiLineStringM{LineStrings: lineStringMs}, nil
 }
 
 func writeMultiLineStringM(w io.Writer, byteOrder binary.ByteOrder, multiLineStringM geom.MultiLineStringM) error {
@@ -119,7 +119,7 @@ func multiLineStringZMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, e
 			return nil, err
 		}
 	}
-	return geom.MultiLineStringZM{lineStringZMs}, nil
+	return geom.MultiLineStringZM{LineStrings: lineStringZMs}, nil
 }
 
 func writeMultiLineStringZM(w io.Writer, byteOrder binary.ByteOrder, multiLineStringZM geom.MultiLineStringZM) error {
