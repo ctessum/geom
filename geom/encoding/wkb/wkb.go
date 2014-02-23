@@ -127,7 +127,7 @@ func Read(r io.Reader) (geom.T, error) {
 	case wkbNDR:
 		byteOrder = binary.LittleEndian
 	default:
-		return nil, fmt.Errorf("invalid byte order %u", wkbByteOrder)
+		return nil, fmt.Errorf("invalid byte order %d", wkbByteOrder)
 	}
 
 	var wkbGeometryType uint32
@@ -138,7 +138,7 @@ func Read(r io.Reader) (geom.T, error) {
 	if reader, ok := wkbReaders[wkbGeometryType]; ok {
 		return reader(r, byteOrder)
 	} else {
-		return nil, fmt.Errorf("unsupported geometry type %u", wkbGeometryType)
+		return nil, fmt.Errorf("unsupported geometry type %d", wkbGeometryType)
 	}
 
 }
