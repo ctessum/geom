@@ -1,5 +1,5 @@
 /*
-Package projgeom is performs geodesic reprojections on 
+Package projgeom is performs geodesic reprojections on
 Open GIS Consortium style geometry objects.
 It is an interface between
 	"github.com/pebbe/go-proj-4/proj"
@@ -29,6 +29,9 @@ func (e UnsupportedGeometryError) Error() string {
 // not, Z values are not supported.
 // I also don't know what to do with M values so they are not supported either.
 func Project(g geom.T, src, dst *proj.Proj, inputDegrees, outputDegrees bool) (geom.T, error) {
+	if g == nil {
+		return nil, nil
+	}
 	switch g.(type) {
 	case geom.Point:
 		point := g.(geom.Point)
