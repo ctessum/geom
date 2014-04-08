@@ -55,6 +55,18 @@ func Encode(g geom.T) ([]byte, error) {
 	case geom.PolygonZM:
 		polygonZM := g.(geom.PolygonZM)
 		return appendPolygonZMWKT(nil, &polygonZM), nil
+	case geom.MultiPolygon:
+		multiPolygon := g.(geom.MultiPolygon)
+		return appendMultiPolygonWKT(nil, &multiPolygon), nil
+	case geom.MultiPolygonZ:
+		multiPolygonZ := g.(geom.MultiPolygonZ)
+		return appendMultiPolygonZWKT(nil, &multiPolygonZ), nil
+	case geom.MultiPolygonM:
+		multiPolygonM := g.(geom.MultiPolygonM)
+		return appendMultiPolygonMWKT(nil, &multiPolygonM), nil
+	case geom.MultiPolygonZM:
+		multiPolygonZM := g.(geom.MultiPolygonZM)
+		return appendMultiPolygonZMWKT(nil, &multiPolygonZM), nil
 	default:
 		return nil, &UnsupportedGeometryError{reflect.TypeOf(g)}
 	}
