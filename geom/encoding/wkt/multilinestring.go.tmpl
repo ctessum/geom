@@ -12,7 +12,7 @@ func appendMultiLineString{{.ZM}}WKT(dst []byte,
 		if i != len(multiLineString{{.ZM}}.LineStrings)-1 {
 			dst = append(dst, ')')
 			dst = append(dst, ',')
-			dst = append(dst, ')')
+			dst = append(dst, '(')
 		}
 	}
 	dst = append(dst, ')')

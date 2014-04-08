@@ -68,6 +68,7 @@ func main() {
 		"geom/encoding/wkt/linestring.go",
 		"geom/encoding/wkt/multilinestring.go",
 		"geom/encoding/wkt/polygon.go",
+		"geom/encoding/wkt/multipolygon.go",
 	}
 
 	if *clean {

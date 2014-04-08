@@ -12,7 +12,7 @@ func appendMultiLineStringWKT(dst []byte,
 		if i != len(multiLineString.LineStrings)-1 {
 			dst = append(dst, ')')
 			dst = append(dst, ',')
-			dst = append(dst, ')')
+			dst = append(dst, '(')
 		}
 	}
 	dst = append(dst, ')')
@@ -28,7 +28,7 @@ func appendMultiLineStringZWKT(dst []byte,
 		if i != len(multiLineStringZ.LineStrings)-1 {
 			dst = append(dst, ')')
 			dst = append(dst, ',')
-			dst = append(dst, ')')
+			dst = append(dst, '(')
 		}
 	}
 	dst = append(dst, ')')
@@ -44,7 +44,7 @@ func appendMultiLineStringMWKT(dst []byte,
 		if i != len(multiLineStringM.LineStrings)-1 {
 			dst = append(dst, ')')
 			dst = append(dst, ',')
-			dst = append(dst, ')')
+			dst = append(dst, '(')
 		}
 	}
 	dst = append(dst, ')')
@@ -60,7 +60,7 @@ func appendMultiLineStringZMWKT(dst []byte,
 		if i != len(multiLineStringZM.LineStrings)-1 {
 			dst = append(dst, ')')
 			dst = append(dst, ',')
-			dst = append(dst, ')')
+			dst = append(dst, '(')
 		}
 	}
 	dst = append(dst, ')')

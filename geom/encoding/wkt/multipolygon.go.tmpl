@@ -1,0 +1,22 @@
+package wkt
+
+import (
+	"github.com/twpayne/gogeom/geom"
+){{range .Dims}}
+
+func appendMultiPolygon{{.ZM}}WKT(dst []byte,
+	multiPolygon{{.ZM}} *geom.MultiPolygon{{.ZM}}) []byte {
+	dst = append(dst, []byte("MULTIPOLYGON{{.ZM}}((")...)
+	for i, pg := range multiPolygon{{.ZM}}.Polygons {
+		dst = appendPoint{{.ZM}}ssCoords(dst, pg.Rings)
+		if i != len(multiPolygon{{.ZM}}.Polygons)-1 {
+			dst = append(dst, ')')
+			dst = append(dst, ',')
+			dst = append(dst, '(')
+		}
+	}
+	dst = append(dst, ')')
+	dst = append(dst, ')')
+	return dst
+}{{end}}
+
