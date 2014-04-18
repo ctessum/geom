@@ -17,20 +17,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package polyclip
+package geomop
 
 import (
 	. "testing"
+	"github.com/twpayne/gogeom/geom"
 )
 
 func TestAbove(t *T) {
 	cases := []struct {
-		left, right Point
+		left, right geom.Point
 		result      bool
-		x           Point
+		x           geom.Point
 	}{
-		{Point{0, 1}, Point{2, 1}, true, Point{1, 0}},
-		{Point{0, 1}, Point{2, 1}, false, Point{1, 3}},
+		{geom.Point{0, 1}, geom.Point{2, 1}, true, geom.Point{1, 0}},
+		{geom.Point{0, 1}, geom.Point{2, 1}, false, geom.Point{1, 3}},
 	}
 	for i, v := range cases {
 		e := &endpoint{p: v.left, left: true, other: &endpoint{p: v.right, left: false}}

@@ -21,13 +21,27 @@
 // based on http://code.google.com/p/as3polyclip/ (MIT licensed)
 // and code by Martínez et al: http://wwwdi.ujaen.es/~fmartin/bool_op.html (public domain)
 
-package polyclip
+package geomop
+
+import (
+	"github.com/twpayne/gogeom/geom"
+)
+
+type outputType int
+
+const (
+	outputPolygons outputType = iota
+	outputLines
+	outputPoints
+)
 
 // Holds intermediate results (pointChains) of the clipping operation and forms them into
 // the final polygon.
 type connector struct {
-	openPolys   []chain
-	closedPolys []chain
+	subject, clipping geom.Polygon
+	outType           outputType
+	openPolys         []chain
+	closedPolys       []chain
 }
 
 func (c *connector) add(s segment) {
@@ -71,14 +85,80 @@ func (c *connector) add(s segment) {
 	c.openPolys = append(c.openPolys, *newChain(s))
 }
 
-func (c *connector) toPolygon() Polygon {
-	poly := Polygon{}
-	for _, chain := range c.closedPolys {
-		con := Contour{}
-		for _, p := range chain.points {
-			con.Add(p)
+func (c *connector) toShape() geom.T {
+	switch c.outType {
+	case outputPolygons:
+		var poly geom.Polygon
+		poly.Rings = make([][]geom.Point, len(c.closedPolys))
+		for i, chain := range c.closedPolys {
+			poly.Rings[i] = make([]geom.Point, len(chain.points)+1)
+			for j, p := range chain.points {
+				poly.Rings[i][j] = p
+			}
+			// close the ring
+			poly.Rings[i][len(chain.points)] = poly.Rings[i][0]
 		}
-		poly.Add(con)
+		// fix winding directions
+		FixOrientation(poly)
+		return geom.T(poly)
+
+	case outputLines:
+		var outline geom.MultiLineString
+		outline.LineStrings = make([]geom.LineString, 1, len(c.closedPolys))
+		outline.LineStrings[0].Points = make([]geom.Point, 0)
+		lnum := 0
+		// only keep points that are coincident with subject
+		for _, chain := range c.closedPolys {
+			for _, ls := range c.subject.Rings {
+				for i := 0; i < len(ls)-1; i++ {
+					pointsMatched := false
+					for _, p := range chain.points {
+						if pointOnSegment(p, ls[i], ls[i+1]) {
+							outline.LineStrings[lnum].Points =
+								append(outline.LineStrings[lnum].Points, p)
+							pointsMatched = true
+						}
+					}
+					if pointsMatched {
+						outline.LineStrings = append(outline.LineStrings,
+							geom.LineString{make([]geom.Point, 0)})
+						lnum++
+					}
+				}
+				outline.LineStrings = append(outline.LineStrings,
+					geom.LineString{make([]geom.Point, 0)})
+				lnum++
+			}
+			outline.LineStrings = append(outline.LineStrings,
+				geom.LineString{make([]geom.Point, 0)})
+			lnum++
+		}
+		return geom.T(outline)
+
+	case outputPoints:
+		// only keep points coincident with both subject and clip
+		var outpt geom.MultiPoint
+		outpt.Points = make([]geom.Point, 0)
+		for _, chain := range c.closedPolys {
+			for _, p := range chain.points {
+				for _, ls1 := range c.subject.Rings {
+					for i := 0; i < len(ls1)-1; i++ {
+						if pointOnSegment(p, ls1[i], ls1[i+1]) {
+							for _, ls2 := range c.clipping.Rings {
+								for j := 0; j < len(ls2)-1; j++ {
+									if pointOnSegment(p, ls2[j], ls2[j+1]) {
+										outpt.Points = append(outpt.Points, p)
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return outpt
+	default:
+		panic("This shouldn't happen!")
+		return nil
 	}
-	return poly
 }

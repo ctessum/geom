@@ -17,13 +17,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package polyclip
+package geomop
 
 import (
 	. "testing"
+	"github.com/twpayne/gogeom/geom"
 )
 
-func connopen(openchains ...[]Point) connector {
+func connopen(openchains ...[]geom.Point) connector {
 	c := connector{openPolys: []chain{}}
 	for _, pts := range openchains {
 		c.openPolys = append(c.openPolys, chain{points: pts})
@@ -39,16 +40,16 @@ func TestConnectorAddClosing1(t *T) {
 	}{
 		{
 			c: connopen(
-				[]Point{{0.527105, 0.24687}, {0.2705720799269327, 0.2795780221218095}, {0.262624807729291, 0.30113844655235167}, {0.43093, 0.407828}, {0.48944187037949144, 0.6116041332606713}, {0.502984, 0.612599}},
-				[]Point{{0.5813234786695596, 0.6602679842620749}, {0.569772, 0.46489}}),
-			add:    segment{Point{0.5813234786695596, 0.6602679842620749}, Point{0.502984, 0.612599}},
+				[]geom.Point{{0.527105, 0.24687}, {0.2705720799269327, 0.2795780221218095}, {0.262624807729291, 0.30113844655235167}, {0.43093, 0.407828}, {0.48944187037949144, 0.6116041332606713}, {0.502984, 0.612599}},
+				[]geom.Point{{0.5813234786695596, 0.6602679842620749}, {0.569772, 0.46489}}),
+			add:    segment{geom.Point{0.5813234786695596, 0.6602679842620749}, geom.Point{0.502984, 0.612599}},
 			length: 8,
 		},
 		{ // simplified version of the above case
 			c: connopen(
-				[]Point{{0, 1}, {0, 2}, {0, 3}},
-				[]Point{{1, 1}, {1, 2}}),
-			add:    segment{Point{1, 1}, Point{0, 3}},
+				[]geom.Point{{0, 1}, {0, 2}, {0, 3}},
+				[]geom.Point{{1, 1}, {1, 2}}),
+			add:    segment{geom.Point{1, 1}, geom.Point{0, 3}},
 			length: 5,
 		},
 	}

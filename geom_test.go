@@ -17,10 +17,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package polyclip
+package geomop
 
 import (
 	"fmt"
+	"github.com/twpayne/gogeom/geom"
 	"math"
 	"sort"
 	. "testing"
@@ -38,59 +39,22 @@ func circa(f, g float64) bool {
 }
 
 func TestPoint(t *T) {
-	verify(t, Point{0, 0}.Equals(Point{0, 0}), "Expected equal points")
-	verify(t, Point{1, 2}.Equals(Point{1, 2}), "Expected equal points")
-	verify(t, circa(Point{3, 4}.Length(), 5), "Expected length 5")
-}
-
-func rect(x, y, w, h float64) Rectangle {
-	return Rectangle{Min: Point{x, y}, Max: Point{x + w, y + h}}
-}
-
-func TestRectangleUnion(t *T) {
-	cases := []struct{ a, b, result Rectangle }{
-		{rect(0, 0, 20, 30), rect(0, 0, 30, 20), rect(0, 0, 30, 30)},
-		{rect(10, 10, 10, 10), rect(-10, -10, 10, 10), rect(-10, -10, 30, 30)},
-	}
-	for i, v := range cases {
-		u := v.a.union(v.b)
-		r := v.result
-		verify(t, u.Min.X == r.Min.X && u.Min.Y == r.Min.Y && u.Max.X == r.Max.X && u.Max.Y == r.Max.Y, "Expected equal rectangles in case %d", i)
-	}
-}
-
-func TestRectangleIntersects(t *T) {
-	r1 := rect(5, 5, 10, 10)
-	cases := []struct {
-		a, b   Rectangle
-		result bool
-	}{
-		{rect(0, 0, 10, 20), rect(0, 10, 20, 10), true},
-		{rect(0, 0, 10, 20), rect(20, 0, 10, 20), false},
-		{rect(10, 50, 10, 10), rect(0, 0, 50, 45), false},
-		{r1, rect(0, 0, 10, 10), true}, // diagonal intersections
-		{r1, rect(10, 0, 10, 10), true},
-		{r1, rect(0, 10, 10, 10), true},
-		{r1, rect(10, 10, 10, 10), true},
-		{r1, rect(-10, -10, 10, 10), false}, // non-intersecting rects on diagonal axes
-		{r1, rect(20, -10, 10, 10), false},
-		{r1, rect(-10, 20, 10, 10), false},
-		{r1, rect(20, 20, 10, 10), false},
-	}
-	for i, v := range cases {
-		verify(t, v.a.Overlaps(v.b) == v.result, "Expected result %v in case %d", v.result, i)
-	}
+	verify(t, PointEquals(geom.Point{0, 0}, geom.Point{0, 0}),
+		"Expected equal points")
+	verify(t, PointEquals(geom.Point{1, 2}, geom.Point{1, 2}),
+		"Expected equal points")
+	verify(t, circa(lengthToOrigin(geom.Point{3, 4}), 5), "Expected length 5")
 }
 
 func TestContourAdd(t *T) {
 	c := Contour{}
-	pp := []Point{{1, 2}, {3, 4}, {5, 6}}
+	pp := []geom.Point{{1, 2}, {3, 4}, {5, 6}}
 	for i := range pp {
-		c.Add(pp[i])
+		c = append(c, pp[i])
 	}
 	verify(t, len(c) == len(pp), "Expected all points in contour")
 	for i := range pp {
-		verify(t, c[i].Equals(pp[i]), "Wrong point at position %d", i)
+		verify(t, PointEquals(c[i], pp[i]), "Wrong point at position %d", i)
 	}
 }
 
@@ -99,17 +63,20 @@ func TestContourBoundingBox(t *T) {
 }
 
 func TestContourSegment(t *T) {
-	c := Contour([]Point{{1, 2}, {3, 4}, {5, 6}})
+	c := Contour([]geom.Point{{1, 2}, {3, 4}, {5, 6}})
 	segeq := func(s1, s2 segment) bool {
-		return s1.start.Equals(s2.start) && s1.end.Equals(s2.end)
+		return PointEquals(s1.start, s2.start) && PointEquals(s1.end, s2.end)
 	}
-	verify(t, segeq(c.segment(0), segment{Point{1, 2}, Point{3, 4}}), "Expected segment 0")
-	verify(t, segeq(c.segment(1), segment{Point{3, 4}, Point{5, 6}}), "Expected segment 1")
-	verify(t, segeq(c.segment(2), segment{Point{5, 6}, Point{1, 2}}), "Expected segment 2")
+	verify(t, segeq(c.segment(0), segment{geom.Point{1, 2}, geom.Point{3, 4}}),
+		"Expected segment 0")
+	verify(t, segeq(c.segment(1), segment{geom.Point{3, 4}, geom.Point{5, 6}}),
+		"Expected segment 1")
+	verify(t, segeq(c.segment(2), segment{geom.Point{5, 6}, geom.Point{1, 2}}),
+		"Expected segment 2")
 }
 
 func TestContourSegmentError1(t *T) {
-	c := Contour([]Point{{1, 2}, {3, 4}, {5, 6}})
+	c := Contour([]geom.Point{{1, 2}, {3, 4}, {5, 6}})
 
 	defer func() {
 		verify(t, recover() != nil, "Expected error")
@@ -118,21 +85,21 @@ func TestContourSegmentError1(t *T) {
 }
 
 type pointresult struct {
-	p      Point
+	p      geom.Point
 	result bool
 }
 
 func TestContourContains(t *T) {
 	var cases1 []pointresult
-	c1 := Contour([]Point{{0, 0}, {10, 0}, {0, 10}})
-	c2 := Contour([]Point{{0, 0}, {0, 10}, {10, 0}}) // opposite rotation
+	c1 := Contour([]geom.Point{{0, 0}, {10, 0}, {0, 10}})
+	c2 := Contour([]geom.Point{{0, 0}, {0, 10}, {10, 0}}) // opposite rotation
 	cases1 = []pointresult{
-		{Point{1, 1}, true},
-		{Point{2, .1}, true},
-		{Point{10, 10}, false},
-		{Point{11, 0}, false},
-		{Point{0, 11}, false},
-		{Point{-1, -1}, false},
+		{geom.Point{1, 1}, true},
+		{geom.Point{2, .1}, true},
+		{geom.Point{10, 10}, false},
+		{geom.Point{11, 0}, false},
+		{geom.Point{0, 11}, false},
+		{geom.Point{-1, -1}, false},
 	}
 	for i, v := range cases1 {
 		verify(t, c1.Contains(v.p) == v.result, "Expected %v for point %d for c1", v.result, i)
@@ -141,15 +108,18 @@ func TestContourContains(t *T) {
 }
 
 // [{1 1} {1 2} {2 1}]
-func ExamplePolygon_Construct() {
-	subject := Polygon{{{1, 1}, {1, 2}, {2, 2}, {2, 1}}} // small square
-	clipping := Polygon{{{0, 0}, {0, 3}, {3, 0}}}        // overlapping triangle
-	result := subject.Construct(INTERSECTION, clipping)
+func ExampleConstruct() {
+	subject := geom.T(geom.Polygon{
+		[][]geom.Point{{{1, 1}, {1, 2}, {2, 2}, {2, 1}}}}) // small square
+	clipping := geom.T(geom.Polygon{
+		[][]geom.Point{{{0, 0}, {0, 3}, {3, 0}}}}) // overlapping triangle
+
+	// Calculate the intersection
+	result := Construct(subject, clipping, INTERSECTION)
 
 	out := []string{}
-	for _, point := range result[0] {
+	for _, point := range result.(geom.Polygon).Rings[0] {
 		out = append(out, fmt.Sprintf("%v", point))
 	}
-	sort.Strings(out)
 	fmt.Println(out)
 }

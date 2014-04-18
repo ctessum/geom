@@ -21,10 +21,11 @@
 // based on http://code.google.com/p/as3polyclip/ (MIT licensed)
 // and code by Martínez et al: http://wwwdi.ujaen.es/~fmartin/bool_op.html (public domain)
 
-package polyclip
+package geomop
 
 import (
 	"fmt"
+	"github.com/twpayne/gogeom/geom"
 	"math"
 )
 
@@ -51,56 +52,61 @@ const (
 // It implements the algorithm for polygon intersection given by Francisco Martínez del Río.
 // See http://wwwdi.ujaen.es/~fmartin/bool_op.html
 type clipper struct {
-	subject, clipping Polygon
+	subject, clipping geom.Polygon
+	outType           outputType // Whether the output should be a polygon, lines or points
 	eventQueue
 }
 
-func (c *clipper) compute(operation Op) Polygon {
+func (c *clipper) compute(operation Op) geom.T {
 
 	// Test 1 for trivial result case
-	if len(c.subject)*len(c.clipping) == 0 {
+	if len(c.subject.Rings)*len(c.clipping.Rings) == 0 {
 		switch operation {
 		case DIFFERENCE:
-			return c.subject.Clone()
+			return Clone(c.subject)
 		case UNION:
-			if len(c.subject) == 0 {
-				return c.clipping.Clone()
+			if len(c.subject.Rings) == 0 {
+				return Clone(c.clipping)
 			}
-			return c.subject.Clone()
+			return Clone(c.subject)
 		}
-		return Polygon{}
+		return geom.Polygon{}
 	}
 
 	// Test 2 for trivial result case
-	subjectbb := c.subject.BoundingBox()
-	clippingbb := c.clipping.BoundingBox()
+	subjectbb := c.subject.Bounds(nil)
+	clippingbb := c.clipping.Bounds(nil)
 	if !subjectbb.Overlaps(clippingbb) {
 		switch operation {
 		case DIFFERENCE:
-			return c.subject.Clone()
-		case UNION:
-			result := c.subject.Clone()
-			for _, cont := range c.clipping {
-				result.Add(cont.Clone())
+			return Clone(c.subject)
+		case UNION, XOR:
+			result := Clone(c.subject)
+			for _, rcont := range c.clipping.Rings {
+				cont := Contour(rcont)
+				result.Rings = append(result.Rings, cont.Clone())
 			}
 			return result
 		}
-		return Polygon{}
+		return geom.Polygon{}
 	}
 
 	// Add each segment to the eventQueue, sorted from left to right.
-	for _, cont := range c.subject {
+	for _, rcont := range c.subject.Rings {
+		cont := Contour(rcont)
 		for i := range cont {
 			addProcessedSegment(&c.eventQueue, cont.segment(i), _SUBJECT)
 		}
 	}
-	for _, cont := range c.clipping {
+	for _, rcont := range c.clipping.Rings {
+		cont := Contour(rcont)
 		for i := range cont {
 			addProcessedSegment(&c.eventQueue, cont.segment(i), _CLIPPING)
 		}
 	}
 
-	connector := connector{} // to connect the edge solutions
+	connector := connector{outType: c.outType,
+		subject: c.subject, clipping: c.clipping} // to connect the edge solutions
 
 	// This is the sweepline. That is, we go through all the polygon edges
 	// by sweeping from left to right.
@@ -118,7 +124,7 @@ func (c *clipper) compute(operation Op) Polygon {
 		case operation == INTERSECTION && e.p.X > MINMAX_X:
 			fallthrough
 		case operation == DIFFERENCE && e.p.X > subjectbb.Max.X:
-			return connector.toPolygon()
+			return connector.toShape()
 		case operation == UNION && e.p.X > MINMAX_X:
 			// add all the non-processed line segments to the result
 			if !e.left {
@@ -131,7 +137,7 @@ func (c *clipper) compute(operation Op) Polygon {
 					connector.add(e.segment())
 				}
 			}
-			return connector.toPolygon()
+			return connector.toShape()
 		}
 
 		if e.left { // the line segment must be inserted into S
@@ -265,31 +271,31 @@ func (c *clipper) compute(operation Op) Polygon {
 			}
 		})
 	}
-	return connector.toPolygon()
+	return connector.toShape()
 }
 
-func findIntersection(seg0, seg1 segment) (int, Point, Point) {
-	var pi0, pi1 Point
+func findIntersection(seg0, seg1 segment) (int, geom.Point, geom.Point) {
+	var pi0, pi1 geom.Point
 	p0 := seg0.start
-	d0 := Point{seg0.end.X - p0.X, seg0.end.Y - p0.Y}
+	d0 := geom.Point{seg0.end.X - p0.X, seg0.end.Y - p0.Y}
 	p1 := seg1.start
-	d1 := Point{seg1.end.X - p1.X, seg1.end.Y - p1.Y}
+	d1 := geom.Point{seg1.end.X - p1.X, seg1.end.Y - p1.Y}
 	sqrEpsilon := 1e-7 // was 1e-3 earlier
-	E := Point{p1.X - p0.X, p1.Y - p0.Y}
+	E := geom.Point{p1.X - p0.X, p1.Y - p0.Y}
 	kross := d0.X*d1.Y - d0.Y*d1.X
 	sqrKross := kross * kross
-	sqrLen0 := d0.Length()
-	sqrLen1 := d1.Length()
+	sqrLen0 := lengthToOrigin(d0)
+	sqrLen1 := lengthToOrigin(d1)
 
 	if sqrKross > sqrEpsilon*sqrLen0*sqrLen1 {
 		// lines of the segments are not parallel
 		s := (E.X*d1.Y - E.Y*d1.X) / kross
 		if s < 0 || s > 1 {
-			return 0, Point{}, Point{}
+			return 0, geom.Point{}, geom.Point{}
 		}
 		t := (E.X*d0.Y - E.Y*d0.X) / kross
 		if t < 0 || t > 1 {
-			return 0, Point{}, Point{}
+			return 0, geom.Point{}, geom.Point{}
 		}
 		// intersection of lines is a point an each segment [MC: ?]
 		pi0.X = p0.X + s*d0.X
@@ -301,7 +307,7 @@ func findIntersection(seg0, seg1 segment) (int, Point, Point) {
 	}
 
 	// lines of the segments are parallel
-	sqrLenE := E.Length()
+	sqrLenE := lengthToOrigin(E)
 	kross = E.X*d0.Y - E.Y*d0.X
 	sqrKross = kross * kross
 	if sqrKross > sqrEpsilon*sqrLen0*sqrLenE {
@@ -372,7 +378,8 @@ func (c *clipper) possibleIntersection(e1, e2 *endpoint) {
 		return
 	}
 
-	if numIntersections == 1 && (e1.p.Equals(e2.p) || e1.other.p.Equals(e2.other.p)) {
+	if numIntersections == 1 && (PointEquals(e1.p, e2.p) ||
+		PointEquals(e1.other.p, e2.other.p)) {
 		return // the line segments intersect at an endpoint of both line segments
 	}
 
@@ -382,11 +389,11 @@ func (c *clipper) possibleIntersection(e1, e2 *endpoint) {
 	}
 
 	if numIntersections == 1 {
-		if !e1.p.Equals(ip1) && !e1.other.p.Equals(ip1) {
+		if !PointEquals(e1.p, ip1) && !PointEquals(e1.other.p, ip1) {
 			// if ip1 is not an endpoint of the line segment associated to e1 then divide "e1"
 			c.divideSegment(e1, ip1)
 		}
-		if !e2.p.Equals(ip1) && !e2.other.p.Equals(ip1) {
+		if !PointEquals(e2.p, ip1) && !PointEquals(e2.other.p, ip1) {
 			// if ip1 is not an endpoint of the line segment associated to e2 then divide "e2"
 			c.divideSegment(e2, ip1)
 		}
@@ -396,7 +403,7 @@ func (c *clipper) possibleIntersection(e1, e2 *endpoint) {
 	// The line segments overlap
 	sortedEvents := make([]*endpoint, 0)
 	switch {
-	case e1.p.Equals(e2.p):
+	case PointEquals(e1.p, e2.p):
 		sortedEvents = append(sortedEvents, nil) // WTF [MC: WTF]
 	case endpointLess(e1, e2):
 		sortedEvents = append(sortedEvents, e2, e1)
@@ -405,7 +412,7 @@ func (c *clipper) possibleIntersection(e1, e2 *endpoint) {
 	}
 
 	switch {
-	case e1.other.p.Equals(e2.other.p):
+	case PointEquals(e1.other.p, e2.other.p):
 		sortedEvents = append(sortedEvents, nil)
 	case endpointLess(e1.other, e2.other):
 		sortedEvents = append(sortedEvents, e2.other, e1.other)
@@ -469,7 +476,7 @@ func (c *clipper) possibleIntersection(e1, e2 *endpoint) {
 	c.divideSegment(sortedEvents[3].other, sortedEvents[2].p)
 }
 
-func (c *clipper) divideSegment(e *endpoint, p Point) {
+func (c *clipper) divideSegment(e *endpoint, p geom.Point) {
 	// "Right event" of the "left line segment" resulting from dividing e (the line segment associated to e)
 	r := &endpoint{p: p, left: false, polygonType: e.polygonType, other: e, edgeType: e.edgeType}
 	// "Left event" of the "right line segment" resulting from dividing e (the line segment associated to e)
@@ -489,7 +496,7 @@ func (c *clipper) divideSegment(e *endpoint, p Point) {
 }
 
 func addProcessedSegment(q *eventQueue, segment segment, polyType polygonType) {
-	if segment.start.Equals(segment.end) {
+	if PointEquals(segment.start, segment.end) {
 		// Possible degenerate condition
 		return
 	}

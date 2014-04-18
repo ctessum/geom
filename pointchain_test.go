@@ -17,15 +17,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package polyclip
+package geomop
 
 import (
 	. "testing"
+	"github.com/twpayne/gogeom/geom"
 )
 
 func TestChainLinkChain(t *T) {
-	a := chain{points: []Point{{0, 1}, {0, 2}, {0, 3}, {1, 1}}}
-	b := chain{points: []Point{{1, 1}, {1, 2}}}
+	a := chain{points: []geom.Point{{0, 1}, {0, 2}, {0, 3}, {1, 1}}}
+	b := chain{points: []geom.Point{{1, 1}, {1, 2}}}
 	verify(t, a.linkChain(&b), "Expected being able to link chains")
 	verify(t, len(a.points) == 5, "Expected len==5, got %d", len(a.points))
 }

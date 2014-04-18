@@ -21,87 +21,37 @@
 // based on http://code.google.com/p/as3polyclip/ (MIT licensed)
 // and code by Martínez et al: http://wwwdi.ujaen.es/~fmartin/bool_op.html (public domain)
 
-// Package polyclip provides implementation of algorithm for Boolean operations on 2D polygons.
+// Package geomop provides implementation of algorithms for geometry operations.
 // For further details, consult the description of Polygon.Construct method.
-package polyclip
+package geomop
 
 import (
+	"github.com/twpayne/gogeom/geom"
 	"math"
+	"reflect"
 )
 
-type Point struct {
-	X, Y float64
-}
-
 // Equals returns true if both p1 and p2 describe exactly the same point.
-func (p1 Point) Equals(p2 Point) bool {
+func PointEquals(p1, p2 geom.Point) bool {
 	return p1.X == p2.X && p1.Y == p2.Y
 }
 
+func pointSubtract(p1, p2 geom.Point) geom.Point {
+	return geom.Point{p1.X - p2.X, p1.Y - p2.Y}
+}
+
 // Length returns distance from p to point (0, 0).
-func (p Point) Length() float64 {
+func lengthToOrigin(p geom.Point) float64 {
 	return math.Sqrt(p.X*p.X + p.Y*p.Y)
-}
-
-type Rectangle struct {
-	Min, Max Point
-}
-
-func (r1 Rectangle) union(r2 Rectangle) Rectangle {
-	return Rectangle{
-		Min: Point{
-			X: math.Min(r1.Min.X, r2.Min.X),
-			Y: math.Min(r1.Min.Y, r2.Min.Y),
-		},
-		Max: Point{
-			X: math.Max(r1.Max.X, r2.Max.X),
-			Y: math.Max(r1.Max.Y, r2.Max.Y),
-		}}
-}
-
-// Overlaps returns whether r1 and r2 have a non-empty intersection.
-func (r1 Rectangle) Overlaps(r2 Rectangle) bool {
-	return r1.Min.X <= r2.Max.X && r1.Max.X >= r2.Min.X &&
-		r1.Min.Y <= r2.Max.Y && r1.Max.Y >= r2.Min.Y
 }
 
 // Used to represent an edge of a polygon.
 type segment struct {
-	start, end Point
+	start, end geom.Point
 }
 
 // Contour represents a sequence of vertices connected by line segments, forming a closed shape.
-type Contour []Point
-
-// Add is a convenience method for appending a point to a contour.
-func (c *Contour) Add(p Point) {
-	*c = append(*c, p)
-}
-
-// BoundingBox finds minimum and maximum coordinates of points in a contour.
-func (c Contour) BoundingBox() Rectangle {
-	bb := Rectangle{}
-	bb.Min.X = math.Inf(1)
-	bb.Min.Y = math.Inf(1)
-	bb.Max.X = math.Inf(-1)
-	bb.Max.Y = math.Inf(-1)
-
-	for _, p := range c {
-		if p.X > bb.Max.X {
-			bb.Max.X = p.X
-		}
-		if p.X < bb.Min.X {
-			bb.Min.X = p.X
-		}
-		if p.Y > bb.Max.Y {
-			bb.Max.Y = p.Y
-		}
-		if p.Y < bb.Min.Y {
-			bb.Min.Y = p.Y
-		}
-	}
-	return bb
-}
+type Contour []geom.Point
 
 func (c Contour) segment(index int) segment {
 	if index == len(c)-1 {
@@ -116,7 +66,7 @@ func (c Contour) segment(index int) segment {
 // convex or concave.
 // See: http://en.wikipedia.org/wiki/Point_in_polygon#Ray_casting_algorithm
 // Returns true if p is inside the polygon defined by contour.
-func (c Contour) Contains(p Point) bool {
+func (c Contour) Contains(p geom.Point) bool {
 	// Cast ray from p.x towards the right
 	intersections := 0
 	for i := range c {
@@ -143,51 +93,34 @@ func (c Contour) Contains(p Point) bool {
 		if curr.X != next.X && p.X > xint {
 			continue
 		}
-
 		intersections++
 	}
-
 	return intersections%2 != 0
 }
 
 // Clone returns a copy of a contour.
 func (c Contour) Clone() Contour {
-	return append([]Point{}, c...)
+	return append([]geom.Point{}, c...)
 }
 
-// Polygon is carved out of a 2D plane by a set of (possibly disjoint) contours.
-// It can thus contain holes, and can be self-intersecting.
-type Polygon []Contour
-
 // NumVertices returns total number of all vertices of all contours of a polygon.
-func (p Polygon) NumVertices() int {
+func NumVertices(p geom.Polygon) int {
 	num := 0
-	for _, c := range p {
+	for _, c := range p.Rings {
 		num += len(c)
 	}
 	return num
 }
 
-// BoundingBox finds minimum and maximum coordinates of points in a polygon.
-func (p Polygon) BoundingBox() Rectangle {
-	bb := p[0].BoundingBox()
-	for _, c := range p[1:] {
-		bb = bb.union(c.BoundingBox())
-	}
-
-	return bb
-}
-
-// Add is a convenience method for appending a contour to a polygon.
-func (p *Polygon) Add(c Contour) {
-	*p = append(*p, c)
-}
-
 // Clone returns a duplicate of a polygon.
-func (p Polygon) Clone() Polygon {
-	r := Polygon(make([]Contour, len(p)))
-	for i := range p {
-		r[i] = p[i].Clone()
+func Clone(p geom.Polygon) geom.Polygon {
+	var r geom.Polygon
+	r.Rings = make([][]geom.Point, len(p.Rings))
+	for i, rr := range p.Rings {
+		r.Rings[i] = make([]geom.Point, len(rr))
+		for j, pp := range p.Rings[i] {
+			r.Rings[i][j] = pp
+		}
 	}
 	return r
 }
@@ -210,10 +143,86 @@ const (
 // The paper describes the algorithm as performing in time O((n+k) log n),
 // where n is number of all edges of all polygons in operation, and
 // k is number of intersections of all polygon edges.
-func (p Polygon) Construct(operation Op, clipping Polygon) Polygon {
-	c := clipper{
-		subject:  p,
-		clipping: clipping,
+// "subject" and "clipping" can both be of type geom.Polygon,
+// geom.MultiPolygon, geom.LineString, or geom.MultiLineString.
+func Construct(subject, clipping geom.T, operation Op) geom.T {
+	// Prepare the input shapes
+	var c clipper
+	switch clipping.(type) {
+	case geom.Polygon, geom.MultiPolygon:
+		c.subject = convertToPolygon(subject)
+		c.clipping = convertToPolygon(clipping)
+		switch subject.(type) {
+		case geom.Polygon, geom.MultiPolygon:
+			c.outType = outputPolygons
+		case geom.LineString, geom.MultiLineString:
+			c.outType = outputLines
+		}
+
+	case geom.LineString, geom.MultiLineString:
+		switch subject.(type) {
+		case geom.Polygon, geom.MultiPolygon:
+			// swap clipping and subject
+			c.subject = convertToPolygon(clipping)
+			c.clipping = convertToPolygon(subject)
+			c.outType = outputLines
+		case geom.LineString, geom.MultiLineString:
+			c.subject = convertToPolygon(subject)
+			c.clipping = convertToPolygon(clipping)
+			c.outType = outputPoints
+		}
 	}
+	// Run the clipper
 	return c.compute(operation)
+}
+
+// convert input shapes to polygon to make internal processing easier
+func convertToPolygon(g geom.T) geom.Polygon {
+	switch g.(type) {
+	case geom.Polygon:
+		return g.(geom.Polygon)
+	case geom.MultiPolygon:
+		var out geom.Polygon
+		out.Rings = make([][]geom.Point, 0)
+		for _, p := range g.(geom.MultiPolygon).Polygons {
+			for _, r := range p.Rings {
+				out.Rings = append(out.Rings, r)
+			}
+		}
+		return out
+	case geom.LineString:
+		var out geom.Polygon
+		g2 := g.(geom.LineString)
+		out.Rings = make([][]geom.Point, 1)
+		out.Rings[0] = make([]geom.Point, len(g2.Points))
+		for j, p := range g2.Points {
+			out.Rings[0][j] = p
+		}
+		return out
+	case geom.MultiLineString:
+		var out geom.Polygon
+		g2 := g.(geom.MultiLineString)
+		out.Rings = make([][]geom.Point, len(g2.LineStrings))
+		for i, ls := range g2.LineStrings {
+			out.Rings[i] = make([]geom.Point, len(ls.Points))
+			for j, p := range ls.Points {
+				out.Rings[i][j] = p
+			}
+		}
+		return out
+	default:
+		panic(NewError(g))
+	}
+}
+
+type UnsupportedGeometryError struct {
+	Type reflect.Type
+}
+
+func NewError(g geom.T) UnsupportedGeometryError {
+	return UnsupportedGeometryError{reflect.TypeOf(g)}
+}
+
+func (e UnsupportedGeometryError) Error() string {
+	return "Unsupported geometry type: " + e.Type.String()
 }

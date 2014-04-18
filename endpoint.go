@@ -21,16 +21,17 @@
 // based on http://code.google.com/p/as3polyclip/ (MIT licensed)
 // and code by Martínez et al: http://wwwdi.ujaen.es/~fmartin/bool_op.html (public domain)
 
-package polyclip
+package geomop
 
 import (
 	"fmt"
+	"github.com/twpayne/gogeom/geom"
 )
 
 // A container for endpoint data. A endpoint represents a location of interest (vertex between two polygon edges)
 // as the sweep line passes through the polygons.
 type endpoint struct {
-	p           Point
+	p           geom.Point
 	left        bool      // Is the point the left endpoint of the segment (p, other->p)?
 	polygonType           // polygonType to which this event belongs to
 	other       *endpoint // Event associated to the other endpoint of the segment
@@ -49,7 +50,7 @@ func (e endpoint) String() string {
 }
 
 func (e1 *endpoint) equals(e2 *endpoint) bool {
-	return e1.p.Equals(e2.p) &&
+	return PointEquals(e1.p,e2.p) &&
 		e1.left == e2.left &&
 		e1.polygonType == e2.polygonType &&
 		e1.other == e2.other &&
@@ -62,19 +63,19 @@ func (se *endpoint) segment() segment {
 	return segment{se.p, se.other.p}
 }
 
-func signedArea(p0, p1, p2 Point) float64 {
+func signedArea(p0, p1, p2 geom.Point) float64 {
 	return (p0.X-p2.X)*(p1.Y-p2.Y) -
 		(p1.X-p2.X)*(p0.Y-p2.Y)
 }
 
 // Checks if this sweep event is below point p.
-func (se *endpoint) below(x Point) bool {
+func (se *endpoint) below(x geom.Point) bool {
 	if se.left {
 		return signedArea(se.p, se.other.p, x) > 0
 	}
 	return signedArea(se.other.p, se.p, x) > 0
 }
 
-func (se *endpoint) above(x Point) bool {
+func (se *endpoint) above(x geom.Point) bool {
 	return !se.below(x)
 }

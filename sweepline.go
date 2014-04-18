@@ -21,7 +21,7 @@
 // based on http://code.google.com/p/as3polyclip/ (MIT licensed)
 // and code by Martínez et al: http://wwwdi.ujaen.es/~fmartin/bool_op.html (public domain)
 
-package polyclip
+package geomop
 
 // This is the data structure that simulates the sweepline as it parses through
 // eventQueue, which holds the events sorted from left to right (x-coordinate).
@@ -64,7 +64,7 @@ func segmentCompare(e1, e2 *endpoint) bool {
 	case signedArea(e1.p, e1.other.p, e2.other.p) != 0:
 		// Segments are not collinear
 		// If they share their left endpoint use the right endpoint to sort
-		if e1.p.Equals(e2.p) {
+		if PointEquals(e1.p, e2.p) {
 			return e1.below(e2.other.p)
 		}
 		// Different points
@@ -74,7 +74,7 @@ func segmentCompare(e1, e2 *endpoint) bool {
 		// The line segment associated to e2 has been inserted into S after the line segment associated to e1
 		return e1.below(e2.p)
 	// Segments are collinear. Just a consistent criterion is used
-	case e1.p.Equals(e2.p):
+	case PointEquals(e1.p, e2.p):
 		//return e1 < e2
 		return false
 	}

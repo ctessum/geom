@@ -17,16 +17,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package polyclip
+package geomop
 
 import (
 	. "testing"
+	"github.com/twpayne/gogeom/geom"
 )
 
 func TestVerticalZigzag(t *T) {
 	mkseg := func(xl, yl, xr, yr float64) (left *endpoint) {
-		left = &endpoint{p: Point{xl, yl}, left: true, polygonType: _SUBJECT}
-		right := &endpoint{p: Point{xr, yr}, polygonType: _SUBJECT, other: left}
+		left = &endpoint{p: geom.Point{xl, yl}, left: true, polygonType: _SUBJECT}
+		right := &endpoint{p: geom.Point{xr, yr}, polygonType: _SUBJECT, other: left}
 		left.other = right
 		return left
 	}

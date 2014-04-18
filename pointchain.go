@@ -21,23 +21,27 @@
 // based on http://code.google.com/p/as3polyclip/ (MIT licensed)
 // and code by Martínez et al: http://wwwdi.ujaen.es/~fmartin/bool_op.html (public domain)
 
-package polyclip
+package geomop
+
+import (
+	"github.com/twpayne/gogeom/geom"
+)
 
 // Represents a connected sequence of segments. The sequence can only be extended by connecting
 // new segments that share an endpoint with the chain.
 type chain struct {
 	closed bool
-	points []Point
+	points []geom.Point
 }
 
 func newChain(s segment) *chain {
 	return &chain{
 		closed: false,
-		points: []Point{s.start, s.end}}
+		points: []geom.Point{s.start, s.end}}
 }
 
-func (c *chain) pushFront(p Point) { c.points = append([]Point{p}, c.points...) }
-func (c *chain) pushBack(p Point)  { c.points = append(c.points, p) }
+func (c *chain) pushFront(p geom.Point) { c.points = append([]geom.Point{p}, c.points...) }
+func (c *chain) pushBack(p geom.Point)  { c.points = append(c.points, p) }
 
 // Links a segment to the chain
 func (c *chain) linkSegment(s segment) bool {
@@ -45,29 +49,29 @@ func (c *chain) linkSegment(s segment) bool {
 	back := c.points[len(c.points)-1]
 
 	switch true {
-	case s.start.Equals(front):
-		if s.end.Equals(back) {
+	case PointEquals(s.start,front):
+		if PointEquals(s.end,back) {
 			c.closed = true
 		} else {
 			c.pushFront(s.end)
 		}
 		return true
-	case s.end.Equals(back):
-		if s.start.Equals(front) {
+	case PointEquals(s.end,back):
+		if PointEquals(s.start,front) {
 			c.closed = true
 		} else {
 			c.pushBack(s.start)
 		}
 		return true
-	case s.end.Equals(front):
-		if s.start.Equals(back) {
+	case PointEquals(s.end,front):
+		if PointEquals(s.start,back) {
 			c.closed = true
 		} else {
 			c.pushFront(s.start)
 		}
 		return true
-	case s.start.Equals(back):
-		if s.end.Equals(front) {
+	case PointEquals(s.start,back):
+		if PointEquals(s.end,front) {
 			c.closed = true
 		} else {
 			c.pushBack(s.end)
@@ -86,27 +90,27 @@ func (c *chain) linkChain(other *chain) bool {
 	otherFront := other.points[0]
 	otherBack := other.points[len(other.points)-1]
 
-	if otherFront.Equals(back) {
+	if PointEquals(otherFront,back) {
 		c.points = append(c.points, other.points[1:]...)
 		goto success
 		//c.points = append(c.points[:len(c.points)-1], other.points...)
 		//return true
 	}
 
-	if otherBack.Equals(front) {
+	if PointEquals(otherBack,front) {
 		c.points = append(other.points, c.points[1:]...)
 		goto success
 		//return true
 	}
 
-	if otherFront.Equals(front) {
+	if PointEquals(otherFront,front) {
 		// Remove the first element, and join to reversed chain.points
 		c.points = append(reversed(other.points), c.points[1:]...)
 		goto success
 		//return true
 	}
 
-	if otherBack.Equals(back) {
+	if PointEquals(otherBack,back) {
 		c.points = append(c.points[:len(c.points)-1], reversed(other.points)...)
 		goto success
 		//c.points = append(other.points, reversed(c.points)...)
@@ -116,13 +120,13 @@ func (c *chain) linkChain(other *chain) bool {
 	return false
 
 success:
-	other.points = []Point{}
+	other.points = []geom.Point{}
 	return true
 }
 
-func reversed(list []Point) []Point {
+func reversed(list []geom.Point) []geom.Point {
 	length := len(list)
-	other := make([]Point, length)
+	other := make([]geom.Point, length)
 	for i := range list {
 		other[length-i-1] = list[i]
 	}
