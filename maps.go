@@ -59,6 +59,7 @@ func (r *RasterMap) DrawVector(g geom.T, strokeColor,
 	}
 	r.GC.SetStrokeColor(strokeColor)
 	r.GC.SetFillColor(fillColor)
+	r.GC.SetLineWidth(linewidth)
 	switch g.(type) {
 	case geom.Point:
 		p := g.(geom.Point)
@@ -67,6 +68,16 @@ func (r *RasterMap) DrawVector(g geom.T, strokeColor,
 	//case geom.PointZ:
 	//case geom.PointM:
 	//case geom.PointZM:
+	case geom.MultiPoint:
+		for _, p := range g.(geom.MultiPoint).Points {
+			x, y := r.coordinates(p.X, p.Y)
+			r.GC.MoveTo(x, y)
+			r.GC.ArcTo(x, y,
+				markersize, markersize, 0, 2*math.Pi)
+		}
+	//case geom.MultiPointZ:
+	//case geom.MultiPointM:
+	//case geom.MultiPointZM:
 	case geom.LineString:
 		l := g.(geom.LineString)
 		for i, p := range l.Points {
