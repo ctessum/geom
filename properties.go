@@ -157,6 +157,36 @@ func polyInPoly(outer, inner Contour) bool {
 	return true
 }
 
+// Function PointInPolygon determines whether "point" is
+// within "polygon". If "polygon" is not actually a polygon,
+// return false.
+func PointInPolygon(point geom.Point, polygon geom.T) bool {
+	inCount := 0
+	switch polygon.(type) {
+	case geom.Polygon:
+		o := orientation(polygon.(geom.Polygon))
+		for i, r := range polygon.(geom.Polygon).Rings {
+			if Contour(r).Contains(point) {
+				if o[i] > 0. {
+					inCount++
+				} else if o[i] < 0. {
+					inCount--
+				}
+			}
+		}
+		return inCount > 0
+	case geom.MultiPolygon:
+		for _, pp := range polygon.(geom.MultiPolygon).Polygons {
+			if PointInPolygon(point, geom.T(pp)) {
+				return true
+			}
+		}
+		return false
+	default:
+		return false
+	}
+}
+
 // dot product
 func dot(u, v geom.Point) float64 { return u.X*v.X + u.Y*v.Y }
 
