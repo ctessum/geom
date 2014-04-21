@@ -5,7 +5,7 @@ import (
 	"math"
 )
 
-const tolerance = 0.00000001
+const tolerance = 1.e-9
 
 // Function Area returns the area of a polygon, or the combined area of a
 // MultiPolygon, assuming that none of the polygons in the MultiPolygon
@@ -142,10 +142,11 @@ func FixOrientation(g geom.T) {
 	}
 }
 
-func reversePolygon(s []geom.Point) {
+func reversePolygon(s []geom.Point) []geom.Point {
 	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
 		s[i], s[j] = s[j], s[i]
 	}
+	return s
 }
 
 func polyInPoly(outer, inner Contour) bool {
@@ -155,6 +156,31 @@ func polyInPoly(outer, inner Contour) bool {
 		}
 	}
 	return true
+}
+
+func Within(inner, outer geom.T) bool {
+	switch outer.(type) {
+	case geom.Polygon:
+		op := outer.(geom.Polygon)
+		switch inner.(type) {
+		case geom.Polygon:
+			ip := inner.(geom.Polygon)
+			for _, r := range ip.Rings {
+				for _, p := range r {
+					if !PointInPolygon(p, op) {
+						return false
+					}
+				}
+			}
+			return true
+		default:
+			panic(NewError(outer))
+			return false
+		}
+	default:
+		panic(NewError(outer))
+		return false
+	}
 }
 
 // Function PointInPolygon determines whether "point" is

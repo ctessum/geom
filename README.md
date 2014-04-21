@@ -49,4 +49,4 @@ See also
   * Microsite about [the original algorithm][fmartin], from its authors (with PDF, and public-domain code in C++).
   * The [as3polyclip] library -- a MIT-licensed ActionScript3 library implementing this same algorithm (it actually served as a base for polyclip-go). The page also contains some thoughts with regards to speed of the algorithm.
   
-  [as3polyclip]: http://code.google.com/p/as3polyclip/
+  [as3polyclip]: http://www.findbestopensource.com/product/as3polyclip

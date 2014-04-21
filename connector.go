@@ -25,6 +25,7 @@ package geomop
 
 import (
 	"github.com/twpayne/gogeom/geom"
+	"math"
 )
 
 type outputType int
@@ -45,6 +46,28 @@ type connector struct {
 }
 
 func (c *connector) add(s segment) {
+
+	// if outputting lines, only keep segments coincident with the
+	// subject linestrings.
+	if c.outType == outputLines {
+		keepSeg := false
+		for _, ls := range c.subject.Rings {
+			for i := 0; i < len(ls)-1; i++ {
+				if pointOnSegment(s.start, ls[i], ls[i+1]) &&
+					pointOnSegment(s.end, ls[i], ls[i+1]) {
+					keepSeg = true
+					break
+				}
+			}
+			if keepSeg {
+				break
+			}
+		}
+		if !keepSeg {
+			return
+		}
+	}
+
 	// j iterates through the openPolygon chains.
 	for j := range c.openPolys {
 		chain := &c.openPolys[j]
@@ -86,6 +109,14 @@ func (c *connector) add(s segment) {
 }
 
 func (c *connector) toShape() geom.T {
+	// Check for empty result
+	if (len(c.closedPolys) == 0 ||
+		(len(c.closedPolys) == 1 && len(c.closedPolys[0].points) == 0)) &&
+		(len(c.openPolys) == 0 ||
+			(len(c.openPolys) == 1 && len(c.openPolys[0].points) == 0)) {
+		return nil
+	}
+
 	switch c.outType {
 	case outputPolygons:
 		var poly geom.Polygon
@@ -103,35 +134,15 @@ func (c *connector) toShape() geom.T {
 		return geom.T(poly)
 
 	case outputLines:
+		// Because we're dealing with linestrings and not polygons,
+		// copy the openPolys to the output instead of the closedPolys
 		var outline geom.MultiLineString
-		outline.LineStrings = make([]geom.LineString, 1, len(c.closedPolys))
-		outline.LineStrings[0].Points = make([]geom.Point, 0)
-		lnum := 0
-		// only keep points that are coincident with subject
-		for _, chain := range c.closedPolys {
-			for _, ls := range c.subject.Rings {
-				for i := 0; i < len(ls)-1; i++ {
-					pointsMatched := false
-					for _, p := range chain.points {
-						if pointOnSegment(p, ls[i], ls[i+1]) {
-							outline.LineStrings[lnum].Points =
-								append(outline.LineStrings[lnum].Points, p)
-							pointsMatched = true
-						}
-					}
-					if pointsMatched {
-						outline.LineStrings = append(outline.LineStrings,
-							geom.LineString{make([]geom.Point, 0)})
-						lnum++
-					}
-				}
-				outline.LineStrings = append(outline.LineStrings,
-					geom.LineString{make([]geom.Point, 0)})
-				lnum++
+		outline.LineStrings = make([]geom.LineString, len(c.openPolys))
+		for i, chain := range c.openPolys {
+			outline.LineStrings[i].Points = make([]geom.Point, len(chain.points))
+			for j, p := range chain.points {
+				outline.LineStrings[i].Points[j] = p
 			}
-			outline.LineStrings = append(outline.LineStrings,
-				geom.LineString{make([]geom.Point, 0)})
-			lnum++
 		}
 		return geom.T(outline)
 
@@ -139,8 +150,8 @@ func (c *connector) toShape() geom.T {
 		// only keep points coincident with both subject and clip
 		var outpt geom.MultiPoint
 		outpt.Points = make([]geom.Point, 0)
-		for _, chain := range c.closedPolys {
-			for _, p := range chain.points {
+		for a, chain := range c.closedPolys {
+			for b, p := range chain.points {
 				for _, ls1 := range c.subject.Rings {
 					for i := 0; i < len(ls1)-1; i++ {
 						if pointOnSegment(p, ls1[i], ls1[i+1]) {
@@ -149,6 +160,9 @@ func (c *connector) toShape() geom.T {
 									if pointOnSegment(p, ls2[j], ls2[j+1]) {
 										outpt.Points = append(outpt.Points, p)
 									}
+									// remove point
+									c.closedPolys[a].points[b] =
+										geom.Point{math.NaN(), math.NaN()}
 								}
 							}
 						}

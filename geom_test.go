@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"github.com/twpayne/gogeom/geom"
 	"math"
-	"sort"
 	. "testing"
 )
 
@@ -42,6 +41,8 @@ func TestPoint(t *T) {
 	verify(t, PointEquals(geom.Point{0, 0}, geom.Point{0, 0}),
 		"Expected equal points")
 	verify(t, PointEquals(geom.Point{1, 2}, geom.Point{1, 2}),
+		"Expected equal points")
+	verify(t, PointEquals(geom.Point{1, 2}, geom.Point{1.000000000001, 2}),
 		"Expected equal points")
 	verify(t, circa(lengthToOrigin(geom.Point{3, 4}), 5), "Expected length 5")
 }

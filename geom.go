@@ -31,9 +31,13 @@ import (
 	"reflect"
 )
 
-// Equals returns true if both p1 and p2 describe exactly the same point.
+// Equals returns true if both p1 and p2 describe the same point within
+// a tolerance limit.
 func PointEquals(p1, p2 geom.Point) bool {
-	return p1.X == p2.X && p1.Y == p2.Y
+	//	return (p1.X == p2.X && p1.Y == p2.Y)
+	return (p1.X == p2.X && p1.Y == p2.Y) ||
+		(math.Abs(p1.X-p2.X)/math.Abs(p1.X+p2.X) < tolerance &&
+			math.Abs(p1.Y-p2.Y)/math.Abs(p1.Y+p2.Y) < tolerance)
 }
 
 func pointSubtract(p1, p2 geom.Point) geom.Point {
@@ -178,29 +182,25 @@ func Construct(subject, clipping geom.T, operation Op) geom.T {
 
 // convert input shapes to polygon to make internal processing easier
 func convertToPolygon(g geom.T) geom.Polygon {
+	var out geom.Polygon
 	switch g.(type) {
 	case geom.Polygon:
-		return g.(geom.Polygon)
+		out = g.(geom.Polygon)
 	case geom.MultiPolygon:
-		var out geom.Polygon
 		out.Rings = make([][]geom.Point, 0)
 		for _, p := range g.(geom.MultiPolygon).Polygons {
 			for _, r := range p.Rings {
 				out.Rings = append(out.Rings, r)
 			}
 		}
-		return out
 	case geom.LineString:
-		var out geom.Polygon
 		g2 := g.(geom.LineString)
 		out.Rings = make([][]geom.Point, 1)
 		out.Rings[0] = make([]geom.Point, len(g2.Points))
 		for j, p := range g2.Points {
 			out.Rings[0][j] = p
 		}
-		return out
 	case geom.MultiLineString:
-		var out geom.Polygon
 		g2 := g.(geom.MultiLineString)
 		out.Rings = make([][]geom.Point, len(g2.LineStrings))
 		for i, ls := range g2.LineStrings {
@@ -209,10 +209,26 @@ func convertToPolygon(g geom.T) geom.Polygon {
 				out.Rings[i][j] = p
 			}
 		}
-		return out
 	default:
 		panic(NewError(g))
 	}
+	// The clipper doesn't work well if a shape is made up of only two points.
+	// To get around this problem, if there are only 2 points, we add a third
+	// one a small distance from the second point.
+	// However, if there is only 1 point, we just delete the shape.
+	for i, r := range out.Rings {
+		if len(r) == 0 {
+			continue
+		} else if len(r) == 1 {
+			out.Rings[i] = make([]geom.Point, 0)
+		} else if len(r) == 2 {
+			const delta = 0.00001
+			newpt := geom.Point{r[1].X + (r[1].X-r[0].X)*delta,
+				r[1].Y - (r[1].Y-r[0].Y)*delta}
+			out.Rings[i] = append(r, newpt)
+		}
+	}
+	return out
 }
 
 type UnsupportedGeometryError struct {

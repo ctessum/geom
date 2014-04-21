@@ -70,7 +70,7 @@ func (c *clipper) compute(operation Op) geom.T {
 			}
 			return Clone(c.subject)
 		}
-		return geom.Polygon{}
+		return nil
 	}
 
 	// Test 2 for trivial result case
@@ -88,7 +88,7 @@ func (c *clipper) compute(operation Op) geom.T {
 			}
 			return result
 		}
-		return geom.Polygon{}
+		return nil
 	}
 
 	// Add each segment to the eventQueue, sorted from left to right.
@@ -262,7 +262,7 @@ func (c *clipper) compute(operation Op) geom.T {
 				c.possibleIntersection(next, prev)
 			}
 
-			_DBG(func() { fmt.Print("Connector:\n", connector, "\n") })
+			//	_DBG(func() { fmt.Print("Connector:\n", connector, "\n") })
 		}
 		_DBG(func() {
 			fmt.Println("Status line after processing intersections: ")
