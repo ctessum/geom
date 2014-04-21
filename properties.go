@@ -173,8 +173,10 @@ func Within(inner, outer geom.T) bool {
 				}
 			}
 			return true
+		case geom.Point:
+			return PointInPolygon(inner.(geom.Point), outer)
 		default:
-			panic(NewError(outer))
+			panic(NewError(inner))
 			return false
 		}
 	default:
