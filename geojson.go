@@ -7,13 +7,25 @@ import (
 )
 
 type GeoJSONfeature struct {
-	Type       string
-	Geometry   *geojson.Geometry
-	Properties map[string]float64
+	Type       string             `json:"type"`
+	Geometry   *geojson.Geometry  `json:"geometry"`
+	Properties map[string]float64 `json:"properties"`
 }
 type GeoJSON struct {
-	Type     string
+	Type     string `json:"type"`
+	CRS      Crs    `json:"crs"`
 	Features []*GeoJSONfeature
+}
+
+// Coordinate reference system. Used for GeoJSON
+type Crs struct {
+	Type       string   `json:"type"`
+	Properties CrsProps `json:"properties"`
+}
+
+// Coordinate reference system properties.
+type CrsProps struct {
+	Name string `json:"name"`
 }
 
 func LoadGeoJSON(r io.Reader) (*GeoJSON, error) {
@@ -29,4 +41,25 @@ func (g *GeoJSON) Sum(propertyName string) float64 {
 		sum += f.Properties[propertyName]
 	}
 	return sum
+}
+
+// Convert map data to GeoJSON, where value name is a
+// name for the data values being output.
+func (m *MapData) ToGeoJSON(valueName string) (*GeoJSON, error) {
+	var err error
+	g := new(GeoJSON)
+	g.Type = "FeatureCollection"
+	g.CRS = Crs{"name", CrsProps{"EPSG:3857"}}
+	g.Features = make([]*GeoJSONfeature, len(m.Shapes))
+	for i, shape := range m.Shapes {
+		f := new(GeoJSONfeature)
+		f.Type = "Feature"
+		f.Geometry, err = geojson.ToGeoJSON(shape)
+		if err != nil {
+			return nil, err
+		}
+		f.Properties = map[string]float64{valueName: m.Data[i]}
+		g.Features[i] = f
+	}
+	return g, nil
 }
