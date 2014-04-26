@@ -348,6 +348,15 @@ func TestDifficultLine4(t *testing.T) {
 	drawLine(line, shape, intersection, "difficultLine4.png")
 }
 
+func TestCentroid(t *testing.T) {
+	shape := geom.T(geom.Polygon{[][]geom.Point{
+		{{0,0},{1,0},{2,1},{2,2},{1,3},{0,3},{-1,2},{-1,1},{0,0}},
+		{{0,0.1},{0.9,2.7},{1.9,1.5},{0.75,0.1},{0,0.1}}}})
+	point := Centroid(shape)
+	t.Log(point)
+	drawShapes(shape,nil,point,"centroid.png")
+}
+
 func drawShapes(a, b, c geom.T, filename string) {
 	f, err := os.Create(filename)
 	if err != nil {
@@ -357,7 +366,7 @@ func drawShapes(a, b, c geom.T, filename string) {
 		[]color.NRGBA{{0, 0, 0, 255}, {0, 0, 0, 255}, {0, 0, 0, 255}},
 		[]color.NRGBA{{255, 0, 0, 127}, {0, 255, 0, 127},
 			{0, 0, 0, 200}},
-		1, 0, a, b, c)
+		1, 8, a, b, c)
 	f.Close()
 }
 

@@ -70,6 +70,40 @@ func length(line []geom.Point) float64 {
 	return l
 }
 
+// Calculate the centroid of a polygon, from
+// wikipedia: http://en.wikipedia.org/wiki/Centroid#Centroid_of_polygon.
+// The polygon can have holes, but each ring must be closed (i.e.,
+// p[0] == p[n-1], where the ring has n points) and must not be
+// self-intersecting.
+// The algorithm will not check to make sure the holes are
+// actually inside the outer rings.
+func Centroid(g geom.T) geom.Point {
+	var out geom.Point
+	var A, xA, yA float64
+	switch g.(type) {
+	case geom.Polygon:
+		for _, r := range g.(geom.Polygon).Rings {
+			a := area(r)
+			cx, cy := 0., 0.
+			for i := 0; i < len(r)-1; i++ {
+				cx += (r[i].X + r[i+1].X) *
+					(r[i].X*r[i+1].Y - r[i+1].X*r[i].Y)
+				cy += (r[i].Y + r[i+1].Y) *
+					(r[i].X*r[i+1].Y - r[i+1].X*r[i].Y)
+			}
+			cx /= 6 * a
+			cy /= 6 * a
+			A += a
+			xA += cx * a
+			yA += cy * a
+		}
+		return geom.Point{xA / A, yA / A}
+	default:
+		panic(NewError(g))
+	}
+	return out
+}
+
 // orientation2D_Polygon(): test the orientation of a simple 2D polygon
 //  Input:  Point* V = an array of n+1 vertex points with V[n]=V[0]
 //  Return: >0 for counterclockwise
