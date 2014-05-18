@@ -2,6 +2,7 @@ package carto
 
 import (
 	"encoding/json"
+	"github.com/twpayne/gogeom/geom"
 	"github.com/twpayne/gogeom/geom/encoding/geojson"
 	"io"
 )
@@ -41,6 +42,26 @@ func (g *GeoJSON) Sum(propertyName string) float64 {
 		sum += f.Properties[propertyName]
 	}
 	return sum
+}
+
+func (g *GeoJSON) GetProperty(propertyName string) []float64 {
+	out := make([]float64, len(g.Features))
+	for i, f := range g.Features {
+		out[i] = f.Properties[propertyName]
+	}
+	return out
+}
+
+func (g *GeoJSON) GetGeometry() ([]geom.T,error) {
+	var err error
+	out := make([]geom.T, len(g.Features))
+	for i, f := range g.Features {
+		out[i], err = geojson.FromGeoJSON(f.Geometry)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return out, nil
 }
 
 // Convert map data to GeoJSON, where value name is a

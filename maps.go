@@ -44,6 +44,25 @@ func NewRasterMap(N, S, E, W float64, width int, f io.Writer) *RasterMap {
 	return r
 }
 
+// Make a new raster map from raster data.
+// It is assumed that the outer axis in the data is the Y-axis
+// (north-south) and the inner axis is the X-axis (west-east)
+// (i.e., len(data)==nx*ny &&  val[j,i] = data[j*nx+i]).
+func NewRasterMapFromRaster(S, W, dy, dx float64, ny, nx int,
+	data []float64, cmap *ColorMap, f io.Writer) *RasterMap {
+	N := S + float64(ny)*dy
+	E := W + float64(nx)*dx
+	r := NewRasterMap(N, S, E, W, nx, f)
+	r.height = ny
+	for i := 0; i < nx; i++ {
+		for j := 0; j < ny; j++ {
+			val := data[j*nx+i]
+			r.I.Set(i, j, cmap.GetColor(val))
+		}
+	}
+	return r
+}
+
 // Draw a vector on a raster map when given the geometry,
 // stroke and fill colors, the width of the bounding line,
 // and the size of the marker (only used for point shapes).
@@ -180,7 +199,7 @@ func (m *MapData) WriteGoogleMapTile(w io.Writer, zoom, x, y int) error {
 		return nil
 	}
 	//strokeColor := color.NRGBA{0, 0, 0, 255}
-	N, S, E, W := GetGoogleTileBounds(zoom, x, y)
+	N, S, E, W := getGoogleTileBounds(zoom, x, y)
 	maptile := NewRasterMap(N, S, E, W, 256, w)
 
 	var strokeColor color.NRGBA
@@ -203,7 +222,7 @@ func (m *MapData) WriteGoogleMapTile(w io.Writer, zoom, x, y int) error {
 	return nil
 }
 
-func GetGoogleTileBounds(zoom, x, y int) (N, S, E, W float64) {
+func getGoogleTileBounds(zoom, x, y int) (N, S, E, W float64) {
 	const originShift = math.Pi * 6378137. // for mercator projection
 	// get boundaries in lat/lon
 	n := math.Pow(2, float64(zoom))
