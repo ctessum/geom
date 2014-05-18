@@ -180,7 +180,7 @@ func (m *MapData) WriteGoogleMapTile(w io.Writer, zoom, x, y int) error {
 		return nil
 	}
 	//strokeColor := color.NRGBA{0, 0, 0, 255}
-	N, S, E, W := getGoogleTileBounds(zoom, x, y)
+	N, S, E, W := GetGoogleTileBounds(zoom, x, y)
 	maptile := NewRasterMap(N, S, E, W, 256, w)
 
 	var strokeColor color.NRGBA
@@ -203,7 +203,7 @@ func (m *MapData) WriteGoogleMapTile(w io.Writer, zoom, x, y int) error {
 	return nil
 }
 
-func getGoogleTileBounds(zoom, x, y int) (N, S, E, W float64) {
+func GetGoogleTileBounds(zoom, x, y int) (N, S, E, W float64) {
 	const originShift = math.Pi * 6378137. // for mercator projection
 	// get boundaries in lat/lon
 	n := math.Pow(2, float64(zoom))
@@ -221,6 +221,14 @@ func getGoogleTileBounds(zoom, x, y int) (N, S, E, W float64) {
 	S = math.Log(math.Tan((90+S_lat)*math.Pi/360.0)) /
 		(math.Pi / 180.0) * originShift / 180.0
 	return
+}
+
+// convert from long/lat to google mercator (or EPSG:4326 to EPSG:900913)
+func Degrees2meters(lon, lat float64) (x, y float64) {
+	x = lon * 20037508.34 / 180.
+	y = math.Log(math.Tan((90.+lat)*math.Pi/360.)) / (math.Pi / 180.)
+	y *= 20037508.34 / 180.
+	return x, y
 }
 
 type UnsupportedGeometryError struct {
