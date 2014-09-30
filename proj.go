@@ -9,9 +9,14 @@ and
 package projgeom
 
 import (
+	"io"
+	"io/ioutil"
+	"reflect"
+	"strings"
+
+	"github.com/lukeroth/gdal"
 	"github.com/pebbe/go-proj-4/proj"
 	"github.com/twpayne/gogeom/geom"
-	"reflect"
 )
 
 type UnsupportedGeometryError struct {
@@ -28,7 +33,7 @@ func (e UnsupportedGeometryError) Error() string {
 // Because I don't know whether to transform Z values from degrees to radians or
 // not, Z values are not supported.
 // I also don't know what to do with M values so they are not supported either.
-func Project(g geom.T, src, dst *proj.Proj, inputDegrees, outputDegrees bool) (geom.T, error) {
+func project(g geom.T, src, dst *proj.Proj, inputDegrees, outputDegrees bool) (geom.T, error) {
 	if g == nil {
 		return nil, nil
 	}
@@ -82,4 +87,65 @@ func Project(g geom.T, src, dst *proj.Proj, inputDegrees, outputDegrees bool) (g
 	default:
 		return nil, &UnsupportedGeometryError{reflect.TypeOf(g)}
 	}
+}
+
+type CoordinateTransform struct {
+	src, dst                    *proj.Proj
+	sameProj                    bool
+	inputDegrees, outputDegrees bool
+}
+
+func NewCoordinateTransform(src, dst gdal.SpatialReference) (
+	ct *CoordinateTransform, err error) {
+	ct = new(CoordinateTransform)
+	ct.sameProj = src.IsSame(dst)
+	var srcproj, dstproj string
+	if !ct.sameProj {
+		srcproj, err = src.ToProj4()
+		if err.Error() != "No Error" {
+			return
+		}
+		ct.inputDegrees = strings.Contains(srcproj, "longlat") ||
+			strings.Contains(srcproj, "latlong")
+		ct.src, err = proj.NewProj(srcproj)
+		if err != nil {
+			return
+		}
+
+		dstproj, err = dst.ToProj4()
+		if err.Error() != "No Error" {
+			return
+		}
+		ct.outputDegrees = strings.Contains(dstproj, "longlat") ||
+			strings.Contains(dstproj, "latlong")
+		ct.dst, err = proj.NewProj(dstproj)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+func (ct *CoordinateTransform) Reproject(g geom.T) (geom.T, error) {
+	if ct.sameProj {
+		return g, nil
+	}
+	g2, err := project(g, ct.src, ct.dst,
+		ct.inputDegrees, ct.outputDegrees)
+	return g2, err
+}
+
+// ReadPrj reads an ESRI '.prj' projection file and
+// creates a corresponding spatial reference.
+func ReadPrj(f io.Reader) (gdal.SpatialReference, error) {
+	sr := gdal.CreateSpatialReference("")
+	prj, err := ioutil.ReadAll(f)
+	if err != nil {
+		return gdal.SpatialReference{}, err
+	}
+	err = sr.FromWKT(string(prj))
+	if err.Error() == "No Error" {
+		err = nil
+	}
+	return sr, err
 }
