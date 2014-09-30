@@ -16,6 +16,15 @@ const (
 )
 
 var (
+	Font = "" // Default font to use
+)
+
+type Colorlist struct {
+	Val, R, G, B        []float64
+	HighLimit, LowLimit color.NRGBA
+}
+
+var (
 	// optimized olors from http://www.cs.unm.edu/~kmorel/documents/ColorMaps/index.html
 	// Originally the 255 values were 221's
 	Optimized = Colorlist{
@@ -79,15 +88,6 @@ var (
 		color.NRGBA{249., 15, 225, 255},
 		color.NRGBA{154., 0, 171, 255}}
 )
-
-var (
-	Font = "" // Default font to use
-)
-
-type Colorlist struct {
-	Val, R, G, B        []float64
-	HighLimit, LowLimit color.NRGBA
-}
 
 type ColorMapType int
 
