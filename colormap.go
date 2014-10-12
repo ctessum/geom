@@ -164,7 +164,7 @@ func (c *ColorMap) AddArray(data []float64) {
 		}
 		sort.Float64s(tmpAbs)
 		cutpt := tmpAbs[roundInt(c.CutPercentile/100.*
-			float64(len(data)))]
+			float64(len(data)))-1]
 		c.cutptlist = append(c.cutptlist, cutpt)
 	}
 }
@@ -440,12 +440,12 @@ func absmax(a, b float64) float64 {
 }
 
 func ConvertSVGToPNG(filename string) {
-	cmd := exec.Command("convert", "-density", "600",
+	cmd := exec.Command("convert", "-density", "300",
 		filename, strings.Replace(filename, "svg", "png", -1))
 	out, err := cmd.CombinedOutput()
 	output := fmt.Sprintf("%s", out)
 	if err != nil {
-		panic(fmt.Errorf(output))
+		panic(fmt.Errorf("%v\n%v", err.Error(), output))
 	}
 }
 
