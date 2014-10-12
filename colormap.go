@@ -16,9 +16,18 @@ const (
 )
 
 var (
+	Font = "" // Default font to use
+)
+
+type Colorlist struct {
+	Val, R, G, B        []float64
+	HighLimit, LowLimit color.NRGBA
+}
+
+var (
 	// optimized olors from http://www.cs.unm.edu/~kmorel/documents/ColorMaps/index.html
 	// Originally the 255 values were 221's
-	optimized = colorlist{
+	Optimized Colorlist = Colorlist{
 		[]float64{-1., -0.9375, -0.875, -0.8125,
 			-0.75, -0.6875, -0.625, -0.5625, -0.5, -0.4375, -0.375,
 			-0.3125, -0.25, -0.1875, -0.125, -0.0625, 0., 0.0625, 0.125,
@@ -35,7 +44,7 @@ var (
 			148, 135, 123, 111, 99, 88, 77, 66, 56, 47, 38},
 		color.NRGBA{70., 6, 16, 255},
 		color.NRGBA{27., 34, 85, 255}}
-	optimizedGrey = colorlist{
+	OptimizedGrey Colorlist = Colorlist{
 		[]float64{-1., -0.9375, -0.875, -0.8125,
 			-0.75, -0.6875, -0.625, -0.5625, -0.5, -0.4375, -0.375,
 			-0.3125, -0.25, -0.1875, -0.125, -0.0625, 0., 0.0625, 0.125,
@@ -52,7 +61,7 @@ var (
 			135, 123, 111, 99, 88, 77, 66, 56, 47, 38},
 		color.NRGBA{70., 6, 16, 255},
 		color.NRGBA{27., 34, 85, 255}}
-	jet = colorlist{
+	Jet Colorlist = Colorlist{
 		[]float64{-1, -0.866666666666667, -0.733333333333333, -0.6,
 			-0.466666666666667, -0.333333333333333, -0.2, -0.0666666666666668,
 			0.0666666666666665, 0.2, 0.333333333333333, 0.466666666666666, 0.6,
@@ -65,7 +74,7 @@ var (
 			0, 0, 0, 0, 0},
 		color.NRGBA{249., 15, 225, 255},
 		color.NRGBA{154., 0, 171, 255}}
-	jetPosOnly = colorlist{
+	JetPosOnly Colorlist = Colorlist{
 		[]float64{-1, 0, 0.0666666666666667, 0.133333333333333, 0.2,
 			0.266666666666667, 0.333333333333333, 0.4, 0.466666666666667,
 			0.533333333333333, 0.6, 0.666666666666667, 0.733333333333333, 0.8,
@@ -80,25 +89,23 @@ var (
 		color.NRGBA{154., 0, 171, 255}}
 )
 
-var (
-	Font = "" // Default font to use
-)
+type ColorMapType int
 
-type colorlist struct {
-	val, R, G, B        []float64
-	HighLimit, LowLimit color.NRGBA
-}
+const (
+	Linear    ColorMapType = iota // Linear color gradient
+	LinCutoff                     // linear with a discontinuity at a percentile
+	// specified by "CutPercentile"
+)
 
 type ColorMap struct {
 	cutoff            float64
 	maxval            float64
 	minval            float64
 	cutptlist         []float64
-	Type              string  // "Linear" or "Lincutoff"
+	Type              ColorMapType
 	CutPercentile     float64 // Percentile at which discontinuity occurs for "LinCutoff" type.
 	NumDivisions      int     // "Number of tick marks on legend.
 	rulestring        string
-	ColorScheme       string // "optimized" or ...
 	colorstops        []float64
 	stopcolors        []color.NRGBA
 	LegendWidth       float64 // width of legend in inches
@@ -112,18 +119,16 @@ type ColorMap struct {
 	BackgroundOpacity float64
 	negativeOutlier   bool
 	positiveOutlier   bool
-	cl                colorlist
+	ColorScheme       Colorlist
 }
 
-// Initialize new color map. Types available are "Linear", and
-// "LinCutoff", which is linear with a discontinuity at a percentile
-// specified by "CutPercentile".
-func NewColorMap(Type string) (c *ColorMap) {
+// Initialize new color map.
+func NewColorMap(Type ColorMapType) (c *ColorMap) {
 	c = new(ColorMap)
 	c.cutptlist = make([]float64, 0)
 	c.Type = Type
 	c.CutPercentile = 99.
-	c.ColorScheme = "optimized"
+	c.ColorScheme = Optimized
 	c.NumDivisions = 9
 	c.colorstops = make([]float64, 0)
 	c.stopcolors = make([]color.NRGBA, 0)
@@ -157,7 +162,7 @@ func (c *ColorMap) AddArray(data []float64) {
 	if min*1.00001 < c.minval {
 		c.minval = min * 1.00001
 	}
-	if c.Type == "LinCutoff" {
+	if c.Type == LinCutoff {
 		tmpAbs := make([]float64, len(data))
 		for i := 0; i < len(data); i++ {
 			tmpAbs[i] = math.Abs(data[i])
@@ -231,9 +236,9 @@ func (cm *ColorMap) GetColor(v float64) color.NRGBA {
 }
 
 // Given an array of x values and an array of y values, find the y value at a // given x using linear interpolation. xArray must be monotonically increasing.
-func (cl *colorlist) interpolate(v float64) color.NRGBA {
+func (cl *Colorlist) interpolate(v float64) color.NRGBA {
 	var R, G, B uint8
-	for i, val := range cl.val {
+	for i, val := range cl.Val {
 		if math.Abs(v-val)/math.Abs(val) < 0.0001 {
 			R = round(cl.R[i])
 			G = round(cl.G[i])
@@ -241,15 +246,15 @@ func (cl *colorlist) interpolate(v float64) color.NRGBA {
 			return color.NRGBA{R, G, B, 255}
 		} else if val > v {
 			R = round(cl.R[i-1] + (cl.R[i]-cl.R[i-1])*
-				(v-cl.val[i-1])/(cl.val[i]-cl.val[i-1]))
+				(v-cl.Val[i-1])/(cl.Val[i]-cl.Val[i-1]))
 			G = round(cl.G[i-1] + (cl.G[i]-cl.G[i-1])*
-				(v-cl.val[i-1])/(cl.val[i]-cl.val[i-1]))
+				(v-cl.Val[i-1])/(cl.Val[i]-cl.Val[i-1]))
 			B = round(cl.B[i-1] + (cl.B[i]-cl.B[i-1])*
-				(v-cl.val[i-1])/(cl.val[i]-cl.val[i-1]))
+				(v-cl.Val[i-1])/(cl.Val[i]-cl.Val[i-1]))
 			return color.NRGBA{R, G, B, 255}
 		}
 	}
-	fmt.Println("x=", v, "xArray=", cl.val)
+	fmt.Println("x=", v, "xArray=", cl.Val)
 	panic("Problem interpolating: x value is larger than xArray")
 }
 
@@ -272,18 +277,6 @@ func newsvgcolor(cIn color.NRGBA) (cOut svg.Offcolor) {
 
 // Figure out rules for color map
 func (c *ColorMap) Set() {
-	switch c.ColorScheme {
-	case "optimized":
-		c.cl = optimized
-	case "optimizedGrey":
-		c.cl = optimizedGrey
-	case "jet":
-		c.cl = jet
-	case "jetPosOnly":
-		c.cl = jetPosOnly
-	default:
-		panic(fmt.Sprintf("%v is not a valid color scheme.", c.ColorScheme))
-	}
 
 	var linmin, linmax, absmax float64
 	cutpt := average(c.cutptlist)
@@ -293,7 +286,7 @@ func (c *ColorMap) Set() {
 		absmax = c.maxval
 	}
 
-	if c.Type == "LinCutoff" && cutpt < absmax && cutpt != 0 {
+	if c.Type == LinCutoff && cutpt < absmax && cutpt != 0 {
 		linmin = cutpt * -1
 		linmax = cutpt
 	} else {
@@ -308,14 +301,14 @@ func (c *ColorMap) Set() {
 		return
 	}
 
-	if c.Type == "LinCutoff" && cutpt*-1 > c.minval && cutpt != 0 {
+	if c.Type == LinCutoff && cutpt*-1 > c.minval && cutpt != 0 {
 		c.colorstops = append(c.colorstops, absmax*-1)
-		c.stopcolors = append(c.stopcolors, c.cl.LowLimit)
+		c.stopcolors = append(c.stopcolors, c.ColorScheme.LowLimit)
 		c.negativeOutlier = true
 	}
 	if (c.minval-linmin)/(c.minval+linmin) > 0.001 {
 		c.colorstops = append(c.colorstops, c.minval)
-		c.stopcolors = append(c.stopcolors, c.cl.interpolate(-1.))
+		c.stopcolors = append(c.stopcolors, c.ColorScheme.interpolate(-1.))
 	}
 
 	interval := (linmax - linmin) / float64(c.NumDivisions+1)
@@ -323,17 +316,17 @@ func (c *ColorMap) Set() {
 		if (val-c.minval)/linmax > -0.0001 &&
 			(val-c.maxval)/linmax < 0.0001 {
 			c.colorstops = append(c.colorstops, val)
-			c.stopcolors = append(c.stopcolors, c.cl.interpolate(val/linmax))
+			c.stopcolors = append(c.stopcolors, c.ColorScheme.interpolate(val/linmax))
 		}
 	}
 	if (c.maxval-linmax)/(c.maxval+linmax) < 0.001 {
 		c.colorstops = append(c.colorstops, c.maxval)
-		c.stopcolors = append(c.stopcolors, c.cl.interpolate(1.))
+		c.stopcolors = append(c.stopcolors, c.ColorScheme.interpolate(1.))
 	}
 
-	if c.Type == "LinCutoff" && cutpt < c.maxval && cutpt != 0 {
+	if c.Type == LinCutoff && cutpt < c.maxval && cutpt != 0 {
 		c.colorstops = append(c.colorstops, absmax)
-		c.stopcolors = append(c.stopcolors, c.cl.HighLimit)
+		c.stopcolors = append(c.stopcolors, c.ColorScheme.HighLimit)
 		c.positiveOutlier = true
 	}
 }

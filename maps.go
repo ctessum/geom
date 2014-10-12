@@ -28,7 +28,57 @@ type RasterMap struct {
 	f             io.Writer
 	I             draw.Image
 	GC            draw2d.GraphicContext
+	MarkerFunc    func(*RasterMap, float64, float64, float64) // function that specifies the shape of the marker for points
 }
+
+type MarkerFunction func(*RasterMap, float64, float64, float64) // Function for specifying the shape of the marker for points
+
+var (
+	Circle MarkerFunction = func(m *RasterMap, x, y, markersize float64) {
+		m.GC.ArcTo(x, y, markersize, markersize, 0, 2*math.Pi)
+	}
+	Square MarkerFunction = func(m *RasterMap, x, y, markersize float64) {
+		adjMS := markersize / 1.2 // ratio to adjust the markersize
+		// to make the area be the same as the circle
+		m.GC.MoveTo(x-adjMS, y-adjMS)
+		m.GC.LineTo(x+adjMS, y-adjMS)
+		m.GC.LineTo(x+adjMS, y+adjMS)
+		m.GC.LineTo(x-adjMS, y+adjMS)
+		m.GC.LineTo(x-adjMS, y-adjMS)
+	}
+	Triangle MarkerFunction = func(m *RasterMap, x, y, markersize float64) {
+		adjMS := markersize / 0.75 // ratio to adjust the markersize
+		// to make the area be the same as the circle
+		cosval := math.Cos(0.125 * math.Pi)
+		sinval := math.Sin(0.125 * math.Pi)
+		m.GC.MoveTo(x-adjMS*cosval, y+adjMS*sinval)
+		m.GC.LineTo(x+adjMS*cosval, y+adjMS*sinval)
+		m.GC.LineTo(x, y-adjMS)
+		m.GC.LineTo(x-adjMS*cosval, y+adjMS*sinval)
+	}
+	Star MarkerFunction = func(m *RasterMap, x, y, markersize float64) {
+		adjMS := markersize / 0.75 // ratio to adjust the markersize
+		// to make the area be the same as the circle
+		var alpha = (2 * math.Pi) / 10
+		// works out the angle between each vertex (5 external + 5 internal = 10)
+		var r_concave = adjMS / 2.25 // r_point is the radius to the external point
+		for i := 11; i != 0; i-- {
+			var ra float64
+			if i%2 == 1 {
+				ra = adjMS
+			} else {
+				ra = r_concave
+			}
+			omega := alpha * float64(i) //omega is the angle of the current point
+			//cx and cy are the center point of the star.
+			if i == 11 {
+				m.GC.MoveTo(x+(ra*math.Sin(omega)), y+(ra*math.Cos(omega)))
+			} else {
+				m.GC.LineTo(x+(ra*math.Sin(omega)), y+(ra*math.Cos(omega)))
+			}
+		}
+	}
+)
 
 func NewRasterMap(N, S, E, W float64, width int, f io.Writer) *RasterMap {
 	r := new(RasterMap)
@@ -41,6 +91,7 @@ func NewRasterMap(N, S, E, W float64, width int, f io.Writer) *RasterMap {
 	r.I = image.NewRGBA(image.Rect(0, 0, r.width, r.height))
 	r.GC = draw2d.NewGraphicContext(r.I)
 	r.GC.SetFillRule(draw2d.FillRuleWinding)
+	r.MarkerFunc = Circle
 	return r
 }
 
@@ -83,7 +134,7 @@ func (r *RasterMap) DrawVector(g geom.T, strokeColor,
 	case geom.Point:
 		p := g.(geom.Point)
 		x, y := r.coordinates(p.X, p.Y)
-		r.GC.ArcTo(x, y, markersize, markersize, 0, 2*math.Pi)
+		r.MarkerFunc(r, x, y, markersize)
 	//case geom.PointZ:
 	//case geom.PointM:
 	//case geom.PointZM:
@@ -91,8 +142,7 @@ func (r *RasterMap) DrawVector(g geom.T, strokeColor,
 		for _, p := range g.(geom.MultiPoint).Points {
 			x, y := r.coordinates(p.X, p.Y)
 			r.GC.MoveTo(x, y)
-			r.GC.ArcTo(x, y,
-				markersize, markersize, 0, 2*math.Pi)
+			r.MarkerFunc(r, x, y, markersize)
 		}
 	//case geom.MultiPointZ:
 	//case geom.MultiPointM:
@@ -178,9 +228,9 @@ type MapData struct {
 	EdgeWidth float64
 }
 
-func NewMapData(numShapes int, colorScheme string) *MapData {
+func NewMapData(numShapes int, Type ColorMapType) *MapData {
 	m := new(MapData)
-	m.Cmap = NewColorMap(colorScheme)
+	m.Cmap = NewColorMap(Type)
 	m.Shapes = make([]geom.T, numShapes)
 	m.Data = make([]float64, numShapes)
 	m.tileCache = cache.New(1*time.Hour, 10*time.Minute)
