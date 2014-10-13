@@ -280,64 +280,93 @@ func (c *ColorMap) Set() {
 
 	var linmin, linmax, absmax float64
 	cutpt := average(c.cutptlist)
+	if c.minval > 0. {
+		c.minval = 0.
+	}
 	if c.minval*-1 > c.maxval {
 		absmax = c.minval * -1
 	} else {
 		absmax = c.maxval
 	}
-
+	if absmax == 0. {
+		return
+	}
 	if c.Type == LinCutoff && cutpt < absmax && cutpt != 0 {
-		linmin = cutpt * -1
-		linmax = cutpt
+		if cutpt*-1 > c.minval {
+			linmin = cutpt * -1
+		} else {
+			linmin = c.minval
+		}
+		if cutpt < c.maxval {
+			linmax = cutpt
+		} else {
+			linmax = c.maxval
+		}
 	} else {
 		linmin = absmax * -1
 		linmax = absmax
+	}
+	if linmax < linmin {
+		panic("illegal range")
 	}
 
 	c.colorstops = make([]float64, 0)
 	c.stopcolors = make([]color.NRGBA, 0)
 
-	if absmax == 0. {
-		return
-	}
-
 	if c.Type == LinCutoff && cutpt*-1 > c.minval && cutpt != 0 {
 		c.colorstops = append(c.colorstops, absmax*-1)
 		c.stopcolors = append(c.stopcolors, c.ColorScheme.LowLimit)
 		c.negativeOutlier = true
-	}
-	if (c.minval-linmin)/(c.minval+linmin) > 0.001 {
+	} else if (c.minval-linmin)/(c.minval+linmin) > 0.001 {
 		c.colorstops = append(c.colorstops, c.minval)
 		c.stopcolors = append(c.stopcolors, c.ColorScheme.interpolate(-1.))
 	}
 
-	interval := (linmax - linmin) / float64(c.NumDivisions+1)
-	for val := linmin; (val-linmax)/linmax < 0.001; val += interval {
-		if (val-c.minval)/linmax > -0.0001 &&
-			(val-c.maxval)/linmax < 0.0001 {
-			c.colorstops = append(c.colorstops, val)
-			c.stopcolors = append(c.stopcolors, c.ColorScheme.interpolate(val/linmax))
-		}
+	tens := math.Pow10(int(math.Floor(math.Log10(linmax - linmin))))
+	n := (linmax - linmin) / tens
+	for n < float64(c.NumDivisions) {
+		tens /= 10
+		n = (linmax - linmin) / tens
 	}
-	if (c.maxval-linmax)/(c.maxval+linmax) < 0.001 {
-		c.colorstops = append(c.colorstops, c.maxval)
-		c.stopcolors = append(c.stopcolors, c.ColorScheme.interpolate(1.))
+	majorMult := int(n / float64(c.NumDivisions))
+	switch majorMult {
+	case 7:
+		majorMult = 6
+	case 9:
+		majorMult = 8
+	}
+	majorDelta := float64(majorMult) * tens
+	val := math.Floor(linmin/majorDelta) * majorDelta
+	for val <= linmax {
+		if val >= linmin && val >= c.minval && val <= linmax && val <= c.maxval {
+			c.colorstops = append(c.colorstops, val)
+			c.stopcolors = append(c.stopcolors,
+				c.ColorScheme.interpolate(val/absMax(linmin, linmax)))
+		}
+		if math.Nextafter(val, val+majorDelta) == val {
+			break
+		}
+		val += majorDelta
 	}
 
 	if c.Type == LinCutoff && cutpt < c.maxval && cutpt != 0 {
 		c.colorstops = append(c.colorstops, absmax)
 		c.stopcolors = append(c.stopcolors, c.ColorScheme.HighLimit)
 		c.positiveOutlier = true
+	} else if (c.maxval-linmax)/(c.maxval+linmax) < 0.001 {
+		c.colorstops = append(c.colorstops, c.maxval)
+		c.stopcolors = append(c.stopcolors, c.ColorScheme.interpolate(1.))
 	}
 }
 
 func (c *ColorMap) Legend(w io.Writer, label string) (err error) {
 	const dpi = 300.
-	const topPad = 0.    // points
-	const bottomPad = 2. // points
-	const unitsPad = 2.5 // pad between units and bar
-	const labelPad = 2.  // pad between bar and label
-	const wPad = 10.     // points
+	const topPad = 0.     // points
+	const bottomPad = 2.  // points
+	const unitsPad = 2.5  // pad between units and bar
+	const labelPad = 2.   // pad between bar and label
+	const wPad = 10.      // points
+	const tickLength = 10 // points
 	pts2px := dpi / pointsPerIn
 	fontHeight := c.FontSize * pts2px
 	strokeWidth := round(c.LineWidth * pts2px)
@@ -363,25 +392,25 @@ func (c *ColorMap) Legend(w io.Writer, label string) (err error) {
 		(topPad+labelPad+bottomPad)*pts2px)
 
 	legendcolors := make([]svg.Offcolor, len(c.stopcolors))
-	numstops := len(c.stopcolors) - 1
-	ticklocs := make([]float64, numstops+1)
+	numstops := len(c.stopcolors)
+	ticklocs := make([]float64, numstops)
 	loc := 0.
-	for i, _ := range c.colorstops {
+	for i := 0; i < numstops; i++ {
 		ticklocs[i] = loc
 		if c.negativeOutlier && i == 0 ||
-			c.positiveOutlier && i == numstops-1 {
+			c.positiveOutlier && i == numstops-2 {
 			loc += 0.33
 		} else {
 			loc += 1.
 		}
 	}
 	for i, val := range ticklocs {
-		ticklocs[i] = val/ticklocs[numstops]*float64(barWidth) + float64(barWstart)
+		ticklocs[i] = val / ticklocs[numstops-1]
 	}
 	for i, val := range ticklocs {
 		legendcolors[i] = newsvgcolor(c.stopcolors[i])
 		legendcolors[i].Offset = uint8(round(val /
-			ticklocs[numstops] * 100))
+			ticklocs[numstops-1] * 100))
 	}
 
 	g := svg.New(w)
@@ -397,17 +426,24 @@ func (c *ColorMap) Legend(w io.Writer, label string) (err error) {
 	for i, tickloc := range ticklocs {
 		val := c.colorstops[i]
 		var valStr string
-		if math.Abs(val) < absmax(c.maxval, c.minval)*1.e-10 {
+		if math.Abs(val) < absMax(c.maxval, c.minval)*1.e-10 {
 			valStr = "0"
 		} else {
 			valStr = strings.Replace(strings.Replace(fmt.Sprintf("%3.2g", val),
 				"e+0", "e", -1), "e-0", "e-", -1)
 		}
+		tickx := roundInt(tickloc*float64(barWidth) + float64(barWstart))
 		if c.negativeOutlier && i == 0 ||
-			c.positiveOutlier && i == numstops {
-			g.Text(roundInt(tickloc), unitsYover, valStr, fontConfig)
+			c.positiveOutlier && i == numstops-1 {
+			g.Text(tickx, unitsYover, valStr, fontConfig)
+			g.Line(tickx, barHstart+barHeight, tickx, barHstart+barHeight-tickLength,
+				fmt.Sprintf("fill:url(#cmap);stroke:%v;stroke-width:%d", c.EdgeColor,
+					strokeWidth))
 		} else {
-			g.Text(roundInt(tickloc), unitsYunder, valStr, fontConfig)
+			g.Text(tickx, unitsYunder, valStr, fontConfig)
+			g.Line(tickx, barHstart+barHeight, tickx, barHstart+barHeight-tickLength,
+				fmt.Sprintf("fill:url(#cmap);stroke:%v;stroke-width:%d", c.EdgeColor,
+					strokeWidth))
 		}
 	}
 	g.Text(labelX, labelY, label, fontConfig)
@@ -422,7 +458,7 @@ func max(a, b float64) float64 {
 		return b
 	}
 }
-func absmax(a, b float64) float64 {
+func absMax(a, b float64) float64 {
 	absa := math.Abs(a)
 	absb := math.Abs(b)
 	if absa > absb {

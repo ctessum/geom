@@ -100,15 +100,38 @@ func NewRasterMap(N, S, E, W float64, width int, f io.Writer) *RasterMap {
 // (north-south) and the inner axis is the X-axis (west-east)
 // (i.e., len(data)==nx*ny &&  val[j,i] = data[j*nx+i]).
 func NewRasterMapFromRaster(S, W, dy, dx float64, ny, nx int,
-	data []float64, cmap *ColorMap, f io.Writer) *RasterMap {
+	data []float64, cmap *ColorMap, f io.Writer, flipVertical, flipHorizontal bool) *RasterMap {
 	N := S + float64(ny)*dy
 	E := W + float64(nx)*dx
 	r := NewRasterMap(N, S, E, W, nx, f)
 	r.height = ny
-	for i := 0; i < nx; i++ {
-		for j := 0; j < ny; j++ {
-			val := data[j*nx+i]
-			r.I.Set(i, j, cmap.GetColor(val))
+	if !flipVertical && !flipHorizontal {
+		for i := 0; i < nx; i++ {
+			for j := 0; j < ny; j++ {
+				val := data[j*nx+i]
+				r.I.Set(i, j, cmap.GetColor(val))
+			}
+		}
+	} else if flipVertical && !flipHorizontal {
+		for i := 0; i < nx; i++ {
+			for j := 0; j < ny; j++ {
+				val := data[j*nx+i]
+				r.I.Set(i, ny-1-j, cmap.GetColor(val))
+			}
+		}
+	} else if !flipVertical && flipHorizontal {
+		for i := 0; i < nx; i++ {
+			for j := 0; j < ny; j++ {
+				val := data[j*nx+i]
+				r.I.Set(nx-1-i, j, cmap.GetColor(val))
+			}
+		}
+	} else if flipVertical && flipHorizontal {
+		for i := 0; i < nx; i++ {
+			for j := 0; j < ny; j++ {
+				val := data[j*nx+i]
+				r.I.Set(nx-1-i, ny-1-j, cmap.GetColor(val))
+			}
 		}
 	}
 	return r
