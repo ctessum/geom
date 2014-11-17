@@ -20,8 +20,8 @@
 package geomop
 
 import (
-	. "testing"
 	"github.com/twpayne/gogeom/geom"
+	. "testing"
 )
 
 func TestVerticalZigzag(t *T) {

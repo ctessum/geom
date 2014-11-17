@@ -104,6 +104,28 @@ func Centroid(g geom.T) geom.Point {
 	return out
 }
 
+// Function PointOnSurface returns a point
+// guaranteed to lie on the surface of the shape.
+// It will usually be the centroid, except for
+// when the centroid is not with the shape.
+func PointOnSurface(g geom.T) geom.Point {
+	c := Centroid(g)
+	if !Within(c, g) {
+		switch g.(type) {
+		case geom.Polygon:
+			return g.(geom.Polygon).Rings[0][0]
+		case geom.LineString:
+			return g.(geom.LineString).Points[0]
+		case geom.MultiLineString:
+			return g.(geom.MultiLineString).LineStrings[0].Points[0]
+		default:
+			panic(NewError(g))
+		}
+	} else {
+		return c
+	}
+}
+
 // orientation2D_Polygon(): test the orientation of a simple 2D polygon
 //  Input:  Point* V = an array of n+1 vertex points with V[n]=V[0]
 //  Return: >0 for counterclockwise

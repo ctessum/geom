@@ -50,7 +50,7 @@ func (e endpoint) String() string {
 }
 
 func (e1 *endpoint) equals(e2 *endpoint) bool {
-	return PointEquals(e1.p,e2.p) &&
+	return PointEquals(e1.p, e2.p) &&
 		e1.left == e2.left &&
 		e1.polygonType == e2.polygonType &&
 		e1.other == e2.other &&

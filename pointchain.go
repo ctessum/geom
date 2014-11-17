@@ -49,29 +49,29 @@ func (c *chain) linkSegment(s segment) bool {
 	back := c.points[len(c.points)-1]
 
 	switch true {
-	case PointEquals(s.start,front):
-		if PointEquals(s.end,back) {
+	case PointEquals(s.start, front):
+		if PointEquals(s.end, back) {
 			c.closed = true
 		} else {
 			c.pushFront(s.end)
 		}
 		return true
-	case PointEquals(s.end,back):
-		if PointEquals(s.start,front) {
+	case PointEquals(s.end, back):
+		if PointEquals(s.start, front) {
 			c.closed = true
 		} else {
 			c.pushBack(s.start)
 		}
 		return true
-	case PointEquals(s.end,front):
-		if PointEquals(s.start,back) {
+	case PointEquals(s.end, front):
+		if PointEquals(s.start, back) {
 			c.closed = true
 		} else {
 			c.pushFront(s.start)
 		}
 		return true
-	case PointEquals(s.start,back):
-		if PointEquals(s.end,front) {
+	case PointEquals(s.start, back):
+		if PointEquals(s.end, front) {
 			c.closed = true
 		} else {
 			c.pushBack(s.end)
@@ -90,27 +90,27 @@ func (c *chain) linkChain(other *chain) bool {
 	otherFront := other.points[0]
 	otherBack := other.points[len(other.points)-1]
 
-	if PointEquals(otherFront,back) {
+	if PointEquals(otherFront, back) {
 		c.points = append(c.points, other.points[1:]...)
 		goto success
 		//c.points = append(c.points[:len(c.points)-1], other.points...)
 		//return true
 	}
 
-	if PointEquals(otherBack,front) {
+	if PointEquals(otherBack, front) {
 		c.points = append(other.points, c.points[1:]...)
 		goto success
 		//return true
 	}
 
-	if PointEquals(otherFront,front) {
+	if PointEquals(otherFront, front) {
 		// Remove the first element, and join to reversed chain.points
 		c.points = append(reversed(other.points), c.points[1:]...)
 		goto success
 		//return true
 	}
 
-	if PointEquals(otherBack,back) {
+	if PointEquals(otherBack, back) {
 		c.points = append(c.points[:len(c.points)-1], reversed(other.points)...)
 		goto success
 		//c.points = append(other.points, reversed(c.points)...)
