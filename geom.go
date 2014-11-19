@@ -55,9 +55,9 @@ type segment struct {
 }
 
 // Contour represents a sequence of vertices connected by line segments, forming a closed shape.
-type Contour []geom.Point
+type contour []geom.Point
 
-func (c Contour) segment(index int) segment {
+func (c contour) segment(index int) segment {
 	if index == len(c)-1 {
 		return segment{c[len(c)-1], c[0]}
 	}
@@ -70,7 +70,7 @@ func (c Contour) segment(index int) segment {
 // convex or concave.
 // See: http://en.wikipedia.org/wiki/Point_in_polygon#Ray_casting_algorithm
 // Returns true if p is inside the polygon defined by contour.
-func (c Contour) Contains(p geom.Point) bool {
+func (c contour) Contains(p geom.Point) bool {
 	// Cast ray from p.x towards the right
 	intersections := 0
 	for i := range c {
@@ -103,7 +103,7 @@ func (c Contour) Contains(p geom.Point) bool {
 }
 
 // Clone returns a copy of a contour.
-func (c Contour) Clone() Contour {
+func (c contour) Clone() contour {
 	return append([]geom.Point{}, c...)
 }
 

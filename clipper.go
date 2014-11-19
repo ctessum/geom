@@ -83,7 +83,7 @@ func (c *clipper) compute(operation Op) geom.T {
 		case UNION, XOR:
 			result := Clone(c.subject)
 			for _, rcont := range c.clipping.Rings {
-				cont := Contour(rcont)
+				cont := contour(rcont)
 				result.Rings = append(result.Rings, cont.Clone())
 			}
 			return result
@@ -93,13 +93,13 @@ func (c *clipper) compute(operation Op) geom.T {
 
 	// Add each segment to the eventQueue, sorted from left to right.
 	for _, rcont := range c.subject.Rings {
-		cont := Contour(rcont)
+		cont := contour(rcont)
 		for i := range cont {
 			addProcessedSegment(&c.eventQueue, cont.segment(i), _SUBJECT)
 		}
 	}
 	for _, rcont := range c.clipping.Rings {
-		cont := Contour(rcont)
+		cont := contour(rcont)
 		for i := range cont {
 			addProcessedSegment(&c.eventQueue, cont.segment(i), _CLIPPING)
 		}

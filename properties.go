@@ -3,6 +3,7 @@ package geomop
 import (
 	"github.com/twpayne/gogeom/geom"
 	"math"
+	"fmt"
 )
 
 const tolerance = 1.e-9
@@ -77,7 +78,7 @@ func length(line []geom.Point) float64 {
 // self-intersecting.
 // The algorithm will not check to make sure the holes are
 // actually inside the outer rings.
-func Centroid(g geom.T) geom.Point {
+func Centroid(g geom.T) (geom.Point, error) {
 	var out geom.Point
 	var A, xA, yA float64
 	switch g.(type) {
@@ -97,32 +98,39 @@ func Centroid(g geom.T) geom.Point {
 			xA += cx * a
 			yA += cy * a
 		}
-		return geom.Point{xA / A, yA / A}
+		return geom.Point{xA / A, yA / A}, nil
 	default:
-		panic(NewError(g))
+		return geom.Point{}, NewError(g)
 	}
-	return out
+	return out, nil
 }
 
 // Function PointOnSurface returns a point
 // guaranteed to lie on the surface of the shape.
 // It will usually be the centroid, except for
 // when the centroid is not with the shape.
-func PointOnSurface(g geom.T) geom.Point {
-	c := Centroid(g)
-	if !Within(c, g) {
+func PointOnSurface(g geom.T) (geom.Point, error) {
+	c, err := Centroid(g)
+	if err != nil {
+		return geom.Point{}, err
+	}
+	in, err := Within(c, g)
+	if err != nil {
+		return geom.Point{}, err
+	}
+	if !in {
 		switch g.(type) {
 		case geom.Polygon:
-			return g.(geom.Polygon).Rings[0][0]
+			return g.(geom.Polygon).Rings[0][0], nil
 		case geom.LineString:
-			return g.(geom.LineString).Points[0]
+			return g.(geom.LineString).Points[0], nil
 		case geom.MultiLineString:
-			return g.(geom.MultiLineString).LineStrings[0].Points[0]
+			return g.(geom.MultiLineString).LineStrings[0].Points[0], nil
 		default:
-			panic(NewError(g))
+			return geom.Point{}, NewError(g)
 		}
 	} else {
-		return c
+		return c, nil
 	}
 }
 
@@ -178,23 +186,41 @@ func isLeft(P0, P1, P2 geom.Point) float64 {
 // Change the winding direction of the outer and inner
 // rings so the outer ring is counter-clockwise and
 // nesting rings alternate directions.
-func FixOrientation(g geom.T) {
-	p := g.(geom.Polygon)
-	o := orientation(p)
-	for i, inner := range p.Rings {
-		numInside := 0
-		for j, outer := range p.Rings {
-			if i != j {
-				if polyInPoly(Contour(outer), Contour(inner)) {
-					numInside++
+func FixOrientation(g geom.T) error {
+	if g == nil {
+		return fmt.Errorf("Nil geometry")
+	}
+	switch g.(type) {
+	case geom.Polygon:
+		p := g.(geom.Polygon)
+		o := orientation(p)
+		for i, inner := range p.Rings {
+			numInside := 0
+			for j, outer := range p.Rings {
+				if i != j {
+					if polyInPoly(contour(outer), contour(inner)) {
+						numInside++
+					}
 				}
 			}
+			fmt.Println(numInside)
+			if numInside%2 == 1 && o[i] > 0. {
+				reversePolygon(inner)
+			} else if numInside%2 == 0 && o[i] < 0. {
+				reversePolygon(inner)
+			}
 		}
-		if numInside%2 == 1 && o[i] > 0. {
-			reversePolygon(inner)
-		} else if numInside%2 == 0 && o[i] < 0. {
-			reversePolygon(inner)
+		return nil
+	case geom.MultiPolygon:
+		for _, p := range g.(geom.MultiPolygon).Polygons {
+			err := FixOrientation(p)
+			if err != nil {
+				return err
+			}
 		}
+		return nil
+	default:
+		return NewError(g)
 	}
 }
 
@@ -205,7 +231,7 @@ func reversePolygon(s []geom.Point) []geom.Point {
 	return s
 }
 
-func polyInPoly(outer, inner Contour) bool {
+func polyInPoly(outer, inner contour) bool {
 	for _, p := range inner {
 		if !outer.Contains(p) {
 			return false
@@ -214,7 +240,7 @@ func polyInPoly(outer, inner Contour) bool {
 	return true
 }
 
-func Within(inner, outer geom.T) bool {
+func Within(inner, outer geom.T) (bool, error) {
 	switch outer.(type) {
 	case geom.Polygon:
 		op := outer.(geom.Polygon)
@@ -223,34 +249,36 @@ func Within(inner, outer geom.T) bool {
 			ip := inner.(geom.Polygon)
 			for _, r := range ip.Rings {
 				for _, p := range r {
-					if !PointInPolygon(p, op) {
-						return false
+					in, err := PointInPolygon(p, op)
+					if err != nil {
+						return false, err
+					}
+					if !in {
+						return false, nil
 					}
 				}
 			}
-			return true
+			return true, nil
 		case geom.Point:
 			return PointInPolygon(inner.(geom.Point), outer)
 		default:
-			panic(NewError(inner))
-			return false
+			return false, NewError(inner)
 		}
 	default:
-		panic(NewError(outer))
-		return false
+		return false, NewError(outer)
 	}
 }
 
 // Function PointInPolygon determines whether "point" is
 // within "polygon". If "polygon" is not actually a polygon,
 // return false.
-func PointInPolygon(point geom.Point, polygon geom.T) bool {
+func PointInPolygon(point geom.Point, polygon geom.T) (bool, error) {
 	inCount := 0
 	switch polygon.(type) {
 	case geom.Polygon:
 		o := orientation(polygon.(geom.Polygon))
 		for i, r := range polygon.(geom.Polygon).Rings {
-			if Contour(r).Contains(point) {
+			if contour(r).Contains(point) {
 				if o[i] > 0. {
 					inCount++
 				} else if o[i] < 0. {
@@ -258,16 +286,20 @@ func PointInPolygon(point geom.Point, polygon geom.T) bool {
 				}
 			}
 		}
-		return inCount > 0
+		return inCount > 0, nil
 	case geom.MultiPolygon:
 		for _, pp := range polygon.(geom.MultiPolygon).Polygons {
-			if PointInPolygon(point, geom.T(pp)) {
-				return true
+			in, err := PointInPolygon(point, geom.T(pp))
+			if err != nil {
+				return false, err
+			}
+			if in {
+				return true, nil
 			}
 		}
-		return false
+		return false, nil
 	default:
-		return false
+		return false, NewError(polygon)
 	}
 }
 

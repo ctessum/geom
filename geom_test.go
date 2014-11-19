@@ -48,7 +48,7 @@ func TestPoint(t *T) {
 }
 
 func TestContourAdd(t *T) {
-	c := Contour{}
+	c := contour{}
 	pp := []geom.Point{{1, 2}, {3, 4}, {5, 6}}
 	for i := range pp {
 		c = append(c, pp[i])
@@ -64,7 +64,7 @@ func TestContourBoundingBox(t *T) {
 }
 
 func TestContourSegment(t *T) {
-	c := Contour([]geom.Point{{1, 2}, {3, 4}, {5, 6}})
+	c := contour([]geom.Point{{1, 2}, {3, 4}, {5, 6}})
 	segeq := func(s1, s2 segment) bool {
 		return PointEquals(s1.start, s2.start) && PointEquals(s1.end, s2.end)
 	}
@@ -77,7 +77,7 @@ func TestContourSegment(t *T) {
 }
 
 func TestContourSegmentError1(t *T) {
-	c := Contour([]geom.Point{{1, 2}, {3, 4}, {5, 6}})
+	c := contour([]geom.Point{{1, 2}, {3, 4}, {5, 6}})
 
 	defer func() {
 		verify(t, recover() != nil, "Expected error")
@@ -92,8 +92,8 @@ type pointresult struct {
 
 func TestContourContains(t *T) {
 	var cases1 []pointresult
-	c1 := Contour([]geom.Point{{0, 0}, {10, 0}, {0, 10}})
-	c2 := Contour([]geom.Point{{0, 0}, {0, 10}, {10, 0}}) // opposite rotation
+	c1 := contour([]geom.Point{{0, 0}, {10, 0}, {0, 10}})
+	c2 := contour([]geom.Point{{0, 0}, {0, 10}, {10, 0}}) // opposite rotation
 	cases1 = []pointresult{
 		{geom.Point{1, 1}, true},
 		{geom.Point{2, .1}, true},
