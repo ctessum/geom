@@ -108,8 +108,7 @@ func TestContourContains(t *T) {
 	}
 }
 
-// [{1 1} {1 2} {2 1}]
-func ExampleConstruct() {
+func ExamplePolygon_Construct() {
 	subject := geom.T(geom.Polygon{
 		[][]geom.Point{{{1, 1}, {1, 2}, {2, 2}, {2, 1}}}}) // small square
 	clipping := geom.T(geom.Polygon{
@@ -123,4 +122,5 @@ func ExampleConstruct() {
 		out = append(out, fmt.Sprintf("%v", point))
 	}
 	fmt.Println(out)
+	// Output: [{1 2} {1 1} {2 1} {1 2}]
 }

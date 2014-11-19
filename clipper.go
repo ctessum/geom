@@ -114,10 +114,19 @@ func (c *clipper) compute(operation Op) geom.T {
 
 	MINMAX_X := math.Min(subjectbb.Max.X, clippingbb.Max.X)
 
+	_DBG(func() {
+		e := c.eventQueue.dequeue()
+		c.eventQueue.enqueue(e)
+		fmt.Print("\nInitial queue:\n")
+		for i, e := range c.eventQueue.elements {
+			fmt.Println(i, "=", *e)
+		}
+	})
+
 	for !c.eventQueue.IsEmpty() {
 		var prev, next *endpoint
 		e := c.eventQueue.dequeue()
-		_DBG(func() { fmt.Print("\nProcess event:\n", *e, "\n") })
+		_DBG(func() { fmt.Printf("\nProcess event: (of %d)\n%v\n", len(c.eventQueue.elements)+1, *e) })
 
 		// optimization 1
 		switch {
@@ -125,19 +134,20 @@ func (c *clipper) compute(operation Op) geom.T {
 			fallthrough
 		case operation == DIFFERENCE && e.p.X > subjectbb.Max.X:
 			return connector.toShape()
-		case operation == UNION && e.p.X > MINMAX_X:
-			// add all the non-processed line segments to the result
-			if !e.left {
-				connector.add(e.segment())
-			}
-
-			for !c.eventQueue.IsEmpty() {
-				e = c.eventQueue.dequeue()
-				if !e.left {
-					connector.add(e.segment())
-				}
-			}
-			return connector.toShape()
+			//case operation == UNION && e.p.X > MINMAX_X:
+			//	_DBG(func() { fmt.Print("\nUNION optimization, fast quit\n") })
+			//	// add all the non-processed line segments to the result
+			//	if !e.left {
+			//		connector.add(e.segment())
+			//	}
+			//
+			//	for !c.eventQueue.IsEmpty() {
+			//		e = c.eventQueue.dequeue()
+			//		if !e.left {
+			//			connector.add(e.segment())
+			//		}
+			//	}
+			//	return connector.toPolygon()
 		}
 
 		if e.left { // the line segment must be inserted into S
@@ -383,10 +393,10 @@ func (c *clipper) possibleIntersection(e1, e2 *endpoint) {
 		return // the line segments intersect at an endpoint of both line segments
 	}
 
-	//if numIntersections == 2 && e1.p.Equals(e2.p) {
-	if numIntersections == 2 && e1.polygonType == e2.polygonType {
-		return // the line segments overlap, but they belong to the same polygon
-	}
+	////if numIntersections == 2 && e1.p.Equals(e2.p) {
+	//if numIntersections == 2 && e1.polygonType == e2.polygonType {
+	//	return // the line segments overlap, but they belong to the same polygon
+	//}
 
 	if numIntersections == 1 {
 		if !PointEquals(e1.p, ip1) && !PointEquals(e1.other.p, ip1) {
