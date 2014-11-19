@@ -107,9 +107,9 @@ const (
 	XOR
 )
 
-// Construct computes a 2D polygon, which is a result of performing
+// Function Construct computes a 2D polygon, which is a result of performing
 // specified Boolean operation on the provided pair of polygons (p <Op> clipping).
-// It uses algorithm described by F. Martínez, A. J. Rueda, F. R. Feito
+// It uses an algorithm described by F. Martínez, A. J. Rueda, F. R. Feito
 // in "A new algorithm for computing Boolean operations on polygons"
 // - see: http://wwwdi.ujaen.es/~fmartin/bool_op.html
 // The paper describes the algorithm as performing in time O((n+k) log n),
@@ -117,7 +117,22 @@ const (
 // k is number of intersections of all polygon edges.
 // "subject" and "clipping" can both be of type geom.Polygon,
 // geom.MultiPolygon, geom.LineString, or geom.MultiLineString.
-func Construct(subject, clipping geom.T, operation Op) geom.T {
+func Construct(subject, clipping geom.T, operation Op) (geom.T, error) {
+	if subject == nil && clipping == nil {
+		return nil, nil
+	} else if subject == nil {
+		if operation == INTERSECTION || operation == DIFFERENCE {
+			return nil, nil
+		} else {
+			return clipping, nil
+		}
+	} else if clipping == nil {
+		if operation == INTERSECTION {
+			return nil, nil
+		} else {
+			return subject, nil
+		}
+	}
 	// Prepare the input shapes
 	var c clipper
 	switch clipping.(type) {
@@ -129,8 +144,9 @@ func Construct(subject, clipping geom.T, operation Op) geom.T {
 			c.outType = outputPolygons
 		case geom.LineString, geom.MultiLineString:
 			c.outType = outputLines
+		default:
+			return nil, NewError(subject)
 		}
-
 	case geom.LineString, geom.MultiLineString:
 		switch subject.(type) {
 		case geom.Polygon, geom.MultiPolygon:
@@ -142,10 +158,14 @@ func Construct(subject, clipping geom.T, operation Op) geom.T {
 			c.subject = convertToPolygon(subject)
 			c.clipping = convertToPolygon(clipping)
 			c.outType = outputPoints
+		default:
+			return nil, NewError(subject)
 		}
+	default:
+		return nil, NewError(clipping)
 	}
 	// Run the clipper
-	return c.compute(operation)
+	return c.compute(operation), nil
 }
 
 // convert input shapes to polygon to make internal processing easier

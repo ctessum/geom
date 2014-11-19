@@ -115,7 +115,8 @@ func ExamplePolygon_Construct() {
 		[][]geom.Point{{{0, 0}, {0, 3}, {3, 0}}}}) // overlapping triangle
 
 	// Calculate the intersection
-	result := Construct(subject, clipping, INTERSECTION)
+	result, err := Construct(subject, clipping, INTERSECTION)
+	handle(err)
 
 	out := []string{}
 	for _, point := range result.(geom.Polygon).Rings[0] {
