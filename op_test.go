@@ -364,15 +364,15 @@ func TestPointOnSurface(t *testing.T) {
 	drawShapes(blockGroup, county, ps, "testPointOnSurface.png")
 }
 
-func TestWithin(t *testing.T) {
-	f, err := os.Open("testData/cell.gob")
+func TestWithin1(t *testing.T) {
+	f, err := os.Open("testData/cell1.gob")
 	handle(err)
 	g := gob.NewDecoder(f)
 	var cell geom.Point
 	err = g.Decode(&cell)
 	handle(err)
 	f.Close()
-	f, err = os.Open("testData/tzs.gob")
+	f, err = os.Open("testData/tzs1.gob")
 	handle(err)
 	g = gob.NewDecoder(f)
 	var tzs []geom.T
@@ -406,9 +406,8 @@ func TestWithin(t *testing.T) {
 				t.Fail()
 			}
 		}
-		drawShapes(cell, tz, nil, fmt.Sprintf("testWithin_%v.png", i))
+		drawShapes(cell, tz, nil, fmt.Sprintf("testWithin1_%v.png", i))
 	}
-
 }
 
 func TestCentroid(t *testing.T) {
