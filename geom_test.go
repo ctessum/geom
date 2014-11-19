@@ -87,7 +87,7 @@ func TestContourSegmentError1(t *T) {
 
 type pointresult struct {
 	p      geom.Point
-	result bool
+	result int
 }
 
 func TestContourContains(t *T) {
@@ -95,16 +95,16 @@ func TestContourContains(t *T) {
 	c1 := contour([]geom.Point{{0, 0}, {10, 0}, {0, 10}})
 	c2 := contour([]geom.Point{{0, 0}, {0, 10}, {10, 0}}) // opposite rotation
 	cases1 = []pointresult{
-		{geom.Point{1, 1}, true},
-		{geom.Point{2, .1}, true},
-		{geom.Point{10, 10}, false},
-		{geom.Point{11, 0}, false},
-		{geom.Point{0, 11}, false},
-		{geom.Point{-1, -1}, false},
+		{geom.Point{1, 1}, 1},
+		{geom.Point{2, .1}, 1},
+		{geom.Point{10, 10}, 0},
+		{geom.Point{11, 0}, 0},
+		{geom.Point{0, 11}, 0},
+		{geom.Point{-1, -1}, 0},
 	}
 	for i, v := range cases1 {
-		verify(t, c1.Contains(v.p) == v.result, "Expected %v for point %d for c1", v.result, i)
-		verify(t, c2.Contains(v.p) == v.result, "Expected %v for point %d for c2", v.result, i)
+		verify(t, pointInPoly(v.p,c1) == v.result, "Expected %v for point %d for c1", v.result, i)
+		verify(t, pointInPoly(v.p,c2) == v.result, "Expected %v for point %d for c2", v.result, i)
 	}
 }
 

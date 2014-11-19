@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/ctessum/carto"
 	"github.com/twpayne/gogeom/geom"
-	"github.com/twpayne/gogeom/geom/encoding/wkt"
 	"image/color"
 	"math"
 	"math/rand"
@@ -245,8 +244,6 @@ func TestDifficultShapes5(t *testing.T) {
 	diff := Construct(a, b, DIFFERENCE)
 	drawShapes(b, a, intersection, "DifficultShapes5.png")
 	drawShapes(b, a, diff, "DifficultShapes5diff.png")
-	s, _ := wkt.Encode(diff)
-	fmt.Println(string(s))
 }
 
 func TestDifficultShapes6(t *testing.T) {
@@ -386,7 +383,6 @@ func TestWithin(t *testing.T) {
 		//c, err := Centroid(cell)
 		//handle(err)
 		t.Log(i, orientation(tz.(geom.Polygon)))
-		fmt.Println("Fixing",i)
 		err = FixOrientation(tz)
 		handle(err)
 		in, err := Within(cell, tz)

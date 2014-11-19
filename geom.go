@@ -40,6 +40,11 @@ func PointEquals(p1, p2 geom.Point) bool {
 			math.Abs(p1.Y-p2.Y)/math.Abs(p1.Y+p2.Y) < tolerance)
 }
 
+func floatEquals(f1, f2 float64) bool {
+	return (f1 == f2) ||
+		(math.Abs(f1-f2)/math.Abs(f1+f2) < tolerance)
+}
+
 func pointSubtract(p1, p2 geom.Point) geom.Point {
 	return geom.Point{p1.X - p2.X, p1.Y - p2.Y}
 }
@@ -63,43 +68,6 @@ func (c contour) segment(index int) segment {
 	}
 	return segment{c[index], c[index+1]}
 	// if out-of-bounds, we expect panic detected by runtime
-}
-
-// Checks if a point is inside a contour using the "point in polygon" raycast method.
-// This works for all polygons, whether they are clockwise or counter clockwise,
-// convex or concave.
-// See: http://en.wikipedia.org/wiki/Point_in_polygon#Ray_casting_algorithm
-// Returns true if p is inside the polygon defined by contour.
-func (c contour) Contains(p geom.Point) bool {
-	// Cast ray from p.x towards the right
-	intersections := 0
-	for i := range c {
-		curr := c[i]
-		ii := i + 1
-		if ii == len(c) {
-			ii = 0
-		}
-		next := c[ii]
-
-		if (p.Y >= next.Y || p.Y <= curr.Y) &&
-			(p.Y >= curr.Y || p.Y <= next.Y) {
-			continue
-		}
-		// Edge is from curr to next.
-
-		if p.X >= math.Max(curr.X, next.X) ||
-			next.Y == curr.Y {
-			continue
-		}
-
-		// Find where the line intersects...
-		xint := (p.Y-curr.Y)*(next.X-curr.X)/(next.Y-curr.Y) + curr.X
-		if curr.X != next.X && p.X > xint {
-			continue
-		}
-		intersections++
-	}
-	return intersections%2 != 0
 }
 
 // Clone returns a copy of a contour.

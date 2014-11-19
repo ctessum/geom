@@ -1,9 +1,9 @@
 package geomop
 
 import (
+	"fmt"
 	"github.com/twpayne/gogeom/geom"
 	"math"
-	"fmt"
 )
 
 const tolerance = 1.e-9
@@ -203,7 +203,6 @@ func FixOrientation(g geom.T) error {
 					}
 				}
 			}
-			fmt.Println(numInside)
 			if numInside%2 == 1 && o[i] > 0. {
 				reversePolygon(inner)
 			} else if numInside%2 == 0 && o[i] < 0. {
@@ -231,9 +230,9 @@ func reversePolygon(s []geom.Point) []geom.Point {
 	return s
 }
 
-func polyInPoly(outer, inner contour) bool {
+func polyInPoly(outer, inner contour) (bool) {
 	for _, p := range inner {
-		if !outer.Contains(p) {
+		if pointInPoly(p, outer) == 0 {
 			return false
 		}
 	}
@@ -270,15 +269,15 @@ func Within(inner, outer geom.T) (bool, error) {
 }
 
 // Function PointInPolygon determines whether "point" is
-// within "polygon". If "polygon" is not actually a polygon,
-// return false.
+// within "polygon". Also returns true if "point" is on the
+// edge of "polygon".
 func PointInPolygon(point geom.Point, polygon geom.T) (bool, error) {
 	inCount := 0
 	switch polygon.(type) {
 	case geom.Polygon:
 		o := orientation(polygon.(geom.Polygon))
 		for i, r := range polygon.(geom.Polygon).Rings {
-			if contour(r).Contains(point) {
+			if pointInPoly(point, contour(r)) != 0 {
 				if o[i] > 0. {
 					inCount++
 				} else if o[i] < 0. {
@@ -301,6 +300,59 @@ func PointInPolygon(point geom.Point, polygon geom.T) (bool, error) {
 	default:
 		return false, NewError(polygon)
 	}
+}
+
+//returns 0 if false, +1 if true, -1 if pt ON polygon boundary
+//See "The Point in Polygon Problem for Arbitrary Polygons" by Hormann & Agathos
+//http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.88.5498&rep=rep1&type=pdf
+func pointInPoly(pt geom.Point, path contour) int {
+	result := 0
+	cnt := len(path)
+	if cnt < 3 {
+		return 0
+	}
+	ip := path[0]
+	for i := 1; i <= cnt; i++ {
+		var ipNext geom.Point
+		if i == cnt {
+			ipNext = path[0]
+		} else {
+			ipNext = path[i]
+		}
+		if floatEquals(ipNext.Y, pt.Y) {
+			if floatEquals(ipNext.X, pt.X) || (floatEquals(ip.Y, pt.Y) &&
+				((ipNext.X-pt.X > -tolerance) == (ip.X-pt.X < tolerance))) {
+				return -1
+			}
+		}
+		if (ip.Y-pt.Y < tolerance) != (ipNext.Y-pt.Y < tolerance) {
+			if ip.X-pt.X >= -tolerance {
+				if ipNext.X-pt.X > -tolerance {
+					result = 1 - result
+				} else {
+					d := (ip.X-pt.X)*(ipNext.Y-pt.Y) -
+						(ipNext.X-pt.X)*(ip.Y-pt.Y)
+					if floatEquals(d, 0) {
+						return -1
+					} else if (d > -tolerance) == (ipNext.Y-ip.Y > -tolerance) {
+						result = 1 - result
+					}
+				}
+			} else {
+				if ipNext.X-pt.X > -tolerance {
+					d := (ip.X-pt.X)*(ipNext.Y-pt.Y) -
+						(ipNext.X-pt.X)*(ip.Y-pt.Y)
+					if floatEquals(d, 0) {
+						return -1
+					} else if (d > -tolerance) == (ipNext.Y-ip.Y > -tolerance) {
+						result = 1 - result
+					}
+				}
+			}
+		}
+		ip = ipNext
+	}
+	return result
 }
 
 // dot product
