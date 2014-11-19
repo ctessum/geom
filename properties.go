@@ -248,7 +248,7 @@ func Within(inner, outer geom.T) (bool, error) {
 			ip := inner.(geom.Polygon)
 			for _, r := range ip.Rings {
 				for _, p := range r {
-					in, err := PointInPolygon(p, op)
+					in, err := pointInPolygon(p, op)
 					if err != nil {
 						return false, err
 					}
@@ -259,7 +259,7 @@ func Within(inner, outer geom.T) (bool, error) {
 			}
 			return true, nil
 		case geom.Point:
-			return PointInPolygon(inner.(geom.Point), outer)
+			return pointInPolygon(inner.(geom.Point), outer)
 		default:
 			return false, NewError(inner)
 		}
@@ -268,10 +268,10 @@ func Within(inner, outer geom.T) (bool, error) {
 	}
 }
 
-// Function PointInPolygon determines whether "point" is
+// Function pointInPolygon determines whether "point" is
 // within "polygon". Also returns true if "point" is on the
 // edge of "polygon".
-func PointInPolygon(point geom.Point, polygon geom.T) (bool, error) {
+func pointInPolygon(point geom.Point, polygon geom.T) (bool, error) {
 	inCount := 0
 	switch polygon.(type) {
 	case geom.Polygon:
@@ -288,7 +288,7 @@ func PointInPolygon(point geom.Point, polygon geom.T) (bool, error) {
 		return inCount > 0, nil
 	case geom.MultiPolygon:
 		for _, pp := range polygon.(geom.MultiPolygon).Polygons {
-			in, err := PointInPolygon(point, geom.T(pp))
+			in, err := pointInPolygon(point, geom.T(pp))
 			if err != nil {
 				return false, err
 			}

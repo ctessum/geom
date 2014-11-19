@@ -75,8 +75,8 @@ func (c contour) Clone() contour {
 	return append([]geom.Point{}, c...)
 }
 
-// NumVertices returns total number of all vertices of all contours of a polygon.
-func NumVertices(p geom.Polygon) int {
+// numVertices returns total number of all vertices of all contours of a polygon.
+func numVertices(p geom.Polygon) int {
 	num := 0
 	for _, c := range p.Rings {
 		num += len(c)
