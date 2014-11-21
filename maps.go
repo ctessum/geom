@@ -1,3 +1,4 @@
+// Go language map drawing library
 package carto
 
 import (
