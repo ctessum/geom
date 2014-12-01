@@ -42,7 +42,7 @@ func TestPoint(t *T) {
 		"Expected equal points")
 	verify(t, PointEquals(geom.Point{1, 2}, geom.Point{1, 2}),
 		"Expected equal points")
-	verify(t, PointEquals(geom.Point{1, 2}, geom.Point{1.000000000001, 2}),
+	verify(t, PointEquals(geom.Point{1, 2}, geom.Point{1.000000000000000000001, 2}),
 		"Expected equal points")
 	verify(t, circa(lengthToOrigin(geom.Point{3, 4}), 5), "Expected length 5")
 }
@@ -103,8 +103,8 @@ func TestContourContains(t *T) {
 		{geom.Point{-1, -1}, 0},
 	}
 	for i, v := range cases1 {
-		verify(t, pointInPoly(v.p,c1) == v.result, "Expected %v for point %d for c1", v.result, i)
-		verify(t, pointInPoly(v.p,c2) == v.result, "Expected %v for point %d for c2", v.result, i)
+		verify(t, pointInPoly(v.p, c1) == v.result, "Expected %v for point %d for c1", v.result, i)
+		verify(t, pointInPoly(v.p, c2) == v.result, "Expected %v for point %d for c2", v.result, i)
 	}
 }
 

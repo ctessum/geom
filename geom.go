@@ -26,23 +26,56 @@
 package geomop
 
 import (
-	"github.com/twpayne/gogeom/geom"
 	"math"
 	"reflect"
+
+	"github.com/gonum/floats"
+	"github.com/twpayne/gogeom/geom"
 )
 
+const numULP uint = 2
+
 // Equals returns true if both p1 and p2 describe the same point within
-// a tolerance limit.
+// a tolerance limit of floating point units.
 func PointEquals(p1, p2 geom.Point) bool {
-	//	return (p1.X == p2.X && p1.Y == p2.Y)
-	return (p1.X == p2.X && p1.Y == p2.Y) ||
-		(math.Abs(p1.X-p2.X)/math.Abs(p1.X+p2.X) < tolerance &&
-			math.Abs(p1.Y-p2.Y)/math.Abs(p1.Y+p2.Y) < tolerance)
+	return floats.EqualWithinULP(p1.X, p2.X, numULP) &&
+		floats.EqualWithinULP(p1.Y, p2.Y, numULP)
 }
 
-func floatEquals(f1, f2 float64) bool {
-	return (f1 == f2) ||
-		(math.Abs(f1-f2)/math.Abs(f1+f2) < tolerance)
+func equals(f1, f2 float64) bool {
+	return floats.EqualWithinULP(f1, f2, numULP)
+}
+
+// is a greater than b?
+func gt(a, b float64) bool {
+	if equals(a, b) {
+		return false
+	}
+	return a > b
+}
+
+// is a less than b?
+func lt(a, b float64) bool {
+	if equals(a, b) {
+		return false
+	}
+	return a < b
+}
+
+// is a greater than or equal to b?
+func gte(a, b float64) bool {
+	if equals(a, b) {
+		return true
+	}
+	return a > b
+}
+
+// is a less than or equal to b?
+func lte(a, b float64) bool {
+	if equals(a, b) {
+		return true
+	}
+	return a < b
 }
 
 func pointSubtract(p1, p2 geom.Point) geom.Point {

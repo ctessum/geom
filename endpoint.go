@@ -71,9 +71,9 @@ func signedArea(p0, p1, p2 geom.Point) float64 {
 // Checks if this sweep event is below point p.
 func (se *endpoint) below(x geom.Point) bool {
 	if se.left {
-		return signedArea(se.p, se.other.p, x) > 0
+		return gt(signedArea(se.p, se.other.p, x), 0)
 	}
-	return signedArea(se.other.p, se.p, x) > 0
+	return gt(signedArea(se.other.p, se.p, x), 0)
 }
 
 func (se *endpoint) above(x geom.Point) bool {

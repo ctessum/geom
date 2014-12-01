@@ -30,6 +30,7 @@ import (
 )
 
 //func _DBG(f func()) { f() }
+
 func _DBG(f func()) {}
 
 type polygonType int
@@ -130,9 +131,9 @@ func (c *clipper) compute(operation Op) geom.T {
 
 		// optimization 1
 		switch {
-		case operation == INTERSECTION && e.p.X > MINMAX_X:
+		case operation == INTERSECTION && gt(e.p.X, MINMAX_X):
 			fallthrough
-		case operation == DIFFERENCE && e.p.X > subjectbb.Max.X:
+		case operation == DIFFERENCE && gt(e.p.X, subjectbb.Max.X):
 			return connector.toShape()
 			//case operation == UNION && e.p.X > MINMAX_X:
 			//	_DBG(func() { fmt.Print("\nUNION optimization, fast quit\n") })
@@ -290,21 +291,21 @@ func findIntersection(seg0, seg1 segment) (int, geom.Point, geom.Point) {
 	d0 := geom.Point{seg0.end.X - p0.X, seg0.end.Y - p0.Y}
 	p1 := seg1.start
 	d1 := geom.Point{seg1.end.X - p1.X, seg1.end.Y - p1.Y}
-	sqrEpsilon := 1e-7 // was 1e-3 earlier
+	sqrEpsilon := 1e-10 // was 1e-3 earlier
 	E := geom.Point{p1.X - p0.X, p1.Y - p0.Y}
 	kross := d0.X*d1.Y - d0.Y*d1.X
 	sqrKross := kross * kross
 	sqrLen0 := lengthToOrigin(d0)
 	sqrLen1 := lengthToOrigin(d1)
 
-	if sqrKross > sqrEpsilon*sqrLen0*sqrLen1 {
+	if gt(sqrKross, sqrEpsilon*sqrLen0*sqrLen1) {
 		// lines of the segments are not parallel
 		s := (E.X*d1.Y - E.Y*d1.X) / kross
-		if s < 0 || s > 1 {
+		if lt(s, 0) || gt(s, 1) {
 			return 0, geom.Point{}, geom.Point{}
 		}
 		t := (E.X*d0.Y - E.Y*d0.X) / kross
-		if t < 0 || t > 1 {
+		if lt(t, 0) || gt(t, 1) {
 			return 0, geom.Point{}, geom.Point{}
 		}
 		// intersection of lines is a point an each segment [MC: ?]
@@ -320,7 +321,7 @@ func findIntersection(seg0, seg1 segment) (int, geom.Point, geom.Point) {
 	sqrLenE := lengthToOrigin(E)
 	kross = E.X*d0.Y - E.Y*d0.X
 	sqrKross = kross * kross
-	if sqrKross > sqrEpsilon*sqrLen0*sqrLenE {
+	if gt(sqrKross, sqrEpsilon*sqrLen0*sqrLenE) {
 		// lines of the segment are different
 		return 0, pi0, pi1
 	}
@@ -351,17 +352,17 @@ func findIntersection(seg0, seg1 segment) (int, geom.Point, geom.Point) {
 }
 
 func findIntersection2(u0, u1, v0, v1 float64, w *[]float64) int {
-	if u1 < v0 || u0 > v1 {
+	if lt(u1, v0) || gt(u0, v1) {
 		return 0
 	}
-	if u1 > v0 {
-		if u0 < v1 {
-			if u0 < v0 {
+	if gt(u1, v0) {
+		if lt(u0, v1) {
+			if lt(u0, v0) {
 				*w = append(*w, v0)
 			} else {
 				*w = append(*w, u0)
 			}
-			if u1 > v1 {
+			if gt(u1, v1) {
 				*w = append(*w, v1)
 			} else {
 				*w = append(*w, u1)
@@ -516,11 +517,11 @@ func addProcessedSegment(q *eventQueue, segment segment, polyType polygonType) {
 	e1.other = e2
 
 	switch {
-	case e1.p.X < e2.p.X:
+	case lt(e1.p.X, e2.p.X):
 		e2.left = false
-	case e1.p.X > e2.p.X:
+	case gt(e1.p.X, e2.p.X):
 		e1.left = false
-	case e1.p.Y < e2.p.Y:
+	case lt(e1.p.Y, e2.p.Y):
 		// the line segment is vertical. The bottom endpoint is the left endpoint
 		e2.left = false
 	default:

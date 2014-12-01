@@ -2,11 +2,10 @@ package geomop
 
 import (
 	"fmt"
-	"github.com/twpayne/gogeom/geom"
 	"math"
-)
 
-const tolerance = 1.e-9
+	"github.com/twpayne/gogeom/geom"
+)
 
 // Function Area returns the area of a polygon, or the combined area of a
 // MultiPolygon, assuming that none of the polygons in the MultiPolygon
@@ -149,10 +148,10 @@ func orientation(V geom.Polygon) []float64 {
 		xmin := r[0].X
 		ymin := r[0].Y
 		for i, p := range r {
-			if p.Y > ymin {
+			if gt(p.Y, ymin) {
 				continue
-			} else if p.Y == ymin { // just as low
-				if p.X < xmin { // and to left
+			} else if equals(p.Y, ymin) { // just as low
+				if lt(p.X, xmin) { // and to left
 					continue
 				}
 			}
@@ -230,7 +229,7 @@ func reversePolygon(s []geom.Point) []geom.Point {
 	return s
 }
 
-func polyInPoly(outer, inner contour) (bool) {
+func polyInPoly(outer, inner contour) bool {
 	for _, p := range inner {
 		if pointInPoly(p, outer) == 0 {
 			return false
@@ -319,32 +318,32 @@ func pointInPoly(pt geom.Point, path contour) int {
 		} else {
 			ipNext = path[i]
 		}
-		if floatEquals(ipNext.Y, pt.Y) {
-			if floatEquals(ipNext.X, pt.X) || (floatEquals(ip.Y, pt.Y) &&
-				((ipNext.X-pt.X > -tolerance) == (ip.X-pt.X < tolerance))) {
+		if equals(ipNext.Y, pt.Y) {
+			if equals(ipNext.X, pt.X) || (equals(ip.Y, pt.Y) &&
+				(gt(ipNext.X, pt.X) == lt(ip.X, pt.X))) {
 				return -1
 			}
 		}
-		if (ip.Y-pt.Y < tolerance) != (ipNext.Y-pt.Y < tolerance) {
-			if ip.X-pt.X >= -tolerance {
-				if ipNext.X-pt.X > -tolerance {
+		if lt(ip.Y, pt.Y) != lt(ipNext.Y, pt.Y) {
+			if gte(ip.X, pt.X) {
+				if gt(ipNext.X, pt.X) {
 					result = 1 - result
 				} else {
 					d := (ip.X-pt.X)*(ipNext.Y-pt.Y) -
 						(ipNext.X-pt.X)*(ip.Y-pt.Y)
-					if floatEquals(d, 0) {
+					if equals(d, 0) {
 						return -1
-					} else if (d > -tolerance) == (ipNext.Y-ip.Y > -tolerance) {
+					} else if gt(d, 0) == gt(ipNext.Y, ip.Y) {
 						result = 1 - result
 					}
 				}
 			} else {
-				if ipNext.X-pt.X > -tolerance {
+				if gt(ipNext.X, pt.X) {
 					d := (ip.X-pt.X)*(ipNext.Y-pt.Y) -
 						(ipNext.X-pt.X)*(ip.Y-pt.Y)
-					if floatEquals(d, 0) {
+					if equals(d, 0) {
 						return -1
-					} else if (d > -tolerance) == (ipNext.Y-ip.Y > -tolerance) {
+					} else if gt(d, 0) == gt(ipNext.Y, ip.Y) {
 						result = 1 - result
 					}
 				}
@@ -373,12 +372,12 @@ func distPointToSegment(p, segStart, segEnd geom.Point) float64 {
 	w := pointSubtract(p, segStart)
 
 	c1 := dot(w, v)
-	if c1 <= 0. {
+	if lte(c1, 0.) {
 		return d(p, segStart)
 	}
 
 	c2 := dot(v, v)
-	if c2 <= c1 {
+	if lte(c2, c1) {
 		return d(p, segEnd)
 	}
 
@@ -388,5 +387,5 @@ func distPointToSegment(p, segStart, segEnd geom.Point) float64 {
 }
 
 func pointOnSegment(p, segStart, segEnd geom.Point) bool {
-	return distPointToSegment(p, segStart, segEnd) < tolerance
+	return equals(distPointToSegment(p, segStart, segEnd), 0.)
 }
