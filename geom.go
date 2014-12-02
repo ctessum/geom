@@ -26,9 +26,10 @@
 package geomop
 
 import (
-	"github.com/twpayne/gogeom/geom"
 	"math"
 	"reflect"
+
+	"github.com/twpayne/gogeom/geom"
 )
 
 // Equals returns true if both p1 and p2 describe the same point within

@@ -126,7 +126,7 @@ func (c *connector) toShape() geom.T {
 			for j, p := range chain.points {
 				poly.Rings[i][j] = p
 			}
-			// close the ring
+			// close the ring as per OGC standard
 			poly.Rings[i][len(chain.points)] = poly.Rings[i][0]
 		}
 		// fix winding directions

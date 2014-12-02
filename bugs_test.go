@@ -2,21 +2,22 @@ package geomop
 
 import (
 	"fmt"
-	"github.com/akavel/polyclip-go"
 	"sort"
 	. "testing"
+
+	"github.com/twpayne/gogeom/geom"
 )
 
-type sorter polyclip.Polygon
+type sorter geom.Polygon
 
-func (s sorter) Len() int      { return len(s) }
-func (s sorter) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
+func (s sorter) Len() int      { return len(s.Rings) }
+func (s sorter) Swap(i, j int) { s.Rings[i], s.Rings[j] = s.Rings[j], s.Rings[i] }
 func (s sorter) Less(i, j int) bool {
-	if len(s[i]) != len(s[j]) {
-		return len(s[i]) < len(s[j])
+	if len(s.Rings[i]) != len(s.Rings[j]) {
+		return len(s.Rings[i]) < len(s.Rings[j])
 	}
-	for k := range s[i] {
-		pi, pj := s[i][k], s[j][k]
+	for k := range s.Rings[i] {
+		pi, pj := s.Rings[i][k], s.Rings[j][k]
 		if pi.X != pj.X {
 			return pi.X < pj.X
 		}
@@ -28,8 +29,8 @@ func (s sorter) Less(i, j int) bool {
 }
 
 // basic normalization just for tests; to be improved if needed
-func normalize(poly polyclip.Polygon) polyclip.Polygon {
-	for i, c := range poly {
+func normalize(poly geom.Polygon) geom.Polygon {
+	for i, c := range poly.Rings {
 		if len(c) == 0 {
 			continue
 		}
@@ -43,72 +44,99 @@ func normalize(poly polyclip.Polygon) polyclip.Polygon {
 		}
 
 		// rotate points to make sure min is first
-		poly[i] = append(c[min:], c[:min]...)
+		poly.Rings[i] = append(c[min:], c[:min]...)
 	}
 
 	sort.Sort(sorter(poly))
-	return poly
+
+	var poly2 geom.Polygon
+	poly2.Rings = make([][]geom.Point, len(poly.Rings))
+	for i, r := range poly.Rings {
+		poly2.Rings[i] = make([]geom.Point, 0, len(r))
+		for j, p := range r {
+			if j == 0 || !PointEquals(p, r[j-1]) {
+				poly2.Rings[i] = append(poly2.Rings[i], p)
+			}
+		}
+	}
+	return poly2
 }
 
-func dump(poly polyclip.Polygon) string {
+func dump(poly geom.Polygon) string {
 	return fmt.Sprintf("%v", normalize(poly))
 }
 
 func TestBug3(t *T) {
-	cases := []struct{ subject, clipping, result polyclip.Polygon }{
+	cases := []struct{ subject, clipping, result geom.T }{
 		// original reported github issue #3
 		{
-			subject: polyclip.Polygon{{{1, 1}, {1, 2}, {2, 2}, {2, 1}}},
-			clipping: polyclip.Polygon{
+			subject: geom.T(geom.Polygon{[][]geom.Point{
+				{{1, 1}, {1, 2}, {2, 2}, {2, 1}}}}),
+			clipping: geom.T(geom.Polygon{[][]geom.Point{
 				{{2, 1}, {2, 2}, {3, 2}, {3, 1}},
 				{{1, 2}, {1, 3}, {2, 3}, {2, 2}},
-				{{2, 2}, {2, 3}, {3, 3}, {3, 2}}},
-			result: polyclip.Polygon{{
-				{1, 1}, {2, 1}, {3, 1},
-				{3, 2}, {3, 3},
-				{2, 3}, {1, 3},
-				{1, 2}}},
+				{{2, 2}, {2, 3}, {3, 3}, {3, 2}}}}),
+			result: geom.T(geom.Polygon{[][]geom.Point{
+				{{1, 1}, {2, 1}, {3, 1},
+					{3, 2}, {3, 3},
+					{2, 3}, {1, 3},
+					{1, 2}}}}),
 		},
 		// simplified variant of issue #3, for easier debugging
 		{
-			subject: polyclip.Polygon{{{1, 2}, {2, 2}, {2, 1}}},
-			clipping: polyclip.Polygon{
+			subject: geom.T(geom.Polygon{[][]geom.Point{
+				{{1, 2}, {2, 2}, {2, 1}}}}),
+			clipping: geom.T(geom.Polygon{[][]geom.Point{
 				{{2, 1}, {2, 2}, {3, 2}},
 				{{1, 2}, {2, 3}, {2, 2}},
-				{{2, 2}, {2, 3}, {3, 2}}},
-			result: polyclip.Polygon{{{1, 2}, {2, 3}, {3, 2}, {2, 1}}},
+				{{2, 2}, {2, 3}, {3, 2}}}}),
+			result: geom.T(geom.Polygon{[][]geom.Point{
+				{{1, 2}, {2, 3}, {3, 2}, {2, 1}}}}),
 		},
 		{
-			subject: polyclip.Polygon{{{1, 2}, {2, 2}, {2, 1}}},
-			clipping: polyclip.Polygon{
+			subject: geom.T(geom.Polygon{[][]geom.Point{
+				{{1, 2}, {2, 2}, {2, 1}}}}),
+			clipping: geom.T(geom.Polygon{[][]geom.Point{
 				{{1, 2}, {2, 3}, {2, 2}},
-				{{2, 2}, {2, 3}, {3, 2}}},
-			result: polyclip.Polygon{{{1, 2}, {2, 3}, {3, 2}, {2, 2}, {2, 1}}},
+				{{2, 2}, {2, 3}, {3, 2}}}}),
+			result: geom.T(geom.Polygon{[][]geom.Point{
+				{{1, 2}, {2, 3}, {3, 2}, {2, 2}, {2, 1}}}}),
 		},
 		// another variation, now with single degenerated curve
 		{
-			subject: polyclip.Polygon{{{1, 2}, {2, 2}, {2, 1}}},
-			clipping: polyclip.Polygon{
-				{{1, 2}, {2, 3}, {2, 2}, {2, 3}, {3, 2}}},
-			result: polyclip.Polygon{{{1, 2}, {2, 3}, {3, 2}, {2, 2}, {2, 1}}},
+			subject: geom.T(geom.Polygon{[][]geom.Point{
+				{{1, 2}, {2, 2}, {2, 1}}}}),
+			clipping: geom.T(geom.Polygon{[][]geom.Point{
+				{{1, 2}, {2, 3}, {2, 2}, {2, 3}, {3, 2}}}}),
+			result: geom.T(geom.Polygon{[][]geom.Point{
+				{{1, 2}, {2, 3}, {3, 2}, {2, 2}, {2, 1}}}}),
 		},
 		{
-			subject: polyclip.Polygon{{{1, 2}, {2, 2}, {2, 1}}},
-			clipping: polyclip.Polygon{
+			subject: geom.T(geom.Polygon{[][]geom.Point{
+				{{1, 2}, {2, 2}, {2, 1}}}}),
+			clipping: geom.T(geom.Polygon{[][]geom.Point{
 				{{2, 1}, {2, 2}, {2, 3}, {3, 2}},
-				{{1, 2}, {2, 3}, {2, 2}}},
-			result: polyclip.Polygon{{{1, 2}, {2, 3}, {3, 2}, {2, 1}}},
+				{{1, 2}, {2, 3}, {2, 2}}}}),
+			result: geom.T(geom.Polygon{[][]geom.Point{
+				{{1, 2}, {2, 3}, {3, 2}, {2, 1}}}}),
 		},
 		// "union" with effectively empty polygon (wholly self-intersecting)
 		{
-			subject:  polyclip.Polygon{{{1, 2}, {2, 2}, {2, 1}}},
-			clipping: polyclip.Polygon{{{1, 2}, {2, 2}, {2, 3}, {1, 2}, {2, 2}, {2, 3}}},
-			result:   polyclip.Polygon{{{1, 2}, {2, 2}, {2, 1}}},
+			subject: geom.T(geom.Polygon{[][]geom.Point{
+				{{1, 2}, {2, 2}, {2, 1}}}}),
+			clipping: geom.T(geom.Polygon{[][]geom.Point{
+				{{1, 2}, {2, 2}, {2, 3}, {1, 2}, {2, 2}, {2, 3}}}}),
+			result: geom.T(geom.Polygon{[][]geom.Point{
+				{{1, 2}, {2, 2}, {2, 1}}}}),
 		},
 	}
 	for _, c := range cases {
-		result := dump(c.subject.Construct(polyclip.UNION, c.clipping))
-		if result != dump(c.result) {
+		union, err := Construct(c.subject, c.clipping, UNION)
+		handle(err)
+		result := dump(union.(geom.Polygon))
+		err = FixOrientation(c.result)
+		handle(err)
+		if result != dump(c.result.(geom.Polygon)) {
 			t.Errorf("case UNION:\nsubject:  %v\nclipping: %v\nexpected: %v\ngot:      %v",
 				c.subject, c.clipping, c.result, result)
 		}
