@@ -100,7 +100,7 @@ func Centroid(g geom.T) (geom.Point, error) {
 		}
 		return geom.Point{xA / A, yA / A}, nil
 	default:
-		return geom.Point{}, NewError(g)
+		return geom.Point{}, newUnsupportedGeometryError(g)
 	}
 	return out, nil
 }
@@ -127,7 +127,7 @@ func PointOnSurface(g geom.T) (geom.Point, error) {
 		case geom.MultiLineString:
 			return g.(geom.MultiLineString).LineStrings[0].Points[0], nil
 		default:
-			return geom.Point{}, NewError(g)
+			return geom.Point{}, newUnsupportedGeometryError(g)
 		}
 	} else {
 		return c, nil
@@ -219,7 +219,7 @@ func FixOrientation(g geom.T) error {
 		}
 		return nil
 	default:
-		return NewError(g)
+		return newUnsupportedGeometryError(g)
 	}
 }
 
@@ -230,7 +230,7 @@ func reversePolygon(s []geom.Point) []geom.Point {
 	return s
 }
 
-func polyInPoly(outer, inner contour) (bool) {
+func polyInPoly(outer, inner contour) bool {
 	for _, p := range inner {
 		if pointInPoly(p, outer) == 0 {
 			return false
@@ -261,10 +261,10 @@ func Within(inner, outer geom.T) (bool, error) {
 		case geom.Point:
 			return pointInPolygon(inner.(geom.Point), outer)
 		default:
-			return false, NewError(inner)
+			return false, newUnsupportedGeometryError(inner)
 		}
 	default:
-		return false, NewError(outer)
+		return false, newUnsupportedGeometryError(outer)
 	}
 }
 
@@ -298,7 +298,7 @@ func pointInPolygon(point geom.Point, polygon geom.T) (bool, error) {
 		}
 		return false, nil
 	default:
-		return false, NewError(polygon)
+		return false, newUnsupportedGeometryError(polygon)
 	}
 }
 

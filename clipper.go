@@ -290,7 +290,7 @@ func findIntersection(seg0, seg1 segment) (int, geom.Point, geom.Point) {
 	d0 := geom.Point{seg0.end.X - p0.X, seg0.end.Y - p0.Y}
 	p1 := seg1.start
 	d1 := geom.Point{seg1.end.X - p1.X, seg1.end.Y - p1.Y}
-	sqrEpsilon := 1e-10 // was 1e-3 earlier
+	sqrEpsilon := 1.e-10 // was 1e-3 earlier
 	E := geom.Point{p1.X - p0.X, p1.Y - p0.Y}
 	kross := d0.X*d1.Y - d0.Y*d1.X
 	sqrKross := kross * kross
@@ -346,7 +346,6 @@ func findIntersection(seg0, seg1 segment) (int, geom.Point, geom.Point) {
 			pi1.Y = p0.Y + w[1]*d0.Y
 		}
 	}
-
 	return imax, pi0, pi1
 }
 
@@ -394,9 +393,9 @@ func (c *clipper) possibleIntersection(e1, e2 *endpoint) {
 	}
 
 	////if numIntersections == 2 && e1.p.Equals(e2.p) {
-	//if numIntersections == 2 && e1.polygonType == e2.polygonType {
-	//	return // the line segments overlap, but they belong to the same polygon
-	//}
+	if numIntersections == 2 && e1.polygonType == e2.polygonType {
+		return // the line segments overlap, but they belong to the same polygon
+	}
 
 	if numIntersections == 1 {
 		if !PointEquals(e1.p, ip1) && !PointEquals(e1.other.p, ip1) {

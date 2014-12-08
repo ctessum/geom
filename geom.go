@@ -26,8 +26,10 @@
 package geomop
 
 import (
+	"fmt"
 	"math"
 	"reflect"
+	"time"
 
 	"github.com/twpayne/gogeom/geom"
 )
@@ -35,15 +37,16 @@ import (
 // Equals returns true if both p1 and p2 describe the same point within
 // a tolerance limit.
 func PointEquals(p1, p2 geom.Point) bool {
-	//	return (p1.X == p2.X && p1.Y == p2.Y)
-	return (p1.X == p2.X && p1.Y == p2.Y) ||
-		(math.Abs(p1.X-p2.X)/math.Abs(p1.X+p2.X) < tolerance &&
-			math.Abs(p1.Y-p2.Y)/math.Abs(p1.Y+p2.Y) < tolerance)
+	return (p1.X == p2.X && p1.Y == p2.Y)
+	//return (p1.X == p2.X && p1.Y == p2.Y) ||
+	//	(math.Abs(p1.X-p2.X)/math.Abs(p1.X+p2.X) < tolerance &&
+	//		math.Abs(p1.Y-p2.Y)/math.Abs(p1.Y+p2.Y) < tolerance)
 }
 
 func floatEquals(f1, f2 float64) bool {
-	return (f1 == f2) ||
-		(math.Abs(f1-f2)/math.Abs(f1+f2) < tolerance)
+	return (f1 == f2)
+	//return (f1 == f2) ||
+	//	(math.Abs(f1-f2)/math.Abs(f1+f2) < tolerance)
 }
 
 func pointSubtract(p1, p2 geom.Point) geom.Point {
@@ -146,7 +149,7 @@ func Construct(subject, clipping geom.T, operation Op) (geom.T, error) {
 		case geom.LineString, geom.MultiLineString:
 			c.outType = outputLines
 		default:
-			return nil, NewError(subject)
+			return nil, newUnsupportedGeometryError(subject)
 		}
 	case geom.LineString, geom.MultiLineString:
 		switch subject.(type) {
@@ -160,13 +163,22 @@ func Construct(subject, clipping geom.T, operation Op) (geom.T, error) {
 			c.clipping = convertToPolygon(clipping)
 			c.outType = outputPoints
 		default:
-			return nil, NewError(subject)
+			return nil, newUnsupportedGeometryError(subject)
 		}
 	default:
-		return nil, NewError(clipping)
+		return nil, newUnsupportedGeometryError(clipping)
 	}
-	// Run the clipper
-	return c.compute(operation), nil
+	resultChan := make(chan geom.T)
+	go func() {
+		// Run the clipper, while checking for an infinite loop.
+		resultChan <- c.compute(operation)
+	}()
+	select {
+	case result := <-resultChan:
+		return result, nil
+	case <-time.After(30 * time.Minute):
+		return nil, newInfiniteLoopError(subject, clipping)
+	}
 }
 
 // convert input shapes to polygon to make internal processing easier
@@ -199,7 +211,7 @@ func convertToPolygon(g geom.T) geom.Polygon {
 			}
 		}
 	default:
-		panic(NewError(g))
+		panic(newUnsupportedGeometryError(g))
 	}
 	// The clipper doesn't work well if a shape is made up of only two points.
 	// To get around this problem, if there are only 2 points, we add a third
@@ -221,13 +233,32 @@ func convertToPolygon(g geom.T) geom.Polygon {
 }
 
 type UnsupportedGeometryError struct {
-	Type reflect.Type
+	G geom.T
 }
 
-func NewError(g geom.T) UnsupportedGeometryError {
-	return UnsupportedGeometryError{reflect.TypeOf(g)}
+func newUnsupportedGeometryError(g geom.T) UnsupportedGeometryError {
+	return UnsupportedGeometryError{g}
 }
 
 func (e UnsupportedGeometryError) Error() string {
-	return "Unsupported geometry type: " + e.Type.String()
+	if e.G == nil {
+		return "Geometry is nil."
+	} else {
+		return "Unsupported geometry type: " + reflect.TypeOf(e.G).String()
+	}
+}
+
+type InfiniteLoopError struct {
+	s, c geom.T
+}
+
+func newInfiniteLoopError(subject, clipping geom.T) InfiniteLoopError {
+	return InfiniteLoopError{s: subject, c: clipping}
+}
+
+func (e InfiniteLoopError) Error() string {
+	return fmt.Sprintf(
+		"Function geomop.Construct appears to have fallen into an "+
+			"infinite loop. \n\nSubject geometry=%v\n\nClipping geometry=%v",
+		e.s, e.c)
 }
