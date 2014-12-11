@@ -29,7 +29,6 @@ import (
 	"fmt"
 	"math"
 	"reflect"
-	"time"
 
 	"github.com/twpayne/gogeom/geom"
 )
@@ -168,17 +167,18 @@ func Construct(subject, clipping geom.T, operation Op) (geom.T, error) {
 	default:
 		return nil, newUnsupportedGeometryError(clipping)
 	}
-	resultChan := make(chan geom.T)
-	go func() {
+	//resultChan := make(chan geom.T)
+	//go func() {
 		// Run the clipper, while checking for an infinite loop.
-		resultChan <- c.compute(operation)
-	}()
-	select {
-	case result := <-resultChan:
-		return result, nil
-	case <-time.After(30 * time.Minute):
-		return nil, newInfiniteLoopError(subject, clipping)
-	}
+	//	resultChan <- c.compute(operation)
+	//}()
+	//select {
+	//case result := <-resultChan:
+	//	return result, nil
+	//case <-time.After(30 * time.Minute):
+	//	return nil, newInfiniteLoopError(subject, clipping)
+	//}
+	return c.compute(operation), nil
 }
 
 // convert input shapes to polygon to make internal processing easier
