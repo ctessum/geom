@@ -348,12 +348,11 @@ func (c *ColorMap) Set() {
 		}
 		val += majorDelta
 	}
-
 	if c.Type == LinCutoff && cutpt < c.maxval && cutpt != 0 {
 		c.colorstops = append(c.colorstops, absmax)
 		c.stopcolors = append(c.stopcolors, c.ColorScheme.HighLimit)
 		c.positiveOutlier = true
-	} else if (c.maxval-linmax)/(c.maxval+linmax) < 0.001 {
+	} else if (c.maxval-c.colorstops[len(c.colorstops)-1])/(c.maxval+c.colorstops[len(c.colorstops)-1]) > 0.001 {
 		c.colorstops = append(c.colorstops, c.maxval)
 		c.stopcolors = append(c.stopcolors, c.ColorScheme.interpolate(1.))
 	}
