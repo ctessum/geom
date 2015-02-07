@@ -4,8 +4,6 @@ package carto
 import (
 	"bufio"
 	"code.google.com/p/draw2d/draw2d"
-	"fmt"
-	"github.com/pmylund/go-cache"
 	"github.com/twpayne/gogeom/geom"
 	"image"
 	"image/color"
@@ -14,7 +12,6 @@ import (
 	"io"
 	"math"
 	"reflect"
-	"time"
 )
 
 type Mapper interface {
@@ -247,7 +244,6 @@ type MapData struct {
 	Cmap      *ColorMap
 	Shapes    []geom.T
 	Data      []float64
-	tileCache *cache.Cache
 	DrawEdges bool
 	EdgeWidth float64
 }
@@ -257,21 +253,11 @@ func NewMapData(numShapes int, Type ColorMapType) *MapData {
 	m.Cmap = NewColorMap(Type)
 	m.Shapes = make([]geom.T, numShapes)
 	m.Data = make([]float64, numShapes)
-	m.tileCache = cache.New(1*time.Hour, 10*time.Minute)
 	m.EdgeWidth = 0.5
 	return m
 }
 
 func (m *MapData) WriteGoogleMapTile(w io.Writer, zoom, x, y int) error {
-	// Check if image is already in the cache.
-	cacheKey := fmt.Sprintf("%v_%v_%v", zoom, x, y)
-	if img, found := m.tileCache.Get(cacheKey); found {
-		err := png.Encode(w, img.(image.Image))
-		if err != nil {
-			return err
-		}
-		return nil
-	}
 	//strokeColor := color.NRGBA{0, 0, 0, 255}
 	N, S, E, W := getGoogleTileBounds(zoom, x, y)
 	maptile := NewRasterMap(N, S, E, W, 256, w)
@@ -292,7 +278,6 @@ func (m *MapData) WriteGoogleMapTile(w io.Writer, zoom, x, y int) error {
 	if err != nil {
 		return err
 	}
-	m.tileCache.Set(cacheKey, maptile.I, 0)
 	return nil
 }
 
