@@ -462,6 +462,24 @@ func TestInfiniteLoopBug2(t *testing.T) {
 	handle(err)
 	drawShapes(subject, clipping, isect, "infiniteLoopBug2.png")
 }
+func TestInfiniteLoopBug3(t *testing.T) {
+	subject := geom.T(geom.Polygon{Rings: [][]geom.Point{[]geom.Point{
+		geom.Point{X: 1.7714672107465276e+06, Y: -102506.68254093888},
+		geom.Point{X: 1.7713768917571804e+06, Y: -102000.75485953009},
+		geom.Point{X: 1.7717109214841307e+06, Y: -101912.19625031832}}}})
+
+	clipping := geom.T(geom.Polygon{Rings: [][]geom.Point{[]geom.Point{
+		geom.Point{X: 1.7714593229229522e+06, Y: -102470.35230830211},
+		//geom.Point{X: 1.7714672107465276e+06, Y: -102506.68254093888},
+		geom.Point{X: 1.7714672107465276e+06, Y: -102506.68254093867},
+		geom.Point{X: 1.771439738086082e+06, Y: -102512.92027456204}}}})
+
+	drawShapes(subject, clipping, nil, "infiniteLoopBug3.png")
+	isect, err := Construct(subject, clipping, INTERSECTION)
+	handle(err)
+	drawShapes(subject, clipping, isect, "infiniteLoopBug3.png")
+
+}
 
 func drawShapes(a, b, c geom.T, filename string) {
 	f, err := os.Create(filename)

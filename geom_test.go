@@ -103,8 +103,8 @@ func TestContourContains(t *T) {
 		{geom.Point{-1, -1}, 0},
 	}
 	for i, v := range cases1 {
-		verify(t, pointInPoly(v.p,c1) == v.result, "Expected %v for point %d for c1", v.result, i)
-		verify(t, pointInPoly(v.p,c2) == v.result, "Expected %v for point %d for c2", v.result, i)
+		verify(t, pointInPoly(v.p, c1) == v.result, "Expected %v for point %d for c1", v.result, i)
+		verify(t, pointInPoly(v.p, c2) == v.result, "Expected %v for point %d for c2", v.result, i)
 	}
 }
 

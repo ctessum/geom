@@ -37,10 +37,10 @@ import (
 // Equals returns true if both p1 and p2 describe the same point within
 // a tolerance limit.
 func PointEquals(p1, p2 geom.Point) bool {
-	return (p1.X == p2.X && p1.Y == p2.Y)
-	//return (p1.X == p2.X && p1.Y == p2.Y) ||
-	//	(math.Abs(p1.X-p2.X)/math.Abs(p1.X+p2.X) < tolerance &&
-	//		math.Abs(p1.Y-p2.Y)/math.Abs(p1.Y+p2.Y) < tolerance)
+	//return (p1.X == p2.X && p1.Y == p2.Y)
+	return (p1.X == p2.X && p1.Y == p2.Y) ||
+		(math.Abs(p1.X-p2.X)/math.Abs(p1.X+p2.X) < tolerance &&
+			math.Abs(p1.Y-p2.Y)/math.Abs(p1.Y+p2.Y) < tolerance)
 }
 
 func floatEquals(f1, f2 float64) bool {
@@ -262,6 +262,6 @@ func newInfiniteLoopError(subject, clipping geom.T) InfiniteLoopError {
 func (e InfiniteLoopError) Error() string {
 	return fmt.Sprintf(
 		"Function geomop.Construct appears to have fallen into an "+
-			"infinite loop. \n\nSubject geometry=%v\n\nClipping geometry=%v",
+			"infinite loop. \n\nSubject geometry=%#v\n\nClipping geometry=%#v",
 		e.s, e.c)
 }
