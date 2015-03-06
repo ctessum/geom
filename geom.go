@@ -262,6 +262,6 @@ func newInfiniteLoopError(subject, clipping geom.T) InfiniteLoopError {
 func (e InfiniteLoopError) Error() string {
 	return fmt.Sprintf(
 		"Function geomop.Construct appears to have fallen into an "+
-			"infinite loop. \n\nSubject geometry=%v\n\nClipping geometry=%v",
+			"infinite loop. \n\nSubject geometry=%#v\n\nClipping geometry=%#v",
 		e.s, e.c)
 }
