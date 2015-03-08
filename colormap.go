@@ -2,13 +2,14 @@ package carto
 
 import (
 	"fmt"
-	"github.com/ajstarks/svgo"
 	"image/color"
 	"io"
 	"math"
 	"os/exec"
 	"sort"
 	"strings"
+
+	"github.com/ajstarks/svgo"
 )
 
 const (
@@ -107,6 +108,7 @@ type ColorMap struct {
 	NumDivisions      int     // "Number of tick marks on legend.
 	rulestring        string
 	colorstops        []float64
+	ticklocs          []float64
 	stopcolors        []color.NRGBA
 	LegendWidth       float64 // width of legend in inches
 	LegendHeight      float64 // height of legend in inches
@@ -210,6 +212,21 @@ func (cm *ColorMap) GetColor(v float64) color.NRGBA {
 	var R, G, B uint8
 	c := cm.stopcolors
 	cv := cm.colorstops
+	if math.IsNaN(v) || math.IsInf(v, 0) {
+		fmt.Printf("Problem interpolating: %v value\n", v)
+		return color.NRGBA{255, 0, 174, 255}
+	}
+	if len(cm.colorstops) == 0 {
+		return color.NRGBA{255, 255, 255, 255}
+	}
+	if cv[0] > v {
+		fmt.Println("x=", v, "xArray=", cm.colorstops)
+		panic("Problem interpolating: x value is smaller than xArray")
+	}
+	if cv[len(cv)-1] < v {
+		fmt.Println("x=", v, "xArray=", cm.colorstops)
+		panic("Problem interpolating: x value is larger than xArray")
+	}
 	for i := 1; i < len(cv); i++ {
 		if math.Abs(v-cv[i])/math.Abs(cv[i]) < 0.0001 {
 			return c[i]
@@ -224,15 +241,8 @@ func (cm *ColorMap) GetColor(v float64) color.NRGBA {
 			return color.NRGBA{R, G, B, 255}
 		}
 	}
-	if math.IsNaN(v) || math.IsInf(v, 0) {
-		fmt.Printf("Problem interpolating: %v value\n", v)
-		return color.NRGBA{255, 0, 174, 255}
-	}
-	if len(cm.colorstops) == 0 {
-		return color.NRGBA{255, 255, 255, 255}
-	}
 	fmt.Println("x=", v, "xArray=", cm.colorstops)
-	panic("Problem interpolating: x value is larger than xArray")
+	panic("Problem interpolating.")
 }
 
 // Given an array of x values and an array of y values, find the y value at a // given x using linear interpolation. xArray must be monotonically increasing.
@@ -277,12 +287,8 @@ func newsvgcolor(cIn color.NRGBA) (cOut svg.Offcolor) {
 
 // Figure out rules for color map
 func (c *ColorMap) Set() {
-
 	var linmin, linmax, absmax float64
 	cutpt := average(c.cutptlist)
-	if c.minval > 0. {
-		c.minval = 0.
-	}
 	if c.minval*-1 > c.maxval {
 		absmax = c.minval * -1
 	} else {
@@ -317,9 +323,10 @@ func (c *ColorMap) Set() {
 		c.colorstops = append(c.colorstops, absmax*-1)
 		c.stopcolors = append(c.stopcolors, c.ColorScheme.LowLimit)
 		c.negativeOutlier = true
-	} else if (c.minval-linmin)/(c.minval+linmin) > 0.001 {
+	} else {
 		c.colorstops = append(c.colorstops, c.minval)
-		c.stopcolors = append(c.stopcolors, c.ColorScheme.interpolate(-1.))
+		c.stopcolors = append(c.stopcolors,
+			c.ColorScheme.interpolate(c.minval/linmax))
 	}
 
 	tens := math.Pow10(int(math.Floor(math.Log10(linmax - linmin))))
@@ -337,11 +344,15 @@ func (c *ColorMap) Set() {
 	}
 	majorDelta := float64(majorMult) * tens
 	val := math.Floor(linmin/majorDelta) * majorDelta
+	tickThreshold := 0.01 // minimum distance for ticks
 	for val <= linmax {
-		if val >= linmin && val >= c.minval && val <= linmax && val <= c.maxval {
+		if val >= linmin && val >= c.minval && val <= linmax &&
+			val <= c.maxval &&
+			math.Abs(val-c.minval) > tickThreshold*linmax &&
+			math.Abs(c.maxval-val) > tickThreshold*linmax {
 			c.colorstops = append(c.colorstops, val)
 			c.stopcolors = append(c.stopcolors,
-				c.ColorScheme.interpolate(val/absMax(linmin, linmax)))
+				c.ColorScheme.interpolate(val/linmax))
 		}
 		if math.Nextafter(val, val+majorDelta) == val {
 			break
@@ -352,9 +363,30 @@ func (c *ColorMap) Set() {
 		c.colorstops = append(c.colorstops, absmax)
 		c.stopcolors = append(c.stopcolors, c.ColorScheme.HighLimit)
 		c.positiveOutlier = true
-	} else if (c.maxval-c.colorstops[len(c.colorstops)-1])/(c.maxval+c.colorstops[len(c.colorstops)-1]) > 0.001 {
+	} else if c.maxval != 0. {
 		c.colorstops = append(c.colorstops, c.maxval)
-		c.stopcolors = append(c.stopcolors, c.ColorScheme.interpolate(1.))
+		c.stopcolors = append(c.stopcolors,
+			c.ColorScheme.interpolate(c.maxval/linmax))
+	}
+
+	// calculate the locations for the tick marks
+	numstops := len(c.stopcolors)
+	c.ticklocs = make([]float64, numstops)
+	span := linmax - linmin
+	loc := 0.
+	for i, stop := range c.colorstops {
+		if i != 0 {
+			if c.negativeOutlier && i == 0 ||
+				c.positiveOutlier && i == numstops-1 {
+				loc += 0.05
+			} else {
+				loc += (stop - c.colorstops[i-1]) / span
+			}
+			c.ticklocs[i] = loc
+		}
+	}
+	for i, val := range c.ticklocs {
+		c.ticklocs[i] = val / c.ticklocs[numstops-1]
 	}
 }
 
@@ -391,25 +423,10 @@ func (c *ColorMap) Legend(w io.Writer, label string) (err error) {
 		(topPad+labelPad+bottomPad)*pts2px)
 
 	legendcolors := make([]svg.Offcolor, len(c.stopcolors))
-	numstops := len(c.stopcolors)
-	ticklocs := make([]float64, numstops)
-	loc := 0.
-	for i := 0; i < numstops; i++ {
-		ticklocs[i] = loc
-		if c.negativeOutlier && i == 0 ||
-			c.positiveOutlier && i == numstops-2 {
-			loc += 0.33
-		} else {
-			loc += 1.
-		}
-	}
-	for i, val := range ticklocs {
-		ticklocs[i] = val / ticklocs[numstops-1]
-	}
-	for i, val := range ticklocs {
+	for i, val := range c.ticklocs {
 		legendcolors[i] = newsvgcolor(c.stopcolors[i])
 		legendcolors[i].Offset = uint8(round(val /
-			ticklocs[numstops-1] * 100))
+			c.ticklocs[len(c.ticklocs)-1] * 100))
 	}
 
 	g := svg.New(w)
@@ -422,7 +439,7 @@ func (c *ColorMap) Legend(w io.Writer, label string) (err error) {
 	g.Rect(barWstart, barHstart, barWidth, barHeight,
 		fmt.Sprintf("fill:url(#cmap);stroke:%v;stroke-width:%d", c.EdgeColor,
 			strokeWidth))
-	for i, tickloc := range ticklocs {
+	for i, tickloc := range c.ticklocs {
 		val := c.colorstops[i]
 		var valStr string
 		if math.Abs(val) < absMax(c.maxval, c.minval)*1.e-10 {
@@ -433,7 +450,7 @@ func (c *ColorMap) Legend(w io.Writer, label string) (err error) {
 		}
 		tickx := roundInt(tickloc*float64(barWidth) + float64(barWstart))
 		if c.negativeOutlier && i == 0 ||
-			c.positiveOutlier && i == numstops-1 {
+			c.positiveOutlier && i == len(c.ticklocs)-1 {
 			g.Text(tickx, unitsYover, valStr, fontConfig)
 			g.Line(tickx, barHstart+barHeight, tickx, barHstart+barHeight-tickLength,
 				fmt.Sprintf("fill:url(#cmap);stroke:%v;stroke-width:%d", c.EdgeColor,
