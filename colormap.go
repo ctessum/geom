@@ -5,19 +5,14 @@ import (
 	"image/color"
 	"io"
 	"math"
-	"os/exec"
 	"sort"
 	"strings"
 
-	"github.com/ajstarks/svgo"
-)
-
-const (
-	pointsPerIn = 72. // postscript points per inch
-)
-
-var (
-	Font = "" // Default font to use
+	"github.com/gonum/plot/vg"
+	"github.com/gonum/plot/vg/draw"
+	//"github.com/gonum/plot/vg/vgimg"
+	//"github.com/gonum/plot/vg/vgsvg"
+	"github.com/gonum/plot/vg/vgpdf"
 )
 
 type Colorlist struct {
@@ -99,6 +94,7 @@ const (
 )
 
 type ColorMap struct {
+	draw.Canvas
 	cutoff            float64
 	maxval            float64
 	minval            float64
@@ -110,15 +106,15 @@ type ColorMap struct {
 	colorstops        []float64
 	ticklocs          []float64
 	stopcolors        []color.NRGBA
-	LegendWidth       float64 // width of legend in inches
-	LegendHeight      float64 // height of legend in inches
-	LineWidth         float64 // width of lines in legend in points
-	FontSize          float64 // font size in points.
-	Font              string  // Name of the font to use in legend
-	FontColor         string
-	EdgeColor         string // Color for legend outline
-	BackgroundColor   string
-	BackgroundOpacity float64
+	LegendWidth       vg.Length // width of legend in inches
+	LegendHeight      vg.Length // height of legend in inches
+	LineWidth         vg.Length // width of lines in legend in points
+	FontSize          vg.Length // font size in points.
+	GradientLineWidth vg.Length // Width of lines that make up legend gradient
+	Font              string    // Name of the font to use in legend
+	FontColor         color.Color
+	EdgeColor         color.Color // Color for legend outline
+	BackgroundColor   color.Color
 	negativeOutlier   bool
 	positiveOutlier   bool
 	ColorScheme       Colorlist
@@ -134,35 +130,33 @@ func NewColorMap(Type ColorMapType) (c *ColorMap) {
 	c.NumDivisions = 9
 	c.colorstops = make([]float64, 0)
 	c.stopcolors = make([]color.NRGBA, 0)
-	c.LegendWidth = 3.70
-	c.LegendHeight = c.LegendWidth * 0.1067
-	c.LineWidth = 0.5
-	c.FontSize = 7.
+	c.LineWidth = 0.5         // points
+	c.GradientLineWidth = 0.2 // points
+	c.FontSize = 7.           // points
 	c.negativeOutlier = false
 	c.positiveOutlier = false
-	c.Font = Font
-	c.FontColor = "black"
-	c.EdgeColor = "black"
-	c.BackgroundColor = "white"
-	c.BackgroundOpacity = 0.
+	c.Font = "Helvetica"
+	c.FontColor = color.NRGBA{0, 0, 0, 255}
+	c.EdgeColor = color.NRGBA{0, 0, 0, 255}
+	c.BackgroundColor = color.NRGBA{255, 255, 255, 255}
 	return
 }
 
 func (c *ColorMap) AddArray(data []float64) {
-	var max, min float64
+	var maxval, minval float64
 	for i := 0; i < len(data); i++ {
-		if data[i] > max {
-			max = data[i]
+		if data[i] > maxval {
+			maxval = data[i]
 		}
-		if data[i] < min {
-			min = data[i]
+		if data[i] < minval {
+			minval = data[i]
 		}
 	}
-	if max*1.00001 > c.maxval {
-		c.maxval = max * 1.00001
+	if maxval*1.00001 > c.maxval {
+		c.maxval = maxval * 1.00001
 	}
-	if min*1.00001 < c.minval {
-		c.minval = min * 1.00001
+	if minval*1.00001 < c.minval {
+		c.minval = minval * 1.00001
 	}
 	if c.Type == LinCutoff {
 		tmpAbs := make([]float64, len(data))
@@ -207,6 +201,24 @@ func (c *ColorMap) AddArrayServer(datachan chan []float64,
 	finished <- 0
 }
 
+func (c *ColorMap) getColorOnLegend(gradLoc, barLeft,
+	barRight vg.Length) color.Color {
+	for i := 0; i < len(c.ticklocs)-1; i++ {
+		tlspot := barLeft + (barRight-barLeft)*vg.Length(c.ticklocs[i])
+		nexttlspot := barLeft + (barRight-barLeft)*vg.Length(c.ticklocs[i+1])
+		if gradLoc >= tlspot && gradLoc < nexttlspot {
+			val := c.colorstops[i] + (c.colorstops[i+1]-c.colorstops[i])*
+				float64((gradLoc-tlspot)/(nexttlspot-tlspot))
+			return c.GetColor(val)
+		}
+	}
+	fmt.Println("gradLoc: ", gradLoc)
+	fmt.Println("barLeft: ", barLeft)
+	fmt.Println("barRight: ", barRight)
+	fmt.Println("ticklocs: ", c.ticklocs)
+	panic("Problem getting color")
+}
+
 // get color for input value. Must run c.Set() first.
 func (cm *ColorMap) GetColor(v float64) color.NRGBA {
 	var R, G, B uint8
@@ -245,7 +257,8 @@ func (cm *ColorMap) GetColor(v float64) color.NRGBA {
 	panic("Problem interpolating.")
 }
 
-// Given an array of x values and an array of y values, find the y value at a // given x using linear interpolation. xArray must be monotonically increasing.
+// Given an array of x values and an array of y values, find the y value at a
+// given x using linear interpolation. xArray must be monotonically increasing.
 func (cl *Colorlist) interpolate(v float64) color.NRGBA {
 	var R, G, B uint8
 	for i, val := range cl.Val {
@@ -276,13 +289,6 @@ func round(x float64) uint8 {
 // round float to an integer
 func roundInt(x float64) int {
 	return int(x + 0.5)
-}
-
-func newsvgcolor(cIn color.NRGBA) (cOut svg.Offcolor) {
-	cOut.Offset = uint8(0)
-	cOut.Opacity = float64(cIn.A) / 255
-	cOut.Color = fmt.Sprintf("rgb(%v,%v,%v)", cIn.R, cIn.G, cIn.B)
-	return
 }
 
 // Figure out rules for color map
@@ -318,6 +324,7 @@ func (c *ColorMap) Set() {
 
 	c.colorstops = make([]float64, 0)
 	c.stopcolors = make([]color.NRGBA, 0)
+	linabsmax := max(linmax, linmin*-1)
 
 	if c.Type == LinCutoff && cutpt*-1 > c.minval && cutpt != 0 {
 		c.colorstops = append(c.colorstops, absmax*-1)
@@ -326,7 +333,7 @@ func (c *ColorMap) Set() {
 	} else {
 		c.colorstops = append(c.colorstops, c.minval)
 		c.stopcolors = append(c.stopcolors,
-			c.ColorScheme.interpolate(c.minval/linmax))
+			c.ColorScheme.interpolate(c.minval/linabsmax))
 	}
 
 	tens := math.Pow10(int(math.Floor(math.Log10(linmax - linmin))))
@@ -348,11 +355,11 @@ func (c *ColorMap) Set() {
 	for val <= linmax {
 		if val >= linmin && val >= c.minval && val <= linmax &&
 			val <= c.maxval &&
-			math.Abs(val-c.minval) > tickThreshold*linmax &&
-			math.Abs(c.maxval-val) > tickThreshold*linmax {
+			math.Abs(val-c.minval) > tickThreshold*linabsmax &&
+			math.Abs(c.maxval-val) > tickThreshold*linabsmax {
 			c.colorstops = append(c.colorstops, val)
 			c.stopcolors = append(c.stopcolors,
-				c.ColorScheme.interpolate(val/linmax))
+				c.ColorScheme.interpolate(val/linabsmax))
 		}
 		if math.Nextafter(val, val+majorDelta) == val {
 			break
@@ -363,10 +370,10 @@ func (c *ColorMap) Set() {
 		c.colorstops = append(c.colorstops, absmax)
 		c.stopcolors = append(c.stopcolors, c.ColorScheme.HighLimit)
 		c.positiveOutlier = true
-	} else if c.maxval != 0. {
+	} else {
 		c.colorstops = append(c.colorstops, c.maxval)
 		c.stopcolors = append(c.stopcolors,
-			c.ColorScheme.interpolate(c.maxval/linmax))
+			c.ColorScheme.interpolate(c.maxval/linabsmax))
 	}
 
 	// calculate the locations for the tick marks
@@ -390,55 +397,93 @@ func (c *ColorMap) Set() {
 	}
 }
 
-func (c *ColorMap) Legend(w io.Writer, label string) (err error) {
-	const dpi = 300.
-	const topPad = 0.     // points
-	const bottomPad = 2.  // points
-	const unitsPad = 2.5  // pad between units and bar
-	const labelPad = 2.   // pad between bar and label
-	const wPad = 10.      // points
-	const tickLength = 10 // points
-	pts2px := dpi / pointsPerIn
-	fontHeight := c.FontSize * pts2px
-	strokeWidth := round(c.LineWidth * pts2px)
-	var fontConfig string
-	if c.Font == "" {
-		fontConfig = fmt.Sprintf("text-anchor:middle;font-size:%dpx;fill:%v",
-			int(fontHeight), c.FontColor)
-	} else {
-		fontConfig = fmt.Sprintf(
-			"text-anchor:middle;font-size:%dpx;fill:%v;font-family:%v",
-			int(fontHeight), c.FontColor, c.Font)
-	}
-	width := roundInt(c.LegendWidth * dpi)
-	height := roundInt(c.LegendHeight * dpi)
-	barWstart := roundInt(wPad * pts2px)
-	barWidth := roundInt(float64(width) - 2*wPad*pts2px)
-	labelX := roundInt(float64(width) * 0.5)
-	labelY := roundInt(topPad*pts2px + fontHeight)
-	unitsYunder := roundInt(float64(height) - bottomPad*pts2px)
-	unitsYover := labelY
-	barHstart := roundInt((topPad+labelPad)*pts2px + fontHeight)
-	barHeight := roundInt(float64(height) - 2*fontHeight -
-		(topPad+labelPad+bottomPad)*pts2px)
+// DefaultLegendCanvas is a default canvas for drawing legends.
+type DefaultLegendCanvas struct {
+	draw.Canvas
+}
 
-	legendcolors := make([]svg.Offcolor, len(c.stopcolors))
-	for i, val := range c.ticklocs {
-		legendcolors[i] = newsvgcolor(c.stopcolors[i])
-		legendcolors[i].Offset = uint8(round(val /
-			c.ticklocs[len(c.ticklocs)-1] * 100))
+func NewDefaultLegendCanvas() *DefaultLegendCanvas {
+	const LegendWidth = 3.70 * vg.Inch
+	const LegendHeight = LegendWidth * 0.1067
+	const dpi = 300
+	c := &DefaultLegendCanvas{
+		Canvas: draw.New(vgpdf.New(LegendWidth, LegendHeight)),
+		//Canvas: draw.New(vgimg.New(LegendWidth, LegendHeight, dpi)),
+	}
+	return c
+}
+
+func (c *DefaultLegendCanvas) WriteTo(w io.Writer) error {
+	//cc := c.Canvas.Canvas.(*vgimg.Canvas)
+	//_, err := vgimg.PngCanvas{cc}.WriteTo(w)
+	//cc := c.Canvas.Canvas.(*vgsvg.Canvas)
+	cc := c.Canvas.Canvas.(*vgpdf.Canvas)
+	_, err := cc.WriteTo(w)
+	return err
+}
+
+// Legend draws a legend to the supplied canvas.
+func (c *ColorMap) Legend(canvas *draw.Canvas, label string) (err error) {
+	c.Canvas = *canvas
+	const topPad = vg.Length(0.)       // points
+	const bottomPad = vg.Length(1.)    // points
+	const tickPadAbove = vg.Length(2.) // pad between tick mark labels and bar
+	const tickPadBelow = vg.Length(1.) // pad between tick mark labels and bar
+	const labelPad = vg.Length(2.)     // pad between bar and label
+	const wPad = vg.Length(10.)        // points
+	const tickLength = vg.Length(3)    // points
+	font, err := vg.MakeFont(c.Font, c.FontSize)
+	if err != nil {
+		return err
+	}
+	textStyle := draw.TextStyle{Color: c.FontColor, Font: font}
+	//barLeft := wPad
+	barLeft := c.Min.X + wPad
+	//barRight := c.Max.X - c.Min.X - wPad
+	barRight := c.Max.X - wPad
+	//barTop := c.Max.Y - c.Min.Y - topPad - textStyle.Height(label) - labelPad
+	barTop := c.Max.Y - topPad - textStyle.Height(label) - labelPad
+	//barBottom := bottomPad + textStyle.Height("2.0e2") + tickPadBelow
+	barBottom := c.Min.Y + bottomPad + textStyle.Height("2.0e2") + tickPadBelow
+	//labelX := (c.Max.X - c.Min.X) * 0.5
+	labelX := c.Min.X + (c.Max.X-c.Min.X)*0.5
+	//labelY := c.Max.Y - c.Min.Y - topPad
+	labelY := c.Max.Y - topPad
+	unitsYunder := barBottom - tickPadBelow
+	unitsYover := barTop + tickPadAbove
+
+	// Fill in background
+	//c.Canvas.FillPolygon(c.BackgroundColor, []draw.Point{
+	//	draw.Point{0., 0.}, draw.Point{c.Max.X - c.Min.X, 0},
+	//	draw.Point{c.Max.X - c.Min.X, c.Max.Y - c.Min.Y},
+	//	draw.Point{0., c.Max.Y - c.Min.Y}, draw.Point{0, 0}})
+	c.Canvas.FillPolygon(c.BackgroundColor, []draw.Point{
+		draw.Point{c.Min.X, c.Min.Y}, draw.Point{c.Max.X, c.Min.Y},
+		draw.Point{c.Max.X, c.Max.Y},
+		draw.Point{c.Min.X, c.Max.Y}, draw.Point{c.Min.X, c.Min.Y}})
+
+	// Create gradient using a bunch of thin lines
+	gradLoc := barLeft
+	for {
+		if gradLoc >= barRight {
+			break
+		}
+		color := c.getColorOnLegend(gradLoc, barLeft, barRight)
+		ls := draw.LineStyle{Color: color, Width: c.GradientLineWidth}
+		c.Canvas.StrokeLine2(ls, gradLoc, barBottom, gradLoc,
+			barTop)
+		gradLoc += c.GradientLineWidth * 0.9
 	}
 
-	g := svg.New(w)
-	g.Start(width, height)
-	g.Rect(0, 0, width, height, fmt.Sprintf("fill:%v;fill-opacity:%v",
-		c.BackgroundColor, c.BackgroundOpacity))
-	g.Def()
-	g.LinearGradient("cmap", 0, 0, 100, 0, legendcolors)
-	g.DefEnd()
-	g.Rect(barWstart, barHstart, barWidth, barHeight,
-		fmt.Sprintf("fill:url(#cmap);stroke:%v;stroke-width:%d", c.EdgeColor,
-			strokeWidth))
+	// Stroke edge of color bar
+	ls := draw.LineStyle{Color: c.EdgeColor, Width: c.LineWidth}
+	c.Canvas.StrokeLines(ls, []draw.Point{
+		draw.Point{barLeft, barBottom},
+		draw.Point{barRight, barBottom},
+		draw.Point{barRight, barTop},
+		draw.Point{barLeft, barTop},
+		draw.Point{barLeft, barBottom}})
+
 	for i, tickloc := range c.ticklocs {
 		val := c.colorstops[i]
 		var valStr string
@@ -448,27 +493,29 @@ func (c *ColorMap) Legend(w io.Writer, label string) (err error) {
 			valStr = strings.Replace(strings.Replace(fmt.Sprintf("%3.2g", val),
 				"e+0", "e", -1), "e-0", "e-", -1)
 		}
-		tickx := roundInt(tickloc*float64(barWidth) + float64(barWstart))
+		tickx := barLeft + vg.Length(tickloc)*(barRight-barLeft)
 		if c.negativeOutlier && i == 0 ||
 			c.positiveOutlier && i == len(c.ticklocs)-1 {
-			g.Text(tickx, unitsYover, valStr, fontConfig)
-			g.Line(tickx, barHstart+barHeight, tickx, barHstart+barHeight-tickLength,
-				fmt.Sprintf("fill:url(#cmap);stroke:%v;stroke-width:%d", c.EdgeColor,
-					strokeWidth))
+			c.Canvas.FillText(textStyle, tickx, unitsYover, -0.5, 0, valStr)
 		} else {
-			g.Text(tickx, unitsYunder, valStr, fontConfig)
-			g.Line(tickx, barHstart+barHeight, tickx, barHstart+barHeight-tickLength,
-				fmt.Sprintf("fill:url(#cmap);stroke:%v;stroke-width:%d", c.EdgeColor,
-					strokeWidth))
+			c.Canvas.FillText(textStyle, tickx, unitsYunder, -0.5, -1, valStr)
 		}
+		c.Canvas.StrokeLine2(ls, tickx, barBottom, tickx,
+			barBottom+tickLength)
 	}
-	g.Text(labelX, labelY, label, fontConfig)
-	g.End()
+	c.Canvas.FillText(textStyle, labelX, labelY, -0.5, -1., label)
 	return
 }
 
 func max(a, b float64) float64 {
 	if a > b {
+		return a
+	} else {
+		return b
+	}
+}
+func min(a, b float64) float64 {
+	if a < b {
 		return a
 	} else {
 		return b
@@ -483,17 +530,6 @@ func absMax(a, b float64) float64 {
 		return absb
 	}
 }
-
-func ConvertSVGToPNG(filename string) {
-	cmd := exec.Command("convert", "-density", "300",
-		filename, strings.Replace(filename, "svg", "png", -1))
-	out, err := cmd.CombinedOutput()
-	output := fmt.Sprintf("%s", out)
-	if err != nil {
-		panic(fmt.Errorf("%v\n%v", err.Error(), output))
-	}
-}
-
 func average(a []float64) (avg float64) {
 	for _, val := range a {
 		avg += val
