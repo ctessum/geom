@@ -24,7 +24,7 @@
 package geomop
 
 import (
-	"github.com/twpayne/gogeom/geom"
+	"github.com/ctessum/geom"
 	"math"
 )
 
@@ -51,7 +51,7 @@ func (c *connector) add(s segment) {
 	// subject linestrings.
 	if c.outType == outputLines {
 		keepSeg := false
-		for _, ls := range c.subject.Rings {
+		for _, ls := range c.subject {
 			for i := 0; i < len(ls)-1; i++ {
 				if pointOnSegment(s.start, ls[i], ls[i+1]) &&
 					pointOnSegment(s.end, ls[i], ls[i+1]) {
@@ -120,14 +120,14 @@ func (c *connector) toShape() geom.T {
 	switch c.outType {
 	case outputPolygons:
 		var poly geom.Polygon
-		poly.Rings = make([][]geom.Point, len(c.closedPolys))
+		poly = make([][]geom.Point, len(c.closedPolys))
 		for i, chain := range c.closedPolys {
-			poly.Rings[i] = make([]geom.Point, len(chain.points)+1)
+			poly[i] = make([]geom.Point, len(chain.points)+1)
 			for j, p := range chain.points {
-				poly.Rings[i][j] = p
+				poly[i][j] = p
 			}
 			// close the ring as per OGC standard
-			poly.Rings[i][len(chain.points)] = poly.Rings[i][0]
+			poly[i][len(chain.points)] = poly[i][0]
 		}
 		// fix winding directions
 		FixOrientation(poly)
@@ -137,11 +137,11 @@ func (c *connector) toShape() geom.T {
 		// Because we're dealing with linestrings and not polygons,
 		// copy the openPolys to the output instead of the closedPolys
 		var outline geom.MultiLineString
-		outline.LineStrings = make([]geom.LineString, len(c.openPolys))
+		outline = make([]geom.LineString, len(c.openPolys))
 		for i, chain := range c.openPolys {
-			outline.LineStrings[i].Points = make([]geom.Point, len(chain.points))
+			outline[i] = make([]geom.Point, len(chain.points))
 			for j, p := range chain.points {
-				outline.LineStrings[i].Points[j] = p
+				outline[i][j] = p
 			}
 		}
 		return geom.T(outline)
@@ -149,16 +149,16 @@ func (c *connector) toShape() geom.T {
 	case outputPoints:
 		// only keep points coincident with both subject and clip
 		var outpt geom.MultiPoint
-		outpt.Points = make([]geom.Point, 0)
+		outpt = make([]geom.Point, 0)
 		for a, chain := range c.closedPolys {
 			for b, p := range chain.points {
-				for _, ls1 := range c.subject.Rings {
+				for _, ls1 := range c.subject {
 					for i := 0; i < len(ls1)-1; i++ {
 						if pointOnSegment(p, ls1[i], ls1[i+1]) {
-							for _, ls2 := range c.clipping.Rings {
+							for _, ls2 := range c.clipping {
 								for j := 0; j < len(ls2)-1; j++ {
 									if pointOnSegment(p, ls2[j], ls2[j+1]) {
-										outpt.Points = append(outpt.Points, p)
+										outpt = append(outpt, p)
 									}
 									// remove point
 									c.closedPolys[a].points[b] =

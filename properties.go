@@ -2,7 +2,7 @@ package geomop
 
 import (
 	"fmt"
-	"github.com/twpayne/gogeom/geom"
+	"github.com/ctessum/geom"
 	"math"
 )
 
@@ -15,15 +15,15 @@ func Area(g geom.T) float64 {
 	a := 0.
 	switch g.(type) {
 	case geom.Polygon:
-		for _, r := range g.(geom.Polygon).Rings {
+		for _, r := range g.(geom.Polygon) {
 			a += area(r)
 		}
 	case geom.MultiPolygon:
-		for _, p := range g.(geom.MultiPolygon).Polygons {
+		for _, p := range g.(geom.MultiPolygon) {
 			a += Area(p)
 		}
 	case geom.GeometryCollection:
-		for _, g := range g.(geom.GeometryCollection).Geoms {
+		for _, g := range g.(geom.GeometryCollection) {
 			a += Area(g)
 		}
 	}
@@ -36,13 +36,13 @@ func Length(g geom.T) float64 {
 	l := 0.
 	switch g.(type) {
 	case geom.LineString:
-		l = length(g.(geom.LineString).Points)
+		l = length(g.(geom.LineString))
 	case geom.MultiLineString:
-		for _, line := range g.(geom.MultiLineString).LineStrings {
+		for _, line := range g.(geom.MultiLineString) {
 			l += Length(line)
 		}
 	case geom.GeometryCollection:
-		for _, g := range g.(geom.GeometryCollection).Geoms {
+		for _, g := range g.(geom.GeometryCollection) {
 			l += Length(g)
 		}
 	}
@@ -83,7 +83,7 @@ func Centroid(g geom.T) (geom.Point, error) {
 	var A, xA, yA float64
 	switch g.(type) {
 	case geom.Polygon:
-		for _, r := range g.(geom.Polygon).Rings {
+		for _, r := range g.(geom.Polygon) {
 			a := area(r)
 			cx, cy := 0., 0.
 			for i := 0; i < len(r)-1; i++ {
@@ -121,11 +121,11 @@ func PointOnSurface(g geom.T) (geom.Point, error) {
 	if !in {
 		switch g.(type) {
 		case geom.Polygon:
-			return g.(geom.Polygon).Rings[0][0], nil
+			return g.(geom.Polygon)[0][0], nil
 		case geom.LineString:
-			return g.(geom.LineString).Points[0], nil
+			return g.(geom.LineString)[0], nil
 		case geom.MultiLineString:
-			return g.(geom.MultiLineString).LineStrings[0].Points[0], nil
+			return g.(geom.MultiLineString)[0][0], nil
 		default:
 			return geom.Point{}, newUnsupportedGeometryError(g)
 		}
@@ -143,8 +143,8 @@ func PointOnSurface(g geom.T) (geom.Point, error) {
 //  From http://geomalgorithms.com/a01-_area.html#orientation2D_Polygon()
 func orientation(V geom.Polygon) []float64 {
 	// first find rightmost lowest vertex of the polygon
-	out := make([]float64, len(V.Rings))
-	for j, r := range V.Rings {
+	out := make([]float64, len(V))
+	for j, r := range V {
 		rmin := 0
 		xmin := r[0].X
 		ymin := r[0].Y
@@ -194,9 +194,9 @@ func FixOrientation(g geom.T) error {
 	case geom.Polygon:
 		p := g.(geom.Polygon)
 		o := orientation(p)
-		for i, inner := range p.Rings {
+		for i, inner := range p {
 			numInside := 0
-			for j, outer := range p.Rings {
+			for j, outer := range p {
 				if i != j {
 					if polyInPoly(contour(outer), contour(inner)) {
 						numInside++
@@ -211,7 +211,7 @@ func FixOrientation(g geom.T) error {
 		}
 		return nil
 	case geom.MultiPolygon:
-		for _, p := range g.(geom.MultiPolygon).Polygons {
+		for _, p := range g.(geom.MultiPolygon) {
 			err := FixOrientation(p)
 			if err != nil {
 				return err
@@ -246,7 +246,7 @@ func Within(inner, outer geom.T) (bool, error) {
 		switch inner.(type) {
 		case geom.Polygon:
 			ip := inner.(geom.Polygon)
-			for _, r := range ip.Rings {
+			for _, r := range ip {
 				for _, p := range r {
 					in, err := pointInPolygon(p, op)
 					if err != nil {
@@ -276,7 +276,7 @@ func pointInPolygon(point geom.Point, polygon geom.T) (bool, error) {
 	switch polygon.(type) {
 	case geom.Polygon:
 		o := orientation(polygon.(geom.Polygon))
-		for i, r := range polygon.(geom.Polygon).Rings {
+		for i, r := range polygon.(geom.Polygon) {
 			if pointInPoly(point, contour(r)) != 0 {
 				if o[i] > 0. {
 					inCount++
@@ -287,7 +287,7 @@ func pointInPolygon(point geom.Point, polygon geom.T) (bool, error) {
 		}
 		return inCount > 0, nil
 	case geom.MultiPolygon:
-		for _, pp := range polygon.(geom.MultiPolygon).Polygons {
+		for _, pp := range polygon.(geom.MultiPolygon) {
 			in, err := pointInPolygon(point, geom.T(pp))
 			if err != nil {
 				return false, err

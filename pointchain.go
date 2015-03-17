@@ -24,7 +24,7 @@
 package geomop
 
 import (
-	"github.com/twpayne/gogeom/geom"
+	"github.com/ctessum/geom"
 )
 
 // Represents a connected sequence of segments. The sequence can only be extended by connecting

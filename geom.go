@@ -31,7 +31,7 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/twpayne/gogeom/geom"
+	"github.com/ctessum/geom"
 )
 
 // Equals returns true if both p1 and p2 describe the same point within
@@ -82,7 +82,7 @@ func (c contour) Clone() contour {
 // numVertices returns total number of all vertices of all contours of a polygon.
 func numVertices(p geom.Polygon) int {
 	num := 0
-	for _, c := range p.Rings {
+	for _, c := range p {
 		num += len(c)
 	}
 	return num
@@ -91,11 +91,11 @@ func numVertices(p geom.Polygon) int {
 // Clone returns a duplicate of a polygon.
 func Clone(p geom.Polygon) geom.Polygon {
 	var r geom.Polygon
-	r.Rings = make([][]geom.Point, len(p.Rings))
-	for i, rr := range p.Rings {
-		r.Rings[i] = make([]geom.Point, len(rr))
-		for j, pp := range p.Rings[i] {
-			r.Rings[i][j] = pp
+	r = make([][]geom.Point, len(p))
+	for i, rr := range p {
+		r[i] = make([]geom.Point, len(rr))
+		for j, pp := range p[i] {
+			r[i][j] = pp
 		}
 	}
 	return r
@@ -191,26 +191,26 @@ func convertToPolygon(g geom.T) geom.Polygon {
 	case geom.Polygon:
 		out = g.(geom.Polygon)
 	case geom.MultiPolygon:
-		out.Rings = make([][]geom.Point, 0)
-		for _, p := range g.(geom.MultiPolygon).Polygons {
-			for _, r := range p.Rings {
-				out.Rings = append(out.Rings, r)
+		out = make([][]geom.Point, 0)
+		for _, p := range g.(geom.MultiPolygon) {
+			for _, r := range p {
+				out = append(out, r)
 			}
 		}
 	case geom.LineString:
 		g2 := g.(geom.LineString)
-		out.Rings = make([][]geom.Point, 1)
-		out.Rings[0] = make([]geom.Point, len(g2.Points))
-		for j, p := range g2.Points {
-			out.Rings[0][j] = p
+		out = make([][]geom.Point, 1)
+		out[0] = make([]geom.Point, len(g2))
+		for j, p := range g2 {
+			out[0][j] = p
 		}
 	case geom.MultiLineString:
 		g2 := g.(geom.MultiLineString)
-		out.Rings = make([][]geom.Point, len(g2.LineStrings))
-		for i, ls := range g2.LineStrings {
-			out.Rings[i] = make([]geom.Point, len(ls.Points))
-			for j, p := range ls.Points {
-				out.Rings[i][j] = p
+		out = make([][]geom.Point, len(g2))
+		for i, ls := range g2 {
+			out[i] = make([]geom.Point, len(ls))
+			for j, p := range ls {
+				out[i][j] = p
 			}
 		}
 	default:
@@ -220,16 +220,16 @@ func convertToPolygon(g geom.T) geom.Polygon {
 	// To get around this problem, if there are only 2 points, we add a third
 	// one a small distance from the second point.
 	// However, if there is only 1 point, we just delete the shape.
-	for i, r := range out.Rings {
+	for i, r := range out {
 		if len(r) == 0 {
 			continue
 		} else if len(r) == 1 {
-			out.Rings[i] = make([]geom.Point, 0)
+			out[i] = make([]geom.Point, 0)
 		} else if len(r) == 2 {
 			const delta = 0.00001
 			newpt := geom.Point{r[1].X + (r[1].X-r[0].X)*delta,
 				r[1].Y - (r[1].Y-r[0].Y)*delta}
-			out.Rings[i] = append(r, newpt)
+			out[i] = append(r, newpt)
 		}
 	}
 	return out

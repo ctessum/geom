@@ -25,7 +25,7 @@ package geomop
 
 import (
 	"fmt"
-	"github.com/twpayne/gogeom/geom"
+	"github.com/ctessum/geom"
 )
 
 // A container for endpoint data. A endpoint represents a location of interest (vertex between two polygon edges)

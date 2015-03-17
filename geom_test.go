@@ -21,7 +21,7 @@ package geomop
 
 import (
 	"fmt"
-	"github.com/twpayne/gogeom/geom"
+	"github.com/ctessum/geom"
 	"math"
 	. "testing"
 )
@@ -110,16 +110,16 @@ func TestContourContains(t *T) {
 
 func ExamplePolygon_Construct() {
 	subject := geom.T(geom.Polygon{
-		[][]geom.Point{{{1, 1}, {1, 2}, {2, 2}, {2, 1}}}}) // small square
+		{{1, 1}, {1, 2}, {2, 2}, {2, 1}}}) // small square
 	clipping := geom.T(geom.Polygon{
-		[][]geom.Point{{{0, 0}, {0, 3}, {3, 0}}}}) // overlapping triangle
+		{{0, 0}, {0, 3}, {3, 0}}}) // overlapping triangle
 
 	// Calculate the intersection
 	result, err := Construct(subject, clipping, INTERSECTION)
 	handle(err)
 
 	out := []string{}
-	for _, point := range result.(geom.Polygon).Rings[0] {
+	for _, point := range result.(geom.Polygon)[0] {
 		out = append(out, fmt.Sprintf("%v", point))
 	}
 	fmt.Println(out)

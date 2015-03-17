@@ -25,7 +25,7 @@ package geomop
 
 import (
 	"fmt"
-	"github.com/twpayne/gogeom/geom"
+	"github.com/ctessum/geom"
 	"math"
 )
 
@@ -60,12 +60,12 @@ type clipper struct {
 func (c *clipper) compute(operation Op) geom.T {
 
 	// Test 1 for trivial result case
-	if len(c.subject.Rings)*len(c.clipping.Rings) == 0 {
+	if len(c.subject)*len(c.clipping) == 0 {
 		switch operation {
 		case DIFFERENCE:
 			return Clone(c.subject)
 		case UNION:
-			if len(c.subject.Rings) == 0 {
+			if len(c.subject) == 0 {
 				return Clone(c.clipping)
 			}
 			return Clone(c.subject)
@@ -82,9 +82,9 @@ func (c *clipper) compute(operation Op) geom.T {
 			return Clone(c.subject)
 		case UNION, XOR:
 			result := Clone(c.subject)
-			for _, rcont := range c.clipping.Rings {
+			for _, rcont := range c.clipping {
 				cont := contour(rcont)
-				result.Rings = append(result.Rings, cont.Clone())
+				result = append(result, cont.Clone())
 			}
 			return result
 		}
@@ -92,13 +92,13 @@ func (c *clipper) compute(operation Op) geom.T {
 	}
 
 	// Add each segment to the eventQueue, sorted from left to right.
-	for _, rcont := range c.subject.Rings {
+	for _, rcont := range c.subject {
 		cont := contour(rcont)
 		for i := range cont {
 			addProcessedSegment(&c.eventQueue, cont.segment(i), _SUBJECT)
 		}
 	}
-	for _, rcont := range c.clipping.Rings {
+	for _, rcont := range c.clipping {
 		cont := contour(rcont)
 		for i := range cont {
 			addProcessedSegment(&c.eventQueue, cont.segment(i), _CLIPPING)

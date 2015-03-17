@@ -20,7 +20,7 @@
 package geomop
 
 import (
-	"github.com/twpayne/gogeom/geom"
+	"github.com/ctessum/geom"
 	. "testing"
 )
 
