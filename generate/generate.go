@@ -1,5 +1,7 @@
 package main
 
+//go:generate go run generate.go
+
 import (
 	"flag"
 	"log"
@@ -46,29 +48,29 @@ func main() {
 	flag.Parse()
 
 	var filenames = []string{
-		"geom/geom.go",
-		"geom/bounds.go",
-		"geom/point.go",
-		"geom/linestring.go",
-		"geom/polygon.go",
-		"geom/multipoint.go",
-		"geom/multilinestring.go",
-		"geom/multipolygon.go",
-		"geom/geometrycollection.go",
-		"geom/similar.go",
-		"geom/encoding/wkb/wkb.go",
-		"geom/encoding/wkb/point.go",
-		"geom/encoding/wkb/linestring.go",
-		"geom/encoding/wkb/polygon.go",
-		"geom/encoding/wkb/multipoint.go",
-		"geom/encoding/wkb/multilinestring.go",
-		"geom/encoding/wkb/multipolygon.go",
-		"geom/encoding/wkb/geometrycollection.go",
-		"geom/encoding/wkt/point.go",
-		"geom/encoding/wkt/linestring.go",
-		"geom/encoding/wkt/multilinestring.go",
-		"geom/encoding/wkt/polygon.go",
-		"geom/encoding/wkt/multipolygon.go",
+		"../geom.go",
+		"../bounds.go",
+		"../point.go",
+		"../linestring.go",
+		"../polygon.go",
+		"../multipoint.go",
+		"../multilinestring.go",
+		"../multipolygon.go",
+		"../geometrycollection.go",
+		"../similar.go",
+		"../encoding/wkb/wkb.go",
+		"../encoding/wkb/point.go",
+		"../encoding/wkb/linestring.go",
+		"../encoding/wkb/polygon.go",
+		"../encoding/wkb/multipoint.go",
+		"../encoding/wkb/multilinestring.go",
+		"../encoding/wkb/multipolygon.go",
+		"../encoding/wkb/geometrycollection.go",
+		"../encoding/wkt/point.go",
+		"../encoding/wkt/linestring.go",
+		"../encoding/wkt/multilinestring.go",
+		"../encoding/wkt/polygon.go",
+		"../encoding/wkt/multipolygon.go",
 	}
 
 	if *clean {
