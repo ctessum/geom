@@ -13,8 +13,6 @@ import (
 	"github.com/ctessum/geom"
 )
 
-const Dim = 3
-
 // Rtree represents an R-tree, a balanced search tree for storing and querying
 // spatial objects.  MinChildren/MaxChildren specify the minimum/maximum branching factors.
 type Rtree struct {
