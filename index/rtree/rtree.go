@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // A library for efficiently storing and querying spatial data.
-package rtreego
+package rtree
 
 import (
 	"fmt"

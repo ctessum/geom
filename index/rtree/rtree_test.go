@@ -1,4 +1,4 @@
-package rtreego
+package rtree
 
 import (
 	"fmt"
