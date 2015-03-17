@@ -1,14 +1,12 @@
 package geom{{range .Dims}}
 
-type GeometryCollection{{.ZM}} struct {
-	Geoms []Geom{{.ZM}}
-}
+type GeometryCollection{{.ZM}} []Geom{{.ZM}}
 
 func (geometryCollection{{.ZM}} GeometryCollection{{.ZM}}) Bounds(b *Bounds) *Bounds {
 	if b == nil {
 		b = NewBounds()
 	}
-	for _, geom{{.ZM}} := range geometryCollection{{.ZM}}.Geoms {
+	for _, geom{{.ZM}} := range geometryCollection{{.ZM}} {
 		b = geom{{.ZM}}.Bounds(b)
 	}
 	return b

@@ -2,7 +2,7 @@ package wkb
 
 import (
 	"encoding/binary"
-	"github.com/twpayne/gogeom/geom"
+	"github.com/ctessum/gogeom/geom"
 	"io"
 )
 
@@ -11,11 +11,11 @@ func lineStringReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
 	if err != nil {
 		return nil, err
 	}
-	return geom.LineString{Points: points}, nil
+	return geom.LineString(points), nil
 }
 
 func writeLineString(w io.Writer, byteOrder binary.ByteOrder, lineString geom.LineString) error {
-	return writePoints(w, byteOrder, lineString.Points)
+	return writePoints(w, byteOrder, lineString)
 }
 
 func lineStringZReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
@@ -23,11 +23,11 @@ func lineStringZReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) 
 	if err != nil {
 		return nil, err
 	}
-	return geom.LineStringZ{Points: pointZs}, nil
+	return geom.LineStringZ(pointZs), nil
 }
 
 func writeLineStringZ(w io.Writer, byteOrder binary.ByteOrder, lineStringZ geom.LineStringZ) error {
-	return writePointZs(w, byteOrder, lineStringZ.Points)
+	return writePointZs(w, byteOrder, lineStringZ)
 }
 
 func lineStringMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
@@ -35,11 +35,11 @@ func lineStringMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) 
 	if err != nil {
 		return nil, err
 	}
-	return geom.LineStringM{Points: pointMs}, nil
+	return geom.LineStringM(pointMs), nil
 }
 
 func writeLineStringM(w io.Writer, byteOrder binary.ByteOrder, lineStringM geom.LineStringM) error {
-	return writePointMs(w, byteOrder, lineStringM.Points)
+	return writePointMs(w, byteOrder, lineStringM)
 }
 
 func lineStringZMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
@@ -47,9 +47,9 @@ func lineStringZMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error)
 	if err != nil {
 		return nil, err
 	}
-	return geom.LineStringZM{Points: pointZMs}, nil
+	return geom.LineStringZM(pointZMs), nil
 }
 
 func writeLineStringZM(w io.Writer, byteOrder binary.ByteOrder, lineStringZM geom.LineStringZM) error {
-	return writePointZMs(w, byteOrder, lineStringZM.Points)
+	return writePointZMs(w, byteOrder, lineStringZM)
 }

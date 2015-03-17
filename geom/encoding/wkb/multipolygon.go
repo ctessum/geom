@@ -2,7 +2,7 @@ package wkb
 
 import (
 	"encoding/binary"
-	"github.com/twpayne/gogeom/geom"
+	"github.com/ctessum/gogeom/geom"
 	"io"
 )
 
@@ -23,14 +23,14 @@ func multiPolygonReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error)
 			return nil, err
 		}
 	}
-	return geom.MultiPolygon{Polygons: polygons}, nil
+	return geom.MultiPolygon(polygons), nil
 }
 
 func writeMultiPolygon(w io.Writer, byteOrder binary.ByteOrder, multiPolygon geom.MultiPolygon) error {
-	if err := binary.Write(w, byteOrder, uint32(len(multiPolygon.Polygons))); err != nil {
+	if err := binary.Write(w, byteOrder, uint32(len(multiPolygon))); err != nil {
 		return err
 	}
-	for _, polygon := range multiPolygon.Polygons {
+	for _, polygon := range multiPolygon {
 		if err := Write(w, byteOrder, polygon); err != nil {
 			return err
 		}
@@ -55,14 +55,14 @@ func multiPolygonZReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error
 			return nil, err
 		}
 	}
-	return geom.MultiPolygonZ{Polygons: polygonZs}, nil
+	return geom.MultiPolygonZ(polygonZs), nil
 }
 
 func writeMultiPolygonZ(w io.Writer, byteOrder binary.ByteOrder, multiPolygonZ geom.MultiPolygonZ) error {
-	if err := binary.Write(w, byteOrder, uint32(len(multiPolygonZ.Polygons))); err != nil {
+	if err := binary.Write(w, byteOrder, uint32(len(multiPolygonZ))); err != nil {
 		return err
 	}
-	for _, polygonZ := range multiPolygonZ.Polygons {
+	for _, polygonZ := range multiPolygonZ {
 		if err := Write(w, byteOrder, polygonZ); err != nil {
 			return err
 		}
@@ -87,14 +87,14 @@ func multiPolygonMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error
 			return nil, err
 		}
 	}
-	return geom.MultiPolygonM{Polygons: polygonMs}, nil
+	return geom.MultiPolygonM(polygonMs), nil
 }
 
 func writeMultiPolygonM(w io.Writer, byteOrder binary.ByteOrder, multiPolygonM geom.MultiPolygonM) error {
-	if err := binary.Write(w, byteOrder, uint32(len(multiPolygonM.Polygons))); err != nil {
+	if err := binary.Write(w, byteOrder, uint32(len(multiPolygonM))); err != nil {
 		return err
 	}
-	for _, polygonM := range multiPolygonM.Polygons {
+	for _, polygonM := range multiPolygonM {
 		if err := Write(w, byteOrder, polygonM); err != nil {
 			return err
 		}
@@ -119,14 +119,14 @@ func multiPolygonZMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, erro
 			return nil, err
 		}
 	}
-	return geom.MultiPolygonZM{Polygons: polygonZMs}, nil
+	return geom.MultiPolygonZM(polygonZMs), nil
 }
 
 func writeMultiPolygonZM(w io.Writer, byteOrder binary.ByteOrder, multiPolygonZM geom.MultiPolygonZM) error {
-	if err := binary.Write(w, byteOrder, uint32(len(multiPolygonZM.Polygons))); err != nil {
+	if err := binary.Write(w, byteOrder, uint32(len(multiPolygonZM))); err != nil {
 		return err
 	}
-	for _, polygonZM := range multiPolygonZM.Polygons {
+	for _, polygonZM := range multiPolygonZM {
 		if err := Write(w, byteOrder, polygonZM); err != nil {
 			return err
 		}

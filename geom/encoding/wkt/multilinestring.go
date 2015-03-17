@@ -1,15 +1,15 @@
 package wkt
 
 import (
-	"github.com/twpayne/gogeom/geom"
+	"github.com/ctessum/gogeom/geom"
 )
 
 func appendMultiLineStringWKT(dst []byte,
-	multiLineString *geom.MultiLineString) []byte {
+	multiLineString geom.MultiLineString) []byte {
 	dst = append(dst, []byte("MULTILINESTRING((")...)
-	for i, ls := range multiLineString.LineStrings {
-		dst = appendPointsCoords(dst, ls.Points)
-		if i != len(multiLineString.LineStrings)-1 {
+	for i, ls := range multiLineString {
+		dst = appendPointsCoords(dst, ls)
+		if i != len(multiLineString)-1 {
 			dst = append(dst, ')')
 			dst = append(dst, ',')
 			dst = append(dst, '(')
@@ -21,11 +21,11 @@ func appendMultiLineStringWKT(dst []byte,
 }
 
 func appendMultiLineStringZWKT(dst []byte,
-	multiLineStringZ *geom.MultiLineStringZ) []byte {
+	multiLineStringZ geom.MultiLineStringZ) []byte {
 	dst = append(dst, []byte("MULTILINESTRINGZ((")...)
-	for i, ls := range multiLineStringZ.LineStrings {
-		dst = appendPointZsCoords(dst, ls.Points)
-		if i != len(multiLineStringZ.LineStrings)-1 {
+	for i, ls := range multiLineStringZ {
+		dst = appendPointZsCoords(dst, ls)
+		if i != len(multiLineStringZ)-1 {
 			dst = append(dst, ')')
 			dst = append(dst, ',')
 			dst = append(dst, '(')
@@ -37,11 +37,11 @@ func appendMultiLineStringZWKT(dst []byte,
 }
 
 func appendMultiLineStringMWKT(dst []byte,
-	multiLineStringM *geom.MultiLineStringM) []byte {
+	multiLineStringM geom.MultiLineStringM) []byte {
 	dst = append(dst, []byte("MULTILINESTRINGM((")...)
-	for i, ls := range multiLineStringM.LineStrings {
-		dst = appendPointMsCoords(dst, ls.Points)
-		if i != len(multiLineStringM.LineStrings)-1 {
+	for i, ls := range multiLineStringM {
+		dst = appendPointMsCoords(dst, ls)
+		if i != len(multiLineStringM)-1 {
 			dst = append(dst, ')')
 			dst = append(dst, ',')
 			dst = append(dst, '(')
@@ -53,11 +53,11 @@ func appendMultiLineStringMWKT(dst []byte,
 }
 
 func appendMultiLineStringZMWKT(dst []byte,
-	multiLineStringZM *geom.MultiLineStringZM) []byte {
+	multiLineStringZM geom.MultiLineStringZM) []byte {
 	dst = append(dst, []byte("MULTILINESTRINGZM((")...)
-	for i, ls := range multiLineStringZM.LineStrings {
-		dst = appendPointZMsCoords(dst, ls.Points)
-		if i != len(multiLineStringZM.LineStrings)-1 {
+	for i, ls := range multiLineStringZM {
+		dst = appendPointZMsCoords(dst, ls)
+		if i != len(multiLineStringZM)-1 {
 			dst = append(dst, ')')
 			dst = append(dst, ',')
 			dst = append(dst, '(')

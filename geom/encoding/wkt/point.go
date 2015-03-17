@@ -1,7 +1,7 @@
 package wkt
 
 import (
-	"github.com/twpayne/gogeom/geom"
+	"github.com/ctessum/gogeom/geom"
 	"strconv"
 )
 

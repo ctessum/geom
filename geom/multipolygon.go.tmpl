@@ -1,14 +1,12 @@
 package geom{{range .Dims}}
 
-type MultiPolygon{{.ZM}} struct {
-	Polygons []Polygon{{.ZM}}
-}
+type MultiPolygon{{.ZM}} []Polygon{{.ZM}}
 
 func (multiPolygon{{.ZM}} MultiPolygon{{.ZM}}) Bounds(b *Bounds) *Bounds {
 	if b == nil {
 		b = NewBounds()
 	}
-	for _, polygon{{.ZM}} := range multiPolygon{{.ZM}}.Polygons {
+	for _, polygon{{.ZM}} := range multiPolygon{{.ZM}} {
 		b = polygon{{.ZM}}.Bounds(b)
 	}
 	return b

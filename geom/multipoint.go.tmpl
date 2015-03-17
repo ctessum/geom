@@ -1,14 +1,12 @@
 package geom{{range .Dims}}
 
-type MultiPoint{{.ZM}} struct {
-	Points []Point{{.ZM}}
-}
+type MultiPoint{{.ZM}} []Point{{.ZM}}
 
 func (multiPoint{{.ZM}} MultiPoint{{.ZM}}) Bounds(b *Bounds) *Bounds {
 	if b == nil {
 		b = NewBounds()
 	}
-	for _, point{{.ZM}} := range multiPoint{{.ZM}}.Points {
+	for _, point{{.ZM}} := range multiPoint{{.ZM}} {
 		b = point{{.ZM}}.Bounds(b)
 	}
 	return b

@@ -1,56 +1,48 @@
 package geom
 
-type MultiPoint struct {
-	Points []Point
-}
+type MultiPoint []Point
 
 func (multiPoint MultiPoint) Bounds(b *Bounds) *Bounds {
 	if b == nil {
 		b = NewBounds()
 	}
-	for _, point := range multiPoint.Points {
+	for _, point := range multiPoint {
 		b = point.Bounds(b)
 	}
 	return b
 }
 
-type MultiPointZ struct {
-	Points []PointZ
-}
+type MultiPointZ []PointZ
 
 func (multiPointZ MultiPointZ) Bounds(b *Bounds) *Bounds {
 	if b == nil {
 		b = NewBounds()
 	}
-	for _, pointZ := range multiPointZ.Points {
+	for _, pointZ := range multiPointZ {
 		b = pointZ.Bounds(b)
 	}
 	return b
 }
 
-type MultiPointM struct {
-	Points []PointM
-}
+type MultiPointM []PointM
 
 func (multiPointM MultiPointM) Bounds(b *Bounds) *Bounds {
 	if b == nil {
 		b = NewBounds()
 	}
-	for _, pointM := range multiPointM.Points {
+	for _, pointM := range multiPointM {
 		b = pointM.Bounds(b)
 	}
 	return b
 }
 
-type MultiPointZM struct {
-	Points []PointZM
-}
+type MultiPointZM []PointZM
 
 func (multiPointZM MultiPointZM) Bounds(b *Bounds) *Bounds {
 	if b == nil {
 		b = NewBounds()
 	}
-	for _, pointZM := range multiPointZM.Points {
+	for _, pointZM := range multiPointZM {
 		b = pointZM.Bounds(b)
 	}
 	return b

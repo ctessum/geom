@@ -2,7 +2,7 @@ package wkb
 
 import (
 	"encoding/binary"
-	"github.com/twpayne/gogeom/geom"
+	"github.com/ctessum/gogeom/geom"
 	"io"
 )
 
@@ -23,14 +23,14 @@ func multiLineStringReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, err
 			return nil, err
 		}
 	}
-	return geom.MultiLineString{LineStrings: lineStrings}, nil
+	return geom.MultiLineString(lineStrings), nil
 }
 
 func writeMultiLineString(w io.Writer, byteOrder binary.ByteOrder, multiLineString geom.MultiLineString) error {
-	if err := binary.Write(w, byteOrder, uint32(len(multiLineString.LineStrings))); err != nil {
+	if err := binary.Write(w, byteOrder, uint32(len(multiLineString))); err != nil {
 		return err
 	}
-	for _, lineString := range multiLineString.LineStrings {
+	for _, lineString := range multiLineString {
 		if err := Write(w, byteOrder, lineString); err != nil {
 			return err
 		}
@@ -55,14 +55,14 @@ func multiLineStringZReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, er
 			return nil, err
 		}
 	}
-	return geom.MultiLineStringZ{LineStrings: lineStringZs}, nil
+	return geom.MultiLineStringZ(lineStringZs), nil
 }
 
 func writeMultiLineStringZ(w io.Writer, byteOrder binary.ByteOrder, multiLineStringZ geom.MultiLineStringZ) error {
-	if err := binary.Write(w, byteOrder, uint32(len(multiLineStringZ.LineStrings))); err != nil {
+	if err := binary.Write(w, byteOrder, uint32(len(multiLineStringZ))); err != nil {
 		return err
 	}
-	for _, lineStringZ := range multiLineStringZ.LineStrings {
+	for _, lineStringZ := range multiLineStringZ {
 		if err := Write(w, byteOrder, lineStringZ); err != nil {
 			return err
 		}
@@ -87,14 +87,14 @@ func multiLineStringMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, er
 			return nil, err
 		}
 	}
-	return geom.MultiLineStringM{LineStrings: lineStringMs}, nil
+	return geom.MultiLineStringM(lineStringMs), nil
 }
 
 func writeMultiLineStringM(w io.Writer, byteOrder binary.ByteOrder, multiLineStringM geom.MultiLineStringM) error {
-	if err := binary.Write(w, byteOrder, uint32(len(multiLineStringM.LineStrings))); err != nil {
+	if err := binary.Write(w, byteOrder, uint32(len(multiLineStringM))); err != nil {
 		return err
 	}
-	for _, lineStringM := range multiLineStringM.LineStrings {
+	for _, lineStringM := range multiLineStringM {
 		if err := Write(w, byteOrder, lineStringM); err != nil {
 			return err
 		}
@@ -119,14 +119,14 @@ func multiLineStringZMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, e
 			return nil, err
 		}
 	}
-	return geom.MultiLineStringZM{LineStrings: lineStringZMs}, nil
+	return geom.MultiLineStringZM(lineStringZMs), nil
 }
 
 func writeMultiLineStringZM(w io.Writer, byteOrder binary.ByteOrder, multiLineStringZM geom.MultiLineStringZM) error {
-	if err := binary.Write(w, byteOrder, uint32(len(multiLineStringZM.LineStrings))); err != nil {
+	if err := binary.Write(w, byteOrder, uint32(len(multiLineStringZM))); err != nil {
 		return err
 	}
-	for _, lineStringZM := range multiLineStringZM.LineStrings {
+	for _, lineStringZM := range multiLineStringZM {
 		if err := Write(w, byteOrder, lineStringZM); err != nil {
 			return err
 		}

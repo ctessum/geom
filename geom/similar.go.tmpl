@@ -45,11 +45,11 @@ func Similar(g1, g2 T, e float64) bool {
 {{range .Dims}}	case Point{{.ZM}}:
 		return point{{.ZM}}Similar(g1.(Point{{.ZM}}), g2.(Point{{.ZM}}), e)
 {{end}}{{range .Dims}}	case LineString{{.ZM}}:
-		return point{{.ZM}}sSimilar(g1.(LineString{{.ZM}}).Points, g2.(LineString{{.ZM}}).Points, e)
+		return point{{.ZM}}sSimilar(g1.(LineString{{.ZM}}), g2.(LineString{{.ZM}}), e)
 {{end}}{{range .Dims}}	case Polygon{{.ZM}}:
-		return point{{.ZM}}ssSimilar(g1.(Polygon{{.ZM}}).Rings, g2.(Polygon{{.ZM}}).Rings, e)
+		return point{{.ZM}}ssSimilar(g1.(Polygon{{.ZM}}), g2.(Polygon{{.ZM}}), e)
 {{end}}{{range .Dims}}	case MultiPoint{{.ZM}}:
-		return point{{.ZM}}sSimilar(g1.(MultiPoint{{.ZM}}).Points, g2.(MultiPoint{{.ZM}}).Points, e)
+		return point{{.ZM}}sSimilar(g1.(MultiPoint{{.ZM}}), g2.(MultiPoint{{.ZM}}), e)
 {{end}}	default:
 		return false
 	}

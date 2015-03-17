@@ -2,7 +2,7 @@ package wkb
 
 import (
 	"encoding/binary"
-	"github.com/twpayne/gogeom/geom"
+	"github.com/ctessum/gogeom/geom"
 	"io"
 ){{range .Dims}}
 
@@ -19,9 +19,9 @@ func polygon{{.ZM}}Reader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, erro
 			ring{{.ZM}}s[i] = point{{.ZM}}s
 		}
 	}
-	return geom.Polygon{{.ZM}}{Rings: ring{{.ZM}}s}, nil
+	return geom.Polygon{{.ZM}}(ring{{.ZM}}s), nil
 }
 
 func writePolygon{{.ZM}}(w io.Writer, byteOrder binary.ByteOrder, polygon{{.ZM}} geom.Polygon{{.ZM}}) error {
-	return writePoint{{.ZM}}ss(w, byteOrder, polygon{{.ZM}}.Rings)
+	return writePoint{{.ZM}}ss(w, byteOrder, polygon{{.ZM}})
 }{{end}}

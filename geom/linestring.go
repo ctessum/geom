@@ -1,45 +1,37 @@
 package geom
 
-type LineString struct {
-	Points []Point
-}
+type LineString []Point
 
 func (lineString LineString) Bounds(b *Bounds) *Bounds {
 	if b == nil {
 		b = NewBounds()
 	}
-	return b.ExtendPoints(lineString.Points)
+	return b.ExtendPoints(lineString)
 }
 
-type LineStringZ struct {
-	Points []PointZ
-}
+type LineStringZ []PointZ
 
 func (lineStringZ LineStringZ) Bounds(b *Bounds) *Bounds {
 	if b == nil {
 		b = NewBounds()
 	}
-	return b.ExtendPointZs(lineStringZ.Points)
+	return b.ExtendPointZs(lineStringZ)
 }
 
-type LineStringM struct {
-	Points []PointM
-}
+type LineStringM []PointM
 
 func (lineStringM LineStringM) Bounds(b *Bounds) *Bounds {
 	if b == nil {
 		b = NewBounds()
 	}
-	return b.ExtendPointMs(lineStringM.Points)
+	return b.ExtendPointMs(lineStringM)
 }
 
-type LineStringZM struct {
-	Points []PointZM
-}
+type LineStringZM []PointZM
 
 func (lineStringZM LineStringZM) Bounds(b *Bounds) *Bounds {
 	if b == nil {
 		b = NewBounds()
 	}
-	return b.ExtendPointZMs(lineStringZM.Points)
+	return b.ExtendPointZMs(lineStringZM)
 }

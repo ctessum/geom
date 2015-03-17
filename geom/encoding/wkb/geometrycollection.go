@@ -2,7 +2,7 @@ package wkb
 
 import (
 	"encoding/binary"
-	"github.com/twpayne/gogeom/geom"
+	"github.com/ctessum/gogeom/geom"
 	"io"
 )
 
@@ -23,14 +23,14 @@ func geometryCollectionReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, 
 			return nil, err
 		}
 	}
-	return geom.GeometryCollection{Geoms: geoms}, nil
+	return geom.GeometryCollection(geoms), nil
 }
 
 func writeGeometryCollection(w io.Writer, byteOrder binary.ByteOrder, geometryCollection geom.GeometryCollection) error {
-	if err := binary.Write(w, byteOrder, uint32(len(geometryCollection.Geoms))); err != nil {
+	if err := binary.Write(w, byteOrder, uint32(len(geometryCollection))); err != nil {
 		return err
 	}
-	for _, geom := range geometryCollection.Geoms {
+	for _, geom := range geometryCollection {
 		if err := Write(w, byteOrder, geom); err != nil {
 			return err
 		}
@@ -55,14 +55,14 @@ func geometryCollectionZReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T,
 			return nil, err
 		}
 	}
-	return geom.GeometryCollectionZ{Geoms: geomZs}, nil
+	return geom.GeometryCollectionZ(geomZs), nil
 }
 
 func writeGeometryCollectionZ(w io.Writer, byteOrder binary.ByteOrder, geometryCollectionZ geom.GeometryCollectionZ) error {
-	if err := binary.Write(w, byteOrder, uint32(len(geometryCollectionZ.Geoms))); err != nil {
+	if err := binary.Write(w, byteOrder, uint32(len(geometryCollectionZ))); err != nil {
 		return err
 	}
-	for _, geomZ := range geometryCollectionZ.Geoms {
+	for _, geomZ := range geometryCollectionZ {
 		if err := Write(w, byteOrder, geomZ); err != nil {
 			return err
 		}
@@ -87,14 +87,14 @@ func geometryCollectionMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T,
 			return nil, err
 		}
 	}
-	return geom.GeometryCollectionM{Geoms: geomMs}, nil
+	return geom.GeometryCollectionM(geomMs), nil
 }
 
 func writeGeometryCollectionM(w io.Writer, byteOrder binary.ByteOrder, geometryCollectionM geom.GeometryCollectionM) error {
-	if err := binary.Write(w, byteOrder, uint32(len(geometryCollectionM.Geoms))); err != nil {
+	if err := binary.Write(w, byteOrder, uint32(len(geometryCollectionM))); err != nil {
 		return err
 	}
-	for _, geomM := range geometryCollectionM.Geoms {
+	for _, geomM := range geometryCollectionM {
 		if err := Write(w, byteOrder, geomM); err != nil {
 			return err
 		}
@@ -119,14 +119,14 @@ func geometryCollectionZMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T
 			return nil, err
 		}
 	}
-	return geom.GeometryCollectionZM{Geoms: geomZMs}, nil
+	return geom.GeometryCollectionZM(geomZMs), nil
 }
 
 func writeGeometryCollectionZM(w io.Writer, byteOrder binary.ByteOrder, geometryCollectionZM geom.GeometryCollectionZM) error {
-	if err := binary.Write(w, byteOrder, uint32(len(geometryCollectionZM.Geoms))); err != nil {
+	if err := binary.Write(w, byteOrder, uint32(len(geometryCollectionZM))); err != nil {
 		return err
 	}
-	for _, geomZM := range geometryCollectionZM.Geoms {
+	for _, geomZM := range geometryCollectionZM {
 		if err := Write(w, byteOrder, geomZM); err != nil {
 			return err
 		}

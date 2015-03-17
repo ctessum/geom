@@ -1,12 +1,10 @@
 package geom{{range .Dims}}
 
-type LineString{{.ZM}} struct {
-	Points []Point{{.ZM}}
-}
+type LineString{{.ZM}} []Point{{.ZM}}
 
 func (lineString{{.ZM}} LineString{{.ZM}}) Bounds(b *Bounds) *Bounds {
 	if b == nil {
 		b = NewBounds()
 	}
-	return b.ExtendPoint{{.ZM}}s(lineString{{.ZM}}.Points)
+	return b.ExtendPoint{{.ZM}}s(lineString{{.ZM}})
 }{{end}}

@@ -2,7 +2,7 @@ package wkb
 
 import (
 	"encoding/binary"
-	"github.com/twpayne/gogeom/geom"
+	"github.com/ctessum/gogeom/geom"
 	"io"
 ){{range .Dims}}
 
@@ -23,14 +23,14 @@ func multiLineString{{.ZM}}Reader(r io.Reader, byteOrder binary.ByteOrder) (geom
 			return nil, err
 		}
 	}
-	return geom.MultiLineString{{.ZM}}{LineStrings: lineString{{.ZM}}s}, nil
+	return geom.MultiLineString{{.ZM}}(lineString{{.ZM}}s), nil
 }
 
 func writeMultiLineString{{.ZM}}(w io.Writer, byteOrder binary.ByteOrder, multiLineString{{.ZM}} geom.MultiLineString{{.ZM}}) error {
-	if err := binary.Write(w, byteOrder, uint32(len(multiLineString{{.ZM}}.LineStrings))); err != nil {
+	if err := binary.Write(w, byteOrder, uint32(len(multiLineString{{.ZM}}))); err != nil {
 		return err
 	}
-	for _, lineString{{.ZM}} := range multiLineString{{.ZM}}.LineStrings {
+	for _, lineString{{.ZM}} := range multiLineString{{.ZM}} {
 		if err := Write(w, byteOrder, lineString{{.ZM}}); err != nil {
 			return err
 		}

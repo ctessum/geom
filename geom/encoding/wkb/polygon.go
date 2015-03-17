@@ -2,7 +2,7 @@ package wkb
 
 import (
 	"encoding/binary"
-	"github.com/twpayne/gogeom/geom"
+	"github.com/ctessum/gogeom/geom"
 	"io"
 )
 
@@ -19,11 +19,11 @@ func polygonReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
 			rings[i] = points
 		}
 	}
-	return geom.Polygon{Rings: rings}, nil
+	return geom.Polygon(rings), nil
 }
 
 func writePolygon(w io.Writer, byteOrder binary.ByteOrder, polygon geom.Polygon) error {
-	return writePointss(w, byteOrder, polygon.Rings)
+	return writePointss(w, byteOrder, polygon)
 }
 
 func polygonZReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
@@ -39,11 +39,11 @@ func polygonZReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
 			ringZs[i] = pointZs
 		}
 	}
-	return geom.PolygonZ{Rings: ringZs}, nil
+	return geom.PolygonZ(ringZs), nil
 }
 
 func writePolygonZ(w io.Writer, byteOrder binary.ByteOrder, polygonZ geom.PolygonZ) error {
-	return writePointZss(w, byteOrder, polygonZ.Rings)
+	return writePointZss(w, byteOrder, polygonZ)
 }
 
 func polygonMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
@@ -59,11 +59,11 @@ func polygonMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
 			ringMs[i] = pointMs
 		}
 	}
-	return geom.PolygonM{Rings: ringMs}, nil
+	return geom.PolygonM(ringMs), nil
 }
 
 func writePolygonM(w io.Writer, byteOrder binary.ByteOrder, polygonM geom.PolygonM) error {
-	return writePointMss(w, byteOrder, polygonM.Rings)
+	return writePointMss(w, byteOrder, polygonM)
 }
 
 func polygonZMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
@@ -79,9 +79,9 @@ func polygonZMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
 			ringZMs[i] = pointZMs
 		}
 	}
-	return geom.PolygonZM{Rings: ringZMs}, nil
+	return geom.PolygonZM(ringZMs), nil
 }
 
 func writePolygonZM(w io.Writer, byteOrder binary.ByteOrder, polygonZM geom.PolygonZM) error {
-	return writePointZMss(w, byteOrder, polygonZM.Rings)
+	return writePointZMss(w, byteOrder, polygonZM)
 }

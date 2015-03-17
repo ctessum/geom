@@ -2,7 +2,7 @@ package wkb
 
 import (
 	"encoding/binary"
-	"github.com/twpayne/gogeom/geom"
+	"github.com/ctessum/gogeom/geom"
 	"io"
 ){{range .Dims}}
 
@@ -23,14 +23,14 @@ func multiPoint{{.ZM}}Reader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, e
 			return nil, err
 		}
 	}
-	return geom.MultiPoint{{.ZM}}{Points: point{{.ZM}}s}, nil
+	return geom.MultiPoint{{.ZM}}(point{{.ZM}}s), nil
 }
 
 func writeMultiPoint{{.ZM}}(w io.Writer, byteOrder binary.ByteOrder, multiPoint{{.ZM}} geom.MultiPoint{{.ZM}}) error {
-	if err := binary.Write(w, byteOrder, uint32(len(multiPoint{{.ZM}}.Points))); err != nil {
+	if err := binary.Write(w, byteOrder, uint32(len(multiPoint{{.ZM}}))); err != nil {
 		return err
 	}
-	for _, point{{.ZM}} := range multiPoint{{.ZM}}.Points {
+	for _, point{{.ZM}} := range multiPoint{{.ZM}} {
 		if err := Write(w, byteOrder, point{{.ZM}}); err != nil {
 			return err
 		}

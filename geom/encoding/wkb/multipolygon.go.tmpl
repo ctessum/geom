@@ -2,7 +2,7 @@ package wkb
 
 import (
 	"encoding/binary"
-	"github.com/twpayne/gogeom/geom"
+	"github.com/ctessum/gogeom/geom"
 	"io"
 ){{range .Dims}}
 
@@ -23,14 +23,14 @@ func multiPolygon{{.ZM}}Reader(r io.Reader, byteOrder binary.ByteOrder) (geom.T,
 			return nil, err
 		}
 	}
-	return geom.MultiPolygon{{.ZM}}{Polygons: polygon{{.ZM}}s}, nil
+	return geom.MultiPolygon{{.ZM}}(polygon{{.ZM}}s), nil
 }
 
 func writeMultiPolygon{{.ZM}}(w io.Writer, byteOrder binary.ByteOrder, multiPolygon{{.ZM}} geom.MultiPolygon{{.ZM}}) error {
-	if err := binary.Write(w, byteOrder, uint32(len(multiPolygon{{.ZM}}.Polygons))); err != nil {
+	if err := binary.Write(w, byteOrder, uint32(len(multiPolygon{{.ZM}}))); err != nil {
 		return err
 	}
-	for _, polygon{{.ZM}} := range multiPolygon{{.ZM}}.Polygons {
+	for _, polygon{{.ZM}} := range multiPolygon{{.ZM}} {
 		if err := Write(w, byteOrder, polygon{{.ZM}}); err != nil {
 			return err
 		}

@@ -1,12 +1,10 @@
 package geom{{range .Dims}}
 
-type Polygon{{.ZM}} struct {
-	Rings [][]Point{{.ZM}}
-}
+type Polygon{{.ZM}} [][]Point{{.ZM}}
 
 func (polygon{{.ZM}} Polygon{{.ZM}}) Bounds(b *Bounds) *Bounds {
 	if b == nil {
 		b = NewBounds()
 	}
-	return b.ExtendPoint{{.ZM}}ss(polygon{{.ZM}}.Rings)
+	return b.ExtendPoint{{.ZM}}ss(polygon{{.ZM}})
 }{{end}}

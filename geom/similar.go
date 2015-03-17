@@ -135,29 +135,29 @@ func Similar(g1, g2 T, e float64) bool {
 	case PointZM:
 		return pointZMSimilar(g1.(PointZM), g2.(PointZM), e)
 	case LineString:
-		return pointsSimilar(g1.(LineString).Points, g2.(LineString).Points, e)
+		return pointsSimilar(g1.(LineString), g2.(LineString), e)
 	case LineStringZ:
-		return pointZsSimilar(g1.(LineStringZ).Points, g2.(LineStringZ).Points, e)
+		return pointZsSimilar(g1.(LineStringZ), g2.(LineStringZ), e)
 	case LineStringM:
-		return pointMsSimilar(g1.(LineStringM).Points, g2.(LineStringM).Points, e)
+		return pointMsSimilar(g1.(LineStringM), g2.(LineStringM), e)
 	case LineStringZM:
-		return pointZMsSimilar(g1.(LineStringZM).Points, g2.(LineStringZM).Points, e)
+		return pointZMsSimilar(g1.(LineStringZM), g2.(LineStringZM), e)
 	case Polygon:
-		return pointssSimilar(g1.(Polygon).Rings, g2.(Polygon).Rings, e)
+		return pointssSimilar(g1.(Polygon), g2.(Polygon), e)
 	case PolygonZ:
-		return pointZssSimilar(g1.(PolygonZ).Rings, g2.(PolygonZ).Rings, e)
+		return pointZssSimilar(g1.(PolygonZ), g2.(PolygonZ), e)
 	case PolygonM:
-		return pointMssSimilar(g1.(PolygonM).Rings, g2.(PolygonM).Rings, e)
+		return pointMssSimilar(g1.(PolygonM), g2.(PolygonM), e)
 	case PolygonZM:
-		return pointZMssSimilar(g1.(PolygonZM).Rings, g2.(PolygonZM).Rings, e)
+		return pointZMssSimilar(g1.(PolygonZM), g2.(PolygonZM), e)
 	case MultiPoint:
-		return pointsSimilar(g1.(MultiPoint).Points, g2.(MultiPoint).Points, e)
+		return pointsSimilar(g1.(MultiPoint), g2.(MultiPoint), e)
 	case MultiPointZ:
-		return pointZsSimilar(g1.(MultiPointZ).Points, g2.(MultiPointZ).Points, e)
+		return pointZsSimilar(g1.(MultiPointZ), g2.(MultiPointZ), e)
 	case MultiPointM:
-		return pointMsSimilar(g1.(MultiPointM).Points, g2.(MultiPointM).Points, e)
+		return pointMsSimilar(g1.(MultiPointM), g2.(MultiPointM), e)
 	case MultiPointZM:
-		return pointZMsSimilar(g1.(MultiPointZM).Points, g2.(MultiPointZM).Points, e)
+		return pointZMsSimilar(g1.(MultiPointZM), g2.(MultiPointZM), e)
 	default:
 		return false
 	}

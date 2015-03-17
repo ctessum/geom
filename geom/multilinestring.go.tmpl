@@ -1,14 +1,12 @@
 package geom{{range .Dims}}
 
-type MultiLineString{{.ZM}} struct {
-	LineStrings []LineString{{.ZM}}
-}
+type MultiLineString{{.ZM}} []LineString{{.ZM}}
 
 func (multiLineString{{.ZM}} MultiLineString{{.ZM}}) Bounds(b *Bounds) *Bounds {
 	if b == nil {
 		b = NewBounds()
 	}
-	for _, lineString{{.ZM}} := range multiLineString{{.ZM}}.LineStrings {
+	for _, lineString{{.ZM}} := range multiLineString{{.ZM}} {
 		b = lineString{{.ZM}}.Bounds(b)
 	}
 	return b

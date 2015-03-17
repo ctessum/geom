@@ -1,15 +1,15 @@
 package wkt
 
 import (
-	"github.com/twpayne/gogeom/geom"
+	"github.com/ctessum/gogeom/geom"
 )
 
 func appendMultiPolygonWKT(dst []byte,
-	multiPolygon *geom.MultiPolygon) []byte {
+	multiPolygon geom.MultiPolygon) []byte {
 	dst = append(dst, []byte("MULTIPOLYGON((")...)
-	for i, pg := range multiPolygon.Polygons {
-		dst = appendPointssCoords(dst, pg.Rings)
-		if i != len(multiPolygon.Polygons)-1 {
+	for i, pg := range multiPolygon {
+		dst = appendPointssCoords(dst, pg)
+		if i != len(multiPolygon)-1 {
 			dst = append(dst, ')')
 			dst = append(dst, ',')
 			dst = append(dst, '(')
@@ -21,11 +21,11 @@ func appendMultiPolygonWKT(dst []byte,
 }
 
 func appendMultiPolygonZWKT(dst []byte,
-	multiPolygonZ *geom.MultiPolygonZ) []byte {
+	multiPolygonZ geom.MultiPolygonZ) []byte {
 	dst = append(dst, []byte("MULTIPOLYGONZ((")...)
-	for i, pg := range multiPolygonZ.Polygons {
-		dst = appendPointZssCoords(dst, pg.Rings)
-		if i != len(multiPolygonZ.Polygons)-1 {
+	for i, pg := range multiPolygonZ {
+		dst = appendPointZssCoords(dst, pg)
+		if i != len(multiPolygonZ)-1 {
 			dst = append(dst, ')')
 			dst = append(dst, ',')
 			dst = append(dst, '(')
@@ -37,11 +37,11 @@ func appendMultiPolygonZWKT(dst []byte,
 }
 
 func appendMultiPolygonMWKT(dst []byte,
-	multiPolygonM *geom.MultiPolygonM) []byte {
+	multiPolygonM geom.MultiPolygonM) []byte {
 	dst = append(dst, []byte("MULTIPOLYGONM((")...)
-	for i, pg := range multiPolygonM.Polygons {
-		dst = appendPointMssCoords(dst, pg.Rings)
-		if i != len(multiPolygonM.Polygons)-1 {
+	for i, pg := range multiPolygonM {
+		dst = appendPointMssCoords(dst, pg)
+		if i != len(multiPolygonM)-1 {
 			dst = append(dst, ')')
 			dst = append(dst, ',')
 			dst = append(dst, '(')
@@ -53,11 +53,11 @@ func appendMultiPolygonMWKT(dst []byte,
 }
 
 func appendMultiPolygonZMWKT(dst []byte,
-	multiPolygonZM *geom.MultiPolygonZM) []byte {
+	multiPolygonZM geom.MultiPolygonZM) []byte {
 	dst = append(dst, []byte("MULTIPOLYGONZM((")...)
-	for i, pg := range multiPolygonZM.Polygons {
-		dst = appendPointZMssCoords(dst, pg.Rings)
-		if i != len(multiPolygonZM.Polygons)-1 {
+	for i, pg := range multiPolygonZM {
+		dst = appendPointZMssCoords(dst, pg)
+		if i != len(multiPolygonZM)-1 {
 			dst = append(dst, ')')
 			dst = append(dst, ',')
 			dst = append(dst, '(')
