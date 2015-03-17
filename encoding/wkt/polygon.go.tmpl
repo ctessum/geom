@@ -1,7 +1,7 @@
 package wkt
 
 import (
-	"github.com/ctessum/gogeom/geom"
+	"github.com/ctessum/geom"
 ){{range .Dims}}
 
 func appendPolygon{{.ZM}}WKT(dst []byte, polygon{{.ZM}} geom.Polygon{{.ZM}}) []byte {

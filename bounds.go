@@ -8,6 +8,14 @@ type Bounds struct {
 	Min, Max Point
 }
 
+func (b1 *Bounds) Bounds(b *Bounds) *Bounds {
+	if b == nil {
+		return b1
+	} else {
+		return b1.ExtendPoint(b.Min).ExtendPoint(b.Max)
+	}
+}
+
 func NewBounds() *Bounds {
 	return &Bounds{Point{math.Inf(1), math.Inf(1)}, Point{math.Inf(-1), math.Inf(-1)}}
 }

@@ -67,4 +67,3 @@ func appendMultiPolygonZMWKT(dst []byte,
 	dst = append(dst, ')')
 	return dst
 }
-

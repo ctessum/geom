@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"math"
 	"sort"
+
+	"github.com/ctessum/geom"
 )
 
 const Dim = 3
@@ -62,9 +64,9 @@ func (n *node) String() string {
 
 // entry represents a spatial index record stored in a tree node.
 type entry struct {
-	bb    *Rect // bounding-box of all children of this entry
+	bb    *geom.Bounds // bounding-box of all children of this entry
 	child *node
-	obj   Spatial
+	obj   geom.T
 }
 
 func (e entry) String() string {
@@ -74,11 +76,6 @@ func (e entry) String() string {
 	return fmt.Sprintf("entry{bb: %v, obj: %v}", e.bb, e.obj)
 }
 
-// Any type that implements Spatial can be stored in an Rtree and queried.
-type Spatial interface {
-	Bounds() *Rect
-}
-
 // Insertion
 
 // Insert inserts a spatial object into the tree.  If insertion
@@ -86,8 +83,8 @@ type Spatial interface {
 //
 // Implemented per Section 3.2 of "R-trees: A Dynamic Index Structure for
 // Spatial Searching" by A. Guttman, Proceedings of ACM SIGMOD, p. 47-57, 1984.
-func (tree *Rtree) Insert(obj Spatial) {
-	e := entry{obj.Bounds(), nil, obj}
+func (tree *Rtree) Insert(obj geom.T) {
+	e := entry{obj.Bounds(nil), nil, obj}
 	tree.insert(e, 1)
 	tree.size++
 }
@@ -133,11 +130,11 @@ func (tree *Rtree) chooseNode(n *node, e entry, level int) *node {
 	// find the entry whose bb needs least enlargement to include obj
 	diff := math.MaxFloat64
 	var chosen entry
-	var bb Rect
+	var bb geom.Bounds
 	for _, en := range n.entries {
 		initBoundingBox(&bb, en.bb, e.bb)
-		d := bb.size() - en.bb.size()
-		if d < diff || (d == diff && en.bb.size() < chosen.bb.size()) {
+		d := size(&bb) - size(en.bb)
+		if d < diff || (d == diff && size(en.bb) < size(chosen.bb)) {
 			diff = d
 			chosen = en
 		}
@@ -189,13 +186,13 @@ func (n *node) getEntry() *entry {
 }
 
 // computeBoundingBox finds the MBR of the children of n.
-func (n *node) computeBoundingBox() *Rect {
-	var bb Rect
+func (n *node) computeBoundingBox() *geom.Bounds {
+	var bb geom.Bounds
 	for i, e := range n.entries {
 		if i == 0 {
 			bb = *e.bb
 		} else {
-			bb.enlarge(e.bb)
+			enlarge(&bb, e.bb)
 		}
 	}
 	return &bb
@@ -264,8 +261,8 @@ func assignGroup(e entry, left, right *node) {
 	rightEnlarged := boundingBox(rightBB, e.bb)
 
 	// first, choose the group that needs the least enlargement
-	leftDiff := leftEnlarged.size() - leftBB.size()
-	rightDiff := rightEnlarged.size() - rightBB.size()
+	leftDiff := size(leftEnlarged) - size(leftBB)
+	rightDiff := size(rightEnlarged) - size(rightBB)
 	if diff := leftDiff - rightDiff; diff < 0 {
 		assign(e, left)
 		return
@@ -275,7 +272,7 @@ func assignGroup(e entry, left, right *node) {
 	}
 
 	// next, choose the group that has smaller area
-	if diff := leftBB.size() - rightBB.size(); diff < 0 {
+	if diff := size(leftBB) - size(rightBB); diff < 0 {
 		assign(e, left)
 		return
 	} else if diff > 0 {
@@ -295,11 +292,11 @@ func assignGroup(e entry, left, right *node) {
 func (n *node) pickSeeds() (int, int) {
 	left, right := 0, 1
 	maxWastedSpace := -1.0
-	var bb Rect
+	var bb geom.Bounds
 	for i, e1 := range n.entries {
 		for j, e2 := range n.entries[i+1:] {
 			initBoundingBox(&bb, e1.bb, e2.bb)
-			d := bb.size() - e1.bb.size() - e2.bb.size()
+			d := size(&bb) - size(e1.bb) - size(e2.bb)
 			if d > maxWastedSpace {
 				maxWastedSpace = d
 				left, right = i, j+i+1
@@ -315,8 +312,8 @@ func pickNext(left, right *node, entries []entry) (next int) {
 	leftBB := left.computeBoundingBox()
 	rightBB := right.computeBoundingBox()
 	for i, e := range entries {
-		d1 := boundingBox(leftBB, e.bb).size() - leftBB.size()
-		d2 := boundingBox(rightBB, e.bb).size() - rightBB.size()
+		d1 := size(boundingBox(leftBB, e.bb)) - size(leftBB)
+		d2 := size(boundingBox(rightBB, e.bb)) - size(rightBB)
 		d := math.Abs(d1 - d2)
 		if d > maxDiff {
 			maxDiff = d
@@ -333,7 +330,7 @@ func pickNext(left, right *node, entries []entry) (next int) {
 //
 // Implemented per Section 3.3 of "R-trees: A Dynamic Index Structure for
 // Spatial Searching" by A. Guttman, Proceedings of ACM SIGMOD, p. 47-57, 1984.
-func (tree *Rtree) Delete(obj Spatial) bool {
+func (tree *Rtree) Delete(obj geom.T) bool {
 	n := tree.findLeaf(tree.root, obj)
 	if n == nil {
 		return false
@@ -362,13 +359,13 @@ func (tree *Rtree) Delete(obj Spatial) bool {
 }
 
 // findLeaf finds the leaf node containing obj.
-func (tree *Rtree) findLeaf(n *node, obj Spatial) *node {
+func (tree *Rtree) findLeaf(n *node, obj geom.T) *node {
 	if n.leaf {
 		return n
 	}
 	// if not leaf, search all candidate subtrees
 	for _, e := range n.entries {
-		if e.bb.containsRect(obj.Bounds()) {
+		if containsRect(e.bb, obj.Bounds(nil)) {
 			leaf := tree.findLeaf(e.child, obj)
 			if leaf == nil {
 				continue
@@ -426,12 +423,12 @@ func (tree *Rtree) condenseTree(n *node) {
 //
 // Implemented per Section 3.1 of "R-trees: A Dynamic Index Structure for
 // Spatial Searching" by A. Guttman, Proceedings of ACM SIGMOD, p. 47-57, 1984.
-func (tree *Rtree) SearchIntersect(bb *Rect) []Spatial {
+func (tree *Rtree) SearchIntersect(bb *geom.Bounds) []geom.T {
 	return tree.searchIntersect(tree.root, bb)
 }
 
-func (tree *Rtree) searchIntersect(n *node, bb *Rect) []Spatial {
-	results := []Spatial{}
+func (tree *Rtree) searchIntersect(n *node, bb *geom.Bounds) []geom.T {
+	results := []geom.T{}
 	for _, e := range n.entries {
 		if intersect(e.bb, bb) {
 			if n.leaf {
@@ -446,7 +443,7 @@ func (tree *Rtree) searchIntersect(n *node, bb *Rect) []Spatial {
 
 // NearestNeighbor returns the closest object to the specified point.
 // Implemented per "Nearest Neighbor Queries" by Roussopoulos et al
-func (tree *Rtree) NearestNeighbor(p Point) Spatial {
+func (tree *Rtree) NearestNeighbor(p geom.Point) geom.T {
 	obj, _ := tree.nearestNeighbor(p, tree.root, math.MaxFloat64, nil)
 	return obj
 }
@@ -456,7 +453,7 @@ func (tree *Rtree) NearestNeighbor(p Point) Spatial {
 type entrySlice struct {
 	entries []entry
 	dists   []float64
-	pt      Point
+	pt      geom.Point
 }
 
 func (s entrySlice) Len() int { return len(s.entries) }
@@ -470,21 +467,21 @@ func (s entrySlice) Less(i, j int) bool {
 	return s.dists[i] < s.dists[j]
 }
 
-func sortEntries(p Point, entries []entry) ([]entry, []float64) {
+func sortEntries(p geom.Point, entries []entry) ([]entry, []float64) {
 	sorted := make([]entry, len(entries))
 	dists := make([]float64, len(entries))
 	for i := 0; i < len(entries); i++ {
 		sorted[i] = entries[i]
-		dists[i] = p.minDist(entries[i].bb)
+		dists[i] = minDist(p, entries[i].bb)
 	}
 	sort.Sort(entrySlice{sorted, dists, p})
 	return sorted, dists
 }
 
-func pruneEntries(p Point, entries []entry, minDists []float64) []entry {
+func pruneEntries(p geom.Point, entries []entry, minDists []float64) []entry {
 	minMinMaxDist := math.MaxFloat64
 	for i := range entries {
-		minMaxDist := p.minMaxDist(entries[i].bb)
+		minMaxDist := minMaxDist(p, entries[i].bb)
 		if minMaxDist < minMinMaxDist {
 			minMinMaxDist = minMaxDist
 		}
@@ -499,10 +496,11 @@ func pruneEntries(p Point, entries []entry, minDists []float64) []entry {
 	return pruned
 }
 
-func (tree *Rtree) nearestNeighbor(p Point, n *node, d float64, nearest Spatial) (Spatial, float64) {
+func (tree *Rtree) nearestNeighbor(p geom.Point, n *node, d float64,
+	nearest geom.T) (geom.T, float64) {
 	if n.leaf {
 		for _, e := range n.entries {
-			dist := math.Sqrt(p.minDist(e.bb))
+			dist := math.Sqrt(minDist(p, e.bb))
 			if dist < d {
 				d = dist
 				nearest = e.obj
@@ -523,9 +521,9 @@ func (tree *Rtree) nearestNeighbor(p Point, n *node, d float64, nearest Spatial)
 	return nearest, d
 }
 
-func (tree *Rtree) NearestNeighbors(k int, p Point) []Spatial {
+func (tree *Rtree) NearestNeighbors(k int, p geom.Point) []geom.T {
 	dists := make([]float64, k)
-	objs := make([]Spatial, k)
+	objs := make([]geom.T, k)
 	for i := 0; i < k; i++ {
 		dists[i] = math.MaxFloat64
 		objs[i] = nil
@@ -535,7 +533,8 @@ func (tree *Rtree) NearestNeighbors(k int, p Point) []Spatial {
 }
 
 // insert obj into nearest and return the first k elements in increasing order.
-func insertNearest(k int, dists []float64, nearest []Spatial, dist float64, obj Spatial) ([]float64, []Spatial) {
+func insertNearest(k int, dists []float64, nearest []geom.T, dist float64,
+	obj geom.T) ([]float64, []geom.T) {
 	i := 0
 	for i < k && dist >= dists[i] {
 		i++
@@ -551,7 +550,7 @@ func insertNearest(k int, dists []float64, nearest []Spatial, dist float64, obj 
 	copy(updatedDists[i+1:], right)
 
 	leftObjs, rightObjs := nearest[:i], nearest[i:k-1]
-	updatedNearest := make([]Spatial, k)
+	updatedNearest := make([]geom.T, k)
 	copy(updatedNearest, leftObjs)
 	updatedNearest[i] = obj
 	copy(updatedNearest[i+1:], rightObjs)
@@ -559,10 +558,11 @@ func insertNearest(k int, dists []float64, nearest []Spatial, dist float64, obj 
 	return updatedDists, updatedNearest
 }
 
-func (tree *Rtree) nearestNeighbors(k int, p Point, n *node, dists []float64, nearest []Spatial) ([]Spatial, []float64) {
+func (tree *Rtree) nearestNeighbors(k int, p geom.Point, n *node,
+	dists []float64, nearest []geom.T) ([]geom.T, []float64) {
 	if n.leaf {
 		for _, e := range n.entries {
-			dist := math.Sqrt(p.minDist(e.bb))
+			dist := math.Sqrt(minDist(p, e.bb))
 			dists, nearest = insertNearest(k, dists, nearest, dist, e.obj)
 		}
 	} else {

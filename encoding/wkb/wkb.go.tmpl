@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"github.com/ctessum/gogeom/geom"
+	"github.com/ctessum/geom"
 	"io"
 	"reflect"
 )
