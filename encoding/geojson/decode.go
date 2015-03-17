@@ -2,7 +2,7 @@ package geojson
 
 import (
 	"encoding/json"
-	"github.com/twpayne/gogeom/geom"
+	"github.com/ctessum/geom"
 )
 
 func decodeCoordinates(jsonCoordinates interface{}) []float64 {
@@ -106,9 +106,9 @@ func doFromGeoJSON(g *Geometry) geom.T {
 		}
 		switch len(coordinates[0]) {
 		case 2:
-			return geom.LineString{makeLinearRing(coordinates)}
+			return geom.LineString(makeLinearRing(coordinates))
 		case 3:
-			return geom.LineStringZ{makeLinearRingZ(coordinates)}
+			return geom.LineStringZ(makeLinearRingZ(coordinates))
 		default:
 			panic(&InvalidGeometryError{})
 		}
@@ -119,9 +119,9 @@ func doFromGeoJSON(g *Geometry) geom.T {
 		}
 		switch len(coordinates[0][0]) {
 		case 2:
-			return geom.Polygon{makeLinearRings(coordinates)}
+			return geom.Polygon(makeLinearRings(coordinates))
 		case 3:
-			return geom.PolygonZ{makeLinearRingZs(coordinates)}
+			return geom.PolygonZ(makeLinearRingZs(coordinates))
 		default:
 			panic(&InvalidGeometryError{})
 		}

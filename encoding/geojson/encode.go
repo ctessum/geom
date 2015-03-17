@@ -2,7 +2,7 @@ package geojson
 
 import (
 	"encoding/json"
-	"github.com/twpayne/gogeom/geom"
+	"github.com/ctessum/geom"
 	"reflect"
 )
 
@@ -61,22 +61,22 @@ func ToGeoJSON(g geom.T) (*Geometry, error) {
 	case geom.LineString:
 		return &Geometry{
 			Type:        "LineString",
-			Coordinates: pointsCoordinates(g.(geom.LineString).Points),
+			Coordinates: pointsCoordinates(g.(geom.LineString)),
 		}, nil
 	case geom.LineStringZ:
 		return &Geometry{
 			Type:        "LineString",
-			Coordinates: pointZsCoordinates(g.(geom.LineStringZ).Points),
+			Coordinates: pointZsCoordinates(g.(geom.LineStringZ)),
 		}, nil
 	case geom.Polygon:
 		return &Geometry{
 			Type:        "Polygon",
-			Coordinates: pointssCoordinates(g.(geom.Polygon).Rings),
+			Coordinates: pointssCoordinates(g.(geom.Polygon)),
 		}, nil
 	case geom.PolygonZ:
 		return &Geometry{
 			Type:        "Polygon",
-			Coordinates: pointZssCoordinates(g.(geom.PolygonZ).Rings),
+			Coordinates: pointZssCoordinates(g.(geom.PolygonZ)),
 		}, nil
 	default:
 		return nil, &UnsupportedGeometryError{reflect.TypeOf(g).String()}

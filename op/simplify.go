@@ -1,7 +1,6 @@
 package geomop
 
 import (
-	"fmt"
 	"github.com/ctessum/geom"
 )
 
@@ -50,18 +49,15 @@ func simplifyCurve(curve []geom.Point,
 		breakTime := false
 		for j := i + 2; j < len(curve); j++ {
 			breakTime2 := false
-			fmt.Println("yyy", curve[i], curve[j])
 			for k := i + 1; k < j; k++ {
-				fmt.Println("xxx", curve[k], curve[i], curve[j])
 				d := distPointToSegment(curve[k], curve[i], curve[j])
 				if d > tol {
 					// we have found a candidate point to keep
 					for {
 						// Make sure this simplifcation doesn't cause any self
 						// intersections.
-						fmt.Println("found", curve[i], curve[j-1])
 						if segMakesNotSimple(curve[i], curve[j-1],
-							[][]geom.Point{out}) ||
+							[][]geom.Point{out[0 : len(out)-1]}) ||
 							segMakesNotSimple(curve[i], curve[j-1],
 								[][]geom.Point{curve[j:]}) ||
 							segMakesNotSimple(curve[i], curve[j-1],
@@ -69,7 +65,6 @@ func simplifyCurve(curve []geom.Point,
 							j--
 						} else {
 							i = j - 1
-							fmt.Println("really found", curve[i], curve[j-1])
 							out = append(out, curve[i])
 							breakTime2 = true
 							break
@@ -77,11 +72,12 @@ func simplifyCurve(curve []geom.Point,
 					}
 				}
 				if breakTime2 {
-					if j == len(curve)-1 {
-						breakTime = true
-					}
 					break
 				}
+			}
+			if j == len(curve)-1 {
+				out = append(out, curve[j])
+				breakTime = true
 			}
 		}
 		if breakTime {

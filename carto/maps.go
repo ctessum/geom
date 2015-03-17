@@ -9,10 +9,10 @@ import (
 	"math"
 	"reflect"
 
+	"github.com/ctessum/geom"
 	"github.com/gonum/plot/vg"
 	"github.com/gonum/plot/vg/draw"
 	"github.com/gonum/plot/vg/vgimg"
-	"github.com/twpayne/gogeom/geom"
 )
 
 // Canvas is a canvas for drawing maps.
@@ -133,7 +133,7 @@ func (m *Canvas) DrawVector(g geom.T, fillColor color.NRGBA,
 	//case geom.PointM:
 	//case geom.PointZM:
 	case geom.MultiPoint:
-		for _, pTemp := range g.(geom.MultiPoint).Points {
+		for _, pTemp := range g.(geom.MultiPoint) {
 			p := m.coordinates(pTemp)
 			m.DrawGlyph(markerGlyph, p)
 		}
@@ -143,7 +143,7 @@ func (m *Canvas) DrawVector(g geom.T, fillColor color.NRGBA,
 	case geom.LineString:
 		l := g.(geom.LineString)
 		var path vg.Path
-		for i, pTemp := range l.Points {
+		for i, pTemp := range l {
 			p := m.coordinates(pTemp)
 			if i == 0 {
 				path.Move(p.X, p.Y)
@@ -157,7 +157,7 @@ func (m *Canvas) DrawVector(g geom.T, fillColor color.NRGBA,
 	//case geom.LineStringZM:
 	case geom.MultiLineString:
 		l := g.(geom.MultiLineString)
-		for _, ls := range l.LineStrings {
+		for _, ls := range l {
 			m.DrawVector(ls, fillColor, lineStyle, markerGlyph)
 		}
 	//case geom.MultiLineStringZ:
@@ -165,7 +165,7 @@ func (m *Canvas) DrawVector(g geom.T, fillColor color.NRGBA,
 	//case geom.MultiLineStringZM:
 	case geom.Polygon:
 		pg := g.(geom.Polygon)
-		for _, ring := range pg.Rings {
+		for _, ring := range pg {
 			var path vg.Path
 			for i, pTemp := range ring {
 				p := m.coordinates(pTemp)
@@ -187,7 +187,7 @@ func (m *Canvas) DrawVector(g geom.T, fillColor color.NRGBA,
 	//case geom.PolygonZM:
 	case geom.MultiPolygon:
 		mpg := g.(geom.MultiPolygon)
-		for _, pg := range mpg.Polygons {
+		for _, pg := range mpg {
 			m.DrawVector(pg, fillColor, lineStyle, markerGlyph)
 		}
 	//case geom.MultiPolygonZ:

@@ -1,7 +1,7 @@
 package carto
 
 import (
-	"github.com/twpayne/gogeom/geom"
+	"github.com/ctessum/geom"
 	"image/color"
 	"math/rand"
 	"os"
@@ -9,9 +9,9 @@ import (
 )
 
 func TestMap(t *testing.T) {
-	shape := geom.T(geom.Polygon{[][]geom.Point{[]geom.Point{
+	shape := geom.T(geom.Polygon([][]geom.Point{[]geom.Point{
 		{1., 0.}, {2., 1.}, {1., 2.},
-		{0., 1.}, {1., 0.}}}})
+		{0., 1.}, {1., 0.}}}))
 	f, err := os.Create("test.png")
 	if err != nil {
 		panic(err)

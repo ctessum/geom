@@ -1,7 +1,6 @@
 package geomop
 
 import (
-	"encoding/gob"
 	"fmt"
 	"github.com/ctessum/geom"
 	"github.com/ctessum/geom/carto"
@@ -21,8 +20,6 @@ func init() {
 	shape2 = geom.Polygon{{geom.Point{.25, .25},
 		geom.Point{.75, .25}, geom.Point{.75, .75}, geom.Point{.25, .75},
 		geom.Point{.25, .25}}}
-	gob.Register(geom.Polygon{})
-	gob.Register(geom.Point{})
 }
 
 func TestArea(t *testing.T) {
@@ -1172,52 +1169,6 @@ func TestPointOnSurface(t *testing.T) {
 		t.Fail()
 	}
 	drawShapes(blockGroup, county, ps, "testPointOnSurface.png")
-}
-
-func TestWithin1(t *testing.T) {
-	f, err := os.Open("testData/cell1.gob")
-	handle(err)
-	g := gob.NewDecoder(f)
-	var cell geom.Point
-	err = g.Decode(&cell)
-	handle(err)
-	f.Close()
-	f, err = os.Open("testData/tzs1.gob")
-	handle(err)
-	g = gob.NewDecoder(f)
-	var tzs []geom.T
-	err = g.Decode(&tzs)
-	handle(err)
-	f.Close()
-	for i, tz := range tzs {
-		//c, err := Centroid(cell)
-		//handle(err)
-		t.Log(i, orientation(tz.(geom.Polygon)))
-		err = FixOrientation(tz)
-		handle(err)
-		in, err := Within(cell, tz)
-		handle(err)
-		t.Log(i, in, orientation(tz.(geom.Polygon)))
-		switch i {
-		case 0:
-			if in {
-				t.Fail()
-			}
-		case 1:
-			if in {
-				t.Fail()
-			}
-		case 2:
-			if !in {
-				t.Fail()
-			}
-		case 3:
-			if in {
-				t.Fail()
-			}
-		}
-		drawShapes(cell, tz, nil, fmt.Sprintf("testWithin1_%v.png", i))
-	}
 }
 
 func TestCentroid(t *testing.T) {

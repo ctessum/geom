@@ -2,8 +2,8 @@ package carto
 
 import (
 	"encoding/json"
-	"github.com/twpayne/gogeom/geom"
-	"github.com/twpayne/gogeom/geom/encoding/geojson"
+	"github.com/ctessum/geom"
+	"github.com/ctessum/geom/encoding/geojson"
 	"io"
 )
 
@@ -52,7 +52,7 @@ func (g *GeoJSON) GetProperty(propertyName string) []float64 {
 	return out
 }
 
-func (g *GeoJSON) GetGeometry() ([]geom.T,error) {
+func (g *GeoJSON) GetGeometry() ([]geom.T, error) {
 	var err error
 	out := make([]geom.T, len(g.Features))
 	for i, f := range g.Features {

@@ -1,8 +1,8 @@
 package hex
 
 import (
-	"github.com/twpayne/gogeom/geom"
-	"github.com/twpayne/gogeom/geom/encoding/wkb"
+	"github.com/ctessum/geom"
+	"github.com/ctessum/geom/encoding/wkb"
 	"testing"
 )
 
