@@ -76,7 +76,7 @@ func polygon2geom(s shp.Polygon) geom.T {
 			pg[i][j-start] = geom.Point(s.Points[j])
 		}
 	}
-	return &pg
+	return pg
 }
 func polygonM2geom(s shp.PolygonM) geom.T {
 	var pg geom.PolygonM = make([][]geom.PointM, len(s.Parts))
@@ -92,7 +92,7 @@ func polygonM2geom(s shp.PolygonM) geom.T {
 			jj--
 		}
 	}
-	return &pg
+	return pg
 }
 
 func polygonZ2geom(s shp.PolygonZ) geom.T {
@@ -110,7 +110,7 @@ func polygonZ2geom(s shp.PolygonZ) geom.T {
 			jj--
 		}
 	}
-	return &pg
+	return pg
 }
 func polyLine2geom(s shp.PolyLine) geom.T {
 	var pl geom.MultiLineString = make([]geom.LineString, len(s.Parts))
@@ -121,7 +121,7 @@ func polyLine2geom(s shp.PolyLine) geom.T {
 			pl[i][j-start] = geom.Point(s.Points[j])
 		}
 	}
-	return &pl
+	return pl
 }
 func polyLineM2geom(s shp.PolyLineM) geom.T {
 	var pl geom.MultiLineStringM = make([]geom.LineStringM, len(s.Parts))
@@ -136,7 +136,7 @@ func polyLineM2geom(s shp.PolyLineM) geom.T {
 			jj++
 		}
 	}
-	return &pl
+	return pl
 }
 func polyLineZ2geom(s shp.PolyLineZ) geom.T {
 	var pl geom.MultiLineStringZM = make([]geom.LineStringZM, len(s.Parts))
@@ -151,28 +151,28 @@ func polyLineZ2geom(s shp.PolyLineZ) geom.T {
 			jj++
 		}
 	}
-	return &pl
+	return pl
 }
 func multiPoint2geom(s shp.MultiPoint) geom.T {
 	var mp geom.MultiPoint = make([]geom.Point, len(s.Points))
 	for i, p := range s.Points {
 		mp[i] = geom.Point(p)
 	}
-	return &mp
+	return mp
 }
 func multiPointM2geom(s shp.MultiPointM) geom.T {
 	var mp geom.MultiPointM = make([]geom.PointM, len(s.Points))
 	for i, p := range s.Points {
 		mp[i] = geom.PointM{p.X, p.Y, s.MArray[i]}
 	}
-	return &mp
+	return mp
 }
 func multiPointZ2geom(s shp.MultiPointZ) geom.T {
 	var mp geom.MultiPointZM = make([]geom.PointZM, len(s.Points))
 	for i, p := range s.Points {
 		mp[i] = geom.PointZM{p.X, p.Y, s.ZArray[i], s.MArray[i]}
 	}
-	return &mp
+	return mp
 }
 
 // Geom2Shp converts a geometry object to a shapefile shape.

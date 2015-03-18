@@ -21,7 +21,7 @@
 // based on http://code.google.com/p/as3polyclip/ (MIT licensed)
 // and code by Martínez et al: http://wwwdi.ujaen.es/~fmartin/bool_op.html (public domain)
 
-package geomop
+package op
 
 import (
 	"fmt"

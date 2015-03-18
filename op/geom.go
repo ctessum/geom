@@ -21,9 +21,9 @@
 // based on http://code.google.com/p/as3polyclip/ (MIT licensed)
 // and code by Martínez et al: http://wwwdi.ujaen.es/~fmartin/bool_op.html (public domain)
 
-// Package geomop provides implementation of algorithms for geometry operations.
+// Package op provides implementation of algorithms for geometry operations.
 // For further details, consult the description of Polygon.Construct method.
-package geomop
+package op
 
 import (
 	"fmt"
@@ -261,7 +261,7 @@ func newInfiniteLoopError(subject, clipping geom.T) InfiniteLoopError {
 
 func (e InfiniteLoopError) Error() string {
 	return fmt.Sprintf(
-		"Function geomop.Construct appears to have fallen into an "+
+		"Function op.Construct appears to have fallen into an "+
 			"infinite loop. \n\nSubject geometry=%#v\n\nClipping geometry=%#v",
 		e.s, e.c)
 }

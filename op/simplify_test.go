@@ -1,4 +1,4 @@
-package geomop
+package op
 
 import (
 	"reflect"

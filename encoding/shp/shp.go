@@ -24,6 +24,17 @@ type Reader struct {
 	err          error
 }
 
+func Open(filename string) (*Reader, error) {
+	r := new(Reader)
+	rr, err := shp.Open(filename)
+	r.Reader = *rr
+	return r, err
+}
+
+func (r *Reader) Close() {
+	r.Reader.Close()
+}
+
 // DecodeRow decodes a shapefile row into a struct. The input
 // value rec must be a pointer to a struct. The function will
 // attempt to match the struct fields to shapefile data.
@@ -59,8 +70,8 @@ func (r Reader) DecodeRow(rec interface{}) bool {
 		tagName := strings.ToLower(fType.Tag.Get(tag))
 
 		// First, check if this is a geometry field
-		var gref geom.T
-		if fType.Type.Implements(reflect.TypeOf(gref)) {
+		gI := reflect.TypeOf((*geom.T)(nil)).Elem()
+		if fType.Type.Implements(gI) {
 			_, g, err := shp2Geom(0, shape)
 			if err != nil {
 				r.err = err

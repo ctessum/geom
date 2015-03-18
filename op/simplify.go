@@ -1,4 +1,4 @@
-package geomop
+package op
 
 import (
 	"github.com/ctessum/geom"
@@ -92,6 +92,11 @@ func segMakesNotSimple(segStart, segEnd geom.Point, paths [][]geom.Point) bool {
 	for _, p := range paths {
 		for i := 0; i < len(p)-1; i++ {
 			seg2 := segment{p[i], p[i+1]}
+			if seg1.start == seg2.start || seg1.end == seg2.end ||
+				seg1.start == seg2.end || seg1.end == seg2.start {
+				// colocated endpoints are not a problem here
+				return false
+			}
 			numIntersections, _, _ := findIntersection(seg1, seg2)
 			if numIntersections > 0 {
 				return true
