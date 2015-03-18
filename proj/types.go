@@ -1,4 +1,4 @@
-package projgeom
+package proj
 
 import (
 	"github.com/ctessum/geom"

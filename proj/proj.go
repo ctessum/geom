@@ -6,7 +6,7 @@ It is an interface between
 and
 	"github.com/twpayne/gogeom/geom"
 */
-package projgeom
+package proj
 
 import (
 	"io"
