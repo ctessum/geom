@@ -14,9 +14,9 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/ctessum/geom"
 	"github.com/lukeroth/gdal"
 	"github.com/pebbe/go-proj-4/proj"
-	"github.com/twpayne/gogeom/geom"
 )
 
 type UnsupportedGeometryError struct {
@@ -52,7 +52,7 @@ func project(g geom.T, src, dst *proj.Proj, inputDegrees, outputDegrees bool) (g
 	//	return projectPointZM(&pointZM, src, dst)
 	case geom.LineString:
 		lineString := g.(geom.LineString)
-		return projectLineString(&lineString, src, dst, inputDegrees,
+		return projectLineString(lineString, src, dst, inputDegrees,
 			outputDegrees)
 	//case geom.LineStringZ:
 	//	lineStringZ := g.(geom.LineStringZ)
@@ -65,11 +65,11 @@ func project(g geom.T, src, dst *proj.Proj, inputDegrees, outputDegrees bool) (g
 	//	return projectLineStringZM(&lineStringZM, src, dst)
 	case geom.MultiLineString:
 		multiLineString := g.(geom.MultiLineString)
-		return projectMultiLineString(&multiLineString, src, dst,
+		return projectMultiLineString(multiLineString, src, dst,
 			inputDegrees, outputDegrees)
 	case geom.Polygon:
 		polygon := g.(geom.Polygon)
-		return projectPolygon(&polygon, src, dst,
+		return projectPolygon(polygon, src, dst,
 			inputDegrees, outputDegrees)
 	//case geom.PolygonZ:
 	//	polygonZ := g.(geom.PolygonZ)
@@ -82,7 +82,7 @@ func project(g geom.T, src, dst *proj.Proj, inputDegrees, outputDegrees bool) (g
 	//	return projectPolygonZM(&polygonZM, src, dst), nil
 	case geom.MultiPolygon:
 		multiPolygon := g.(geom.MultiPolygon)
-		return projectMultiPolygon(&multiPolygon, src, dst,
+		return projectMultiPolygon(multiPolygon, src, dst,
 			inputDegrees, outputDegrees)
 	default:
 		return nil, &UnsupportedGeometryError{reflect.TypeOf(g)}
@@ -95,13 +95,13 @@ type CoordinateTransform struct {
 	inputDegrees, outputDegrees bool
 }
 
-func NewCoordinateTransform(src, dst gdal.SpatialReference) (
+func NewCoordinateTransform(src, dst SR) (
 	ct *CoordinateTransform, err error) {
 	ct = new(CoordinateTransform)
-	ct.sameProj = src.IsSame(dst)
+	ct.sameProj = gdal.SpatialReference(src).IsSame(gdal.SpatialReference(dst))
 	var srcproj, dstproj string
 	if !ct.sameProj {
-		srcproj, err = src.ToProj4()
+		srcproj, err = gdal.SpatialReference(src).ToProj4()
 		if err.Error() != "No Error" {
 			return
 		}
@@ -112,7 +112,7 @@ func NewCoordinateTransform(src, dst gdal.SpatialReference) (
 			return
 		}
 
-		dstproj, err = dst.ToProj4()
+		dstproj, err = gdal.SpatialReference(dst).ToProj4()
 		if err.Error() != "No Error" {
 			return
 		}
@@ -137,15 +137,30 @@ func (ct *CoordinateTransform) Reproject(g geom.T) (geom.T, error) {
 
 // ReadPrj reads an ESRI '.prj' projection file and
 // creates a corresponding spatial reference.
-func ReadPrj(f io.Reader) (gdal.SpatialReference, error) {
+func ReadPrj(f io.Reader) (SR, error) {
 	sr := gdal.CreateSpatialReference("")
 	prj, err := ioutil.ReadAll(f)
 	if err != nil {
-		return gdal.SpatialReference{}, err
+		return SR{}, err
 	}
 	err = sr.FromWKT(string(prj))
 	if err.Error() == "No Error" {
 		err = nil
 	}
-	return sr, err
+	return SR(sr), err
 }
+
+// FromProj4 converts a Proj4 string into the corresponding
+// spatial reference
+func FromProj4(proj4 string) (SR, error) {
+	sr := gdal.CreateSpatialReference("")
+	err := sr.FromProj4(proj4)
+	if err.Error() == "No Error" {
+		err = nil
+	}
+	return SR(sr), err
+}
+
+// SR is a spatial reference or coordinate system to use in
+// reprojections.
+type SR gdal.SpatialReference

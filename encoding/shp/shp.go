@@ -33,6 +33,10 @@ type Reader struct {
 // that match an attribute name in the shapefile (case insensitive).
 // Only exported fields will be matched, and all matched fields
 // must be of either string, int, or float64 types.
+// The return value is true if there are still more records
+// to be read from the shapefile.
+// Be sure to call r.Error() after reading is finished
+// to check for any errors that may have occured.
 func (r Reader) DecodeRow(rec interface{}) bool {
 	run := r.Next()
 	if !run || r.err != nil {

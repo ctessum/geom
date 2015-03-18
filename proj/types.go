@@ -1,8 +1,8 @@
 package projgeom
 
 import (
+	"github.com/ctessum/geom"
 	"github.com/pebbe/go-proj-4/proj"
-	"github.com/twpayne/gogeom/geom"
 )
 
 func projectPoint(point *geom.Point, src, dst *proj.Proj, inputDegrees,
@@ -23,74 +23,74 @@ func projectPoint(point *geom.Point, src, dst *proj.Proj, inputDegrees,
 	return newPoint, err
 }
 
-func projectLineString(lineString *geom.LineString, src, dst *proj.Proj,
+func projectLineString(lineString geom.LineString, src, dst *proj.Proj,
 	inputDegrees, outputDegrees bool) (geom.T, error) {
 	var err error
 	var newPoint geom.T
 	var newLineString geom.LineString
-	newLineString.Points = make([]geom.Point, len(lineString.Points))
-	for i, point := range lineString.Points {
+	newLineString = make([]geom.Point, len(lineString))
+	for i, point := range lineString {
 		newPoint, err = projectPoint(&point, src, dst, inputDegrees,
 			outputDegrees)
 		if err != nil {
 			return nil, err
 		}
-		newLineString.Points[i] = newPoint.(geom.Point)
+		newLineString[i] = newPoint.(geom.Point)
 	}
 	return newLineString, err
 }
 
-func projectMultiLineString(multiLineString *geom.MultiLineString,
+func projectMultiLineString(multiLineString geom.MultiLineString,
 	src, dst *proj.Proj, inputDegrees, outputDegrees bool) (geom.T, error) {
 	var err error
 	var newLineString geom.T
 	var newMultiLineString geom.MultiLineString
-	newMultiLineString.LineStrings =
-		make([]geom.LineString, len(multiLineString.LineStrings))
-	for i, lineString := range multiLineString.LineStrings {
-		newLineString, err = projectLineString(&lineString,
+	newMultiLineString =
+		make([]geom.LineString, len(multiLineString))
+	for i, lineString := range multiLineString {
+		newLineString, err = projectLineString(lineString,
 			src, dst, inputDegrees, outputDegrees)
 		if err != nil {
 			return nil, err
 		}
-		newMultiLineString.LineStrings[i] = newLineString.(geom.LineString)
+		newMultiLineString[i] = newLineString.(geom.LineString)
 	}
 	return newMultiLineString, err
 }
 
-func projectPolygon(polygon *geom.Polygon, src, dst *proj.Proj,
+func projectPolygon(polygon geom.Polygon, src, dst *proj.Proj,
 	inputDegrees, outputDegrees bool) (geom.T, error) {
 	var err error
 	var newPoint geom.T
 	var newPolygon geom.Polygon
-	newPolygon.Rings = make([][]geom.Point, len(polygon.Rings))
-	for i := 0; i < len(polygon.Rings); i++ {
-		newPolygon.Rings[i] = make([]geom.Point, len(polygon.Rings[i]))
-		for j := 0; j < len(polygon.Rings[i]); j++ {
-			newPoint, err = projectPoint(&polygon.Rings[i][j],
+	newPolygon = make([][]geom.Point, len(polygon))
+	for i := 0; i < len(polygon); i++ {
+		newPolygon[i] = make([]geom.Point, len(polygon[i]))
+		for j := 0; j < len(polygon[i]); j++ {
+			newPoint, err = projectPoint(&polygon[i][j],
 				src, dst, inputDegrees, outputDegrees)
 			if err != nil {
 				return nil, err
 			}
-			newPolygon.Rings[i][j] = newPoint.(geom.Point)
+			newPolygon[i][j] = newPoint.(geom.Point)
 		}
 	}
 	return newPolygon, err
 }
 
-func projectMultiPolygon(multiPolygon *geom.MultiPolygon,
+func projectMultiPolygon(multiPolygon geom.MultiPolygon,
 	src, dst *proj.Proj, inputDegrees, outputDegrees bool) (geom.T, error) {
 	var err error
 	var newPolygon geom.T
 	var newMultiPolygon geom.MultiPolygon
-	newMultiPolygon.Polygons = make([]geom.Polygon, len(multiPolygon.Polygons))
-	for i, polygon := range multiPolygon.Polygons {
-		newPolygon, err = projectPolygon(&polygon,
+	newMultiPolygon = make([]geom.Polygon, len(multiPolygon))
+	for i, polygon := range multiPolygon {
+		newPolygon, err = projectPolygon(polygon,
 			src, dst, inputDegrees, outputDegrees)
 		if err != nil {
 			return nil, err
 		}
-		multiPolygon.Polygons[i] = newPolygon.(geom.Polygon)
+		multiPolygon[i] = newPolygon.(geom.Polygon)
 	}
 	return newMultiPolygon, err
 }
