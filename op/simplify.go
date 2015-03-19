@@ -4,9 +4,19 @@ import (
 	"github.com/ctessum/geom"
 )
 
+// Simplify simplifies a line, multiline, polygon, or multipolygon
+// by removing points according to the tolerance parameter,
+// while ensuring that the resulting shape is not self intersecting
+// (but only if the input shape is not self intersecting).
+//
+// It is based on the algorithm:
+// J. L. G. Pallero, Robust line simplification on the plane.
+// Comput. Geosci. 61, 152–159 (2013).
 func Simplify(g geom.T, tolerance float64) (geom.T, error) {
 
 	switch g.(type) {
+	case geom.Point, geom.MultiPoint:
+		return g, nil
 	case geom.Polygon:
 		p := g.(geom.Polygon)
 		var out geom.Polygon = make([][]geom.Point, len(p))
