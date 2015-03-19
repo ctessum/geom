@@ -176,11 +176,17 @@ func (m *Canvas) DrawVector(g geom.T, fillColor color.NRGBA,
 				}
 			}
 			path.Close()
-			m.Push() // save stroke color
-			m.SetColor(fillColor)
-			m.Fill(path)
-			m.Pop() // retrieve stroke color
-			m.Stroke(path)
+			if _, _, _, a := fillColor.RGBA(); a != 0 {
+				// Only fill if not transparent
+				m.Push() // save stroke color
+				m.SetColor(fillColor)
+				m.Fill(path)
+				m.Pop() // retrieve stroke color
+			}
+			if _, _, _, a := lineStyle.Color.RGBA(); a != 0 {
+				// Only stroke if not transparent
+				m.Stroke(path)
+			}
 		}
 	//case geom.PolygonZ:
 	//case geom.PolygonM:
