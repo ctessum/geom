@@ -71,9 +71,9 @@ type Canvas struct {
 //	}
 //)
 
-func NewCanvas(N, S, E, W float64, c *draw.Canvas) *Canvas {
+func NewCanvas(N, S, E, W float64, c draw.Canvas) *Canvas {
 	m := &Canvas{
-		*c,
+		c,
 		geom.NewBoundsPoint(geom.Point{W, S}).
 			ExtendPoint(geom.Point{E, N}),
 		min(float64(c.Max.X-c.Min.X)/(E-W),
