@@ -48,7 +48,7 @@ func (r *Reader) Close() {
 // to be read from the shapefile.
 // Be sure to call r.Error() after reading is finished
 // to check for any errors that may have occured.
-func (r Reader) DecodeRow(rec interface{}) bool {
+func (r *Reader) DecodeRow(rec interface{}) bool {
 	run := r.Next()
 	if !run || r.err != nil {
 		return false
@@ -87,7 +87,6 @@ func (r Reader) DecodeRow(rec interface{}) bool {
 		} else if j, ok := r.fieldIndices[fName]; ok {
 			r.setFieldToAttribute(fValue, fType.Type, j)
 		}
-
 	}
 	r.row++
 	return run
