@@ -127,14 +127,14 @@ func (m *Canvas) DrawVector(g geom.T, fillColor color.NRGBA,
 	switch g.(type) {
 	case geom.Point:
 		pTemp := g.(geom.Point)
-		p := m.coordinates(pTemp)
+		p := m.Coordinates(pTemp)
 		m.DrawGlyph(markerGlyph, p)
 	//case geom.PointZ:
 	//case geom.PointM:
 	//case geom.PointZM:
 	case geom.MultiPoint:
 		for _, pTemp := range g.(geom.MultiPoint) {
-			p := m.coordinates(pTemp)
+			p := m.Coordinates(pTemp)
 			m.DrawGlyph(markerGlyph, p)
 		}
 	//case geom.MultiPointZ:
@@ -144,7 +144,7 @@ func (m *Canvas) DrawVector(g geom.T, fillColor color.NRGBA,
 		l := g.(geom.LineString)
 		var path vg.Path
 		for i, pTemp := range l {
-			p := m.coordinates(pTemp)
+			p := m.Coordinates(pTemp)
 			if i == 0 {
 				path.Move(p.X, p.Y)
 			} else {
@@ -168,7 +168,7 @@ func (m *Canvas) DrawVector(g geom.T, fillColor color.NRGBA,
 		for _, ring := range pg {
 			var path vg.Path
 			for i, pTemp := range ring {
-				p := m.coordinates(pTemp)
+				p := m.Coordinates(pTemp)
 				if i == 0 {
 					path.Move(p.X, p.Y)
 				} else {
@@ -205,11 +205,12 @@ func (m *Canvas) DrawVector(g geom.T, fillColor color.NRGBA,
 	return nil
 }
 
-// transform geographic coordinates to raster map coordinates
-func (m *Canvas) coordinates(pIn geom.Point) draw.Point {
+// Coordinates transforms geographic coordinates to coordinates
+// on the canvas
+func (m *Canvas) Coordinates(p geom.Point) draw.Point {
 	var pOut draw.Point
-	pOut.X = m.Min.X + vg.Length(m.scale*(pIn.X-m.bounds.Min.X))
-	pOut.Y = m.Min.Y + vg.Length(m.scale*(pIn.Y-m.bounds.Min.Y))
+	pOut.X = m.Min.X + vg.Length(m.scale*(p.X-m.bounds.Min.X))
+	pOut.Y = m.Min.Y + vg.Length(m.scale*(p.Y-m.bounds.Min.Y))
 	return pOut
 }
 
