@@ -165,8 +165,8 @@ func (m *Canvas) DrawVector(g geom.T, fillColor color.NRGBA,
 	//case geom.MultiLineStringZM:
 	case geom.Polygon:
 		pg := g.(geom.Polygon)
+		var path vg.Path
 		for _, ring := range pg {
-			var path vg.Path
 			for i, pTemp := range ring {
 				p := m.Coordinates(pTemp)
 				if i == 0 {
@@ -175,18 +175,18 @@ func (m *Canvas) DrawVector(g geom.T, fillColor color.NRGBA,
 					path.Line(p.X, p.Y)
 				}
 			}
-			path.Close()
-			if _, _, _, a := fillColor.RGBA(); a != 0 {
-				// Only fill if not transparent
-				m.Push() // save stroke color
-				m.SetColor(fillColor)
-				m.Fill(path)
-				m.Pop() // retrieve stroke color
-			}
-			if _, _, _, a := lineStyle.Color.RGBA(); a != 0 {
-				// Only stroke if not transparent
-				m.Stroke(path)
-			}
+		}
+		path.Close()
+		if _, _, _, a := fillColor.RGBA(); a != 0 {
+			// Only fill if not transparent
+			m.Push() // save stroke color
+			m.SetColor(fillColor)
+			m.Fill(path)
+			m.Pop() // retrieve stroke color
+		}
+		if _, _, _, a := lineStyle.Color.RGBA(); a != 0 {
+			// Only stroke if not transparent
+			m.Stroke(path)
 		}
 	//case geom.PolygonZ:
 	//case geom.PolygonM:
@@ -206,7 +206,7 @@ func (m *Canvas) DrawVector(g geom.T, fillColor color.NRGBA,
 }
 
 // Coordinates transforms geographic coordinates to coordinates
-// on the canvas
+// on the canvas.
 func (m *Canvas) Coordinates(p geom.Point) draw.Point {
 	var pOut draw.Point
 	pOut.X = m.Min.X + vg.Length(m.scale*(p.X-m.bounds.Min.X))
