@@ -176,7 +176,7 @@ func multiPointZ2geom(s shp.MultiPointZ) geom.T {
 }
 
 // Geom2Shp converts a geometry object to a shapefile shape.
-func Geom2Shp(g geom.T) (shp.Shape, error) {
+func geom2Shp(g geom.T) (shp.Shape, error) {
 	if g == nil {
 		return &shp.Null{}, nil
 	}

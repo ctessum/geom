@@ -15,23 +15,37 @@ import (
 // Case insensitive.
 const tag = "shp"
 
-// Reader is a wrapper around the github.com/jonas-p/go-shp shapefile
+const (
+	// intLength is the integer length to use when creating shapefiles
+	intLength = 10
+
+	// floatLength is the float length to use when creating shapefiles
+	floatLength = 10
+
+	// floatPrecision is the float precision to use when creating shapefiles
+	floatPrecision = 10
+
+	// stringLength is the length of the string to use when creating shapefiles
+	stringLength = 50
+)
+
+// Decoder is a wrapper around the github.com/jonas-p/go-shp shapefile
 // reader.
-type Reader struct {
+type Decoder struct {
 	shp.Reader
 	row          int
 	fieldIndices map[string]int
 	err          error
 }
 
-func Open(filename string) (*Reader, error) {
-	r := new(Reader)
+func NewDecoder(filename string) (*Decoder, error) {
+	r := new(Decoder)
 	rr, err := shp.Open(filename)
 	r.Reader = *rr
 	return r, err
 }
 
-func (r *Reader) Close() {
+func (r *Decoder) Close() {
 	r.Reader.Close()
 }
 
@@ -48,7 +62,7 @@ func (r *Reader) Close() {
 // to be read from the shapefile.
 // Be sure to call r.Error() after reading is finished
 // to check for any errors that may have occured.
-func (r *Reader) DecodeRow(rec interface{}) bool {
+func (r *Decoder) DecodeRow(rec interface{}) bool {
 	run := r.Next()
 	if !run || r.err != nil {
 		return false
@@ -94,7 +108,7 @@ func (r *Reader) DecodeRow(rec interface{}) bool {
 
 // Error returns any errors that have been encountered while decoding
 // a shapfile.
-func (r Reader) Error() error {
+func (r Decoder) Error() error {
 	return r.err
 }
 
@@ -136,7 +150,7 @@ func shpAttributeToInt(attr string) (int64, error) {
 	return i, err
 }
 
-func (r Reader) setFieldToAttribute(fValue reflect.Value,
+func (r Decoder) setFieldToAttribute(fValue reflect.Value,
 	fType reflect.Type, index int) {
 	dataStr := r.ReadAttribute(r.row, index)
 	switch fType.Kind() {
@@ -159,5 +173,123 @@ func (r Reader) setFieldToAttribute(fValue reflect.Value,
 	default:
 		panic("Struct field type can only be float64, int, or string.")
 	}
+}
 
+// Encode is a wrapper around the github.com/jonas-p/go-shp shapefile
+// reader.
+type Encoder struct {
+	shp.Writer
+	fieldIndices []int
+	geomIndex    int
+	row          int
+}
+
+// NewEncoder creates a new encoder using the path to the output shapefile
+// and a data archetype which is a struct whose fields will become the
+// fields in the output shapefile. The archetype struct must also contain
+// a field that holds a concrete geometry type by which to set the shape type
+// in the output shapefile.
+func NewEncoder(filename string, archetype interface{}) (*Encoder, error) {
+	var err error
+	e := new(Encoder)
+
+	t := reflect.TypeOf(archetype)
+	if t.Kind() != reflect.Struct {
+		panic("Archetype must be a struct")
+	}
+
+	var shpType shp.ShapeType
+	var shpFields []shp.Field
+	for i := 0; i < t.NumField(); i++ {
+		sField := t.Field(i)
+		switch sField.Type.Kind() {
+		case reflect.Int:
+			shpFields = append(shpFields, shp.NumberField(sField.Name, intLength))
+			e.fieldIndices = append(e.fieldIndices, i)
+		case reflect.Float64:
+			shpFields = append(shpFields,
+				shp.FloatField(sField.Name, floatLength, floatPrecision))
+			e.fieldIndices = append(e.fieldIndices, i)
+		case reflect.String:
+			shpFields = append(shpFields,
+				shp.StringField(sField.Name, stringLength))
+			e.fieldIndices = append(e.fieldIndices, i)
+		case reflect.Struct, reflect.Slice:
+			switch sField.Name {
+			case "Point":
+				shpType = shp.POINT
+				e.geomIndex = i
+			case "LineString":
+				shpType = shp.POLYLINE
+				e.geomIndex = i
+			case "Polygon":
+				shpType = shp.POLYGON
+				e.geomIndex = i
+			case "MultiPoint":
+				shpType = shp.MULTIPOINT
+				e.geomIndex = i
+			case "PointZ":
+				shpType = shp.POINTZ
+				e.geomIndex = i
+			case "LineStringZ":
+				shpType = shp.POLYLINEZ
+				e.geomIndex = i
+			case "PolygonZ":
+				shpType = shp.POLYGONZ
+				e.geomIndex = i
+			case "MultiPolygonZ":
+				shpType = shp.MULTIPOINTZ
+				e.geomIndex = i
+			case "PointM":
+				shpType = shp.POINTM
+				e.geomIndex = i
+			case "LineStringM":
+				shpType = shp.POLYLINEM
+				e.geomIndex = i
+			case "PolygonM":
+				shpType = shp.POLYGONM
+				e.geomIndex = i
+			case "MultiPointM":
+				shpType = shp.MULTIPOINTM
+				e.geomIndex = i
+				//shpType = shp.MULTIPATCH
+			}
+		default:
+			panic(fmt.Sprintf("Invalid type `%v` for field `%v`.",
+				sField.Type.Kind(), sField.Name))
+		}
+	}
+	if shpType == shp.NULL {
+		panic("Did not find a shape field in the archetype struct")
+	}
+
+	w, err := shp.Create(filename, shpType)
+	if err != nil {
+		return nil, err
+	}
+	e.Writer = *w
+	e.Writer.SetFields(shpFields)
+	return e, nil
+}
+
+func (e *Encoder) Close() {
+	e.Writer.Close()
+}
+
+// Encode encodes the data in a struct as a shapefile record.
+// d must be of the same type as the archetype struct that was used to
+// initialize the encoder.
+func (e *Encoder) Encode(d interface{}) error {
+	v := reflect.ValueOf(d)
+	for i, j := range e.fieldIndices {
+		e.Writer.WriteAttribute(e.row, i, v.Field(j).Interface())
+	}
+
+	shape, err := geom2Shp(v.Field(e.geomIndex).Interface().(geom.T))
+	if err != nil {
+		return err
+	}
+	e.Writer.Write(shape)
+	e.row++
+	return nil
 }
