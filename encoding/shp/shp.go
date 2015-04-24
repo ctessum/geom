@@ -41,6 +41,9 @@ type Decoder struct {
 func NewDecoder(filename string) (*Decoder, error) {
 	r := new(Decoder)
 	rr, err := shp.Open(filename)
+	if err != nil {
+		return nil, err
+	}
 	r.Reader = *rr
 	return r, err
 }
@@ -77,6 +80,8 @@ func (r *Decoder) DecodeRow(rec interface{}) bool {
 	}
 	v, t := getRecInfo(rec)
 	_, shape := r.Shape()
+
+	gI := reflect.TypeOf((*geom.T)(nil)).Elem()
 	for i := 0; i < v.NumField(); i++ {
 		fType := t.Field(i)
 		fValue := v.Field(i)
@@ -84,7 +89,6 @@ func (r *Decoder) DecodeRow(rec interface{}) bool {
 		tagName := strings.ToLower(fType.Tag.Get(tag))
 
 		// First, check if this is a geometry field
-		gI := reflect.TypeOf((*geom.T)(nil)).Elem()
 		if fType.Type.Implements(gI) {
 			_, g, err := shp2Geom(0, shape)
 			if err != nil {

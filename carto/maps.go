@@ -94,8 +94,8 @@ func NewRasterMap(N, S, E, W float64, width int) *RasterMap {
 	m := &RasterMap{
 		Canvas: Canvas{
 			//Canvas: draw.New(vgimg.NewImage(I, vgimg.DPI(int(float64(width)/mapWidth)))),
-			//Canvas: draw.New(vgimg.NewImage(I)),
-			Canvas: draw.New(vgimg.New(vgimg.UseImage(I), vgimg.DPI(300))),
+			Canvas: draw.New(vgimg.NewImage(I)),
+			//Canvas: draw.New(vgimg.New(vgimg.UseImage(I), vgimg.DPI(300))),
 			bounds: geom.NewBoundsPoint(geom.Point{W, S}).
 				ExtendPoint(geom.Point{E, N}),
 		},
