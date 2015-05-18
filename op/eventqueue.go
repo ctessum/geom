@@ -60,12 +60,12 @@ func (q *eventQueue) enqueue(e *endpoint) {
 // Return true means that [...] e1 is processed by the algorithm after e2
 func endpointLess(e1, e2 *endpoint) bool {
 	// Different x coordinate
-	if e1.p.X != e2.p.X {
+	if !floatEquals(e1.p.X, e2.p.X) {
 		return e1.p.X > e2.p.X
 	}
 
 	// Same x coordinate. The event with lower y coordinate is processed first
-	if e1.p.Y != e2.p.Y {
+	if !floatEquals(e1.p.Y, e2.p.Y) {
 		return e1.p.Y > e2.p.Y
 	}
 

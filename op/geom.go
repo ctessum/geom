@@ -44,9 +44,9 @@ func PointEquals(p1, p2 geom.Point) bool {
 }
 
 func floatEquals(f1, f2 float64) bool {
-	return (f1 == f2)
-	//return (f1 == f2) ||
-	//	(math.Abs(f1-f2)/math.Abs(f1+f2) < tolerance)
+	//return (f1 == f2)
+	return (f1 == f2) ||
+		(math.Abs(f1-f2)/math.Abs(f1+f2) < tolerance)
 }
 
 func pointSubtract(p1, p2 geom.Point) geom.Point {
