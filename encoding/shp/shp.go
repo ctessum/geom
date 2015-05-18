@@ -39,8 +39,9 @@ type Decoder struct {
 }
 
 func NewDecoder(filename string) (*Decoder, error) {
+	fname := strings.TrimSuffix(filename, ".shp")
 	r := new(Decoder)
-	rr, err := shp.Open(filename)
+	rr, err := shp.Open(fname + ".shp")
 	if err != nil {
 		return nil, err
 	}
@@ -50,6 +51,17 @@ func NewDecoder(filename string) (*Decoder, error) {
 
 func (r *Decoder) Close() {
 	r.Reader.Close()
+}
+
+// getFieldIndices figures out the indices of the attribute fields
+func (r *Decoder) getFieldIndices() {
+	if r.fieldIndices == nil {
+		r.fieldIndices = make(map[string]int)
+		for i, f := range r.Fields() {
+			name := strings.ToLower(shpFieldName2String(f.Name))
+			r.fieldIndices[name] = i
+		}
+	}
 }
 
 // DecodeRow decodes a shapefile row into a struct. The input
@@ -70,14 +82,7 @@ func (r *Decoder) DecodeRow(rec interface{}) bool {
 	if !run || r.err != nil {
 		return false
 	}
-	// Figure out the indices of the attribute fields
-	if r.fieldIndices == nil {
-		r.fieldIndices = make(map[string]int)
-		for i, f := range r.Fields() {
-			name := strings.ToLower(shpFieldName2String(f.Name))
-			r.fieldIndices[name] = i
-		}
-	}
+	r.getFieldIndices()
 	v, t := getRecInfo(rec)
 	_, shape := r.Shape()
 
@@ -108,6 +113,45 @@ func (r *Decoder) DecodeRow(rec interface{}) bool {
 	}
 	r.row++
 	return run
+}
+
+// DecodeRowFields decodes a shapefile row, returning the row
+// geometry (g), the values of the specified fields (fields),
+// and whether there are still more records to be read from the
+// shapefile (more).
+func (r *Decoder) DecodeRowFields(fieldNames ...string) (
+	g geom.T, fields map[string]interface{}, more bool) {
+
+	fields = make(map[string]interface{})
+	var err error
+
+	more = r.Next()
+	if !more || r.err != nil {
+		return
+	}
+
+	r.getFieldIndices()
+
+	// Get geometry
+	_, shape := r.Shape()
+	_, g, err = shp2Geom(0, shape)
+	if err != nil {
+		r.err = err
+		return
+	}
+
+	// Get fields
+	for _, name := range fieldNames {
+		if i, ok := r.fieldIndices[strings.ToLower(name)]; ok {
+			fields[name] = r.getField(i)
+		} else {
+			r.err = fmt.Errorf("Shapefile does not contain field `%s`", name)
+			return
+		}
+	}
+	r.row++
+	return
+
 }
 
 // Error returns any errors that have been encountered while decoding
@@ -177,6 +221,30 @@ func (r Decoder) setFieldToAttribute(fValue reflect.Value,
 	default:
 		panic("Struct field type can only be float64, int, or string.")
 	}
+}
+
+func (r Decoder) getField(index int) (out interface{}) {
+	dataStr := r.ReadAttribute(r.row, index)
+	var err error
+	switch r.Fields()[index].Fieldtype {
+	case 'F':
+		out, err = shpAttributeToFloat(dataStr)
+		if err != nil {
+			r.err = err
+			return
+		}
+	case 'N':
+		out, err = shpAttributeToInt(dataStr)
+		if err != nil {
+			r.err = err
+			return
+		}
+	case 'C', 'D': // Date fields not yet implemented
+		out = dataStr
+	default:
+		panic("Field type can only be float64, int, or string.")
+	}
+	return
 }
 
 // Encode is a wrapper around the github.com/jonas-p/go-shp shapefile
