@@ -251,9 +251,10 @@ func (r Decoder) getField(index int) (out interface{}) {
 // reader.
 type Encoder struct {
 	shp.Writer
-	fieldIndices []int
-	geomIndex    int
-	row          int
+	fieldIndices      []int
+	geomIndex         int
+	row               int
+	createdFromStruct bool
 }
 
 // NewEncoder creates a new encoder using the path to the output shapefile
@@ -264,6 +265,7 @@ type Encoder struct {
 func NewEncoder(filename string, archetype interface{}) (*Encoder, error) {
 	var err error
 	e := new(Encoder)
+	e.createdFromStruct = true
 
 	t := reflect.TypeOf(archetype)
 	if t.Kind() != reflect.Struct {
@@ -344,6 +346,22 @@ func NewEncoder(filename string, archetype interface{}) (*Encoder, error) {
 	return e, nil
 }
 
+func NewEncoderFromFields(filename string, t shp.ShapeType,
+	fields ...shp.Field) (*Encoder, error) {
+
+	var err error
+	e := new(Encoder)
+
+	w, err := shp.Create(filename, t)
+	if err != nil {
+		return nil, err
+	}
+	e.Writer = *w
+	e.Writer.SetFields(fields)
+
+	return e, nil
+}
+
 func (e *Encoder) Close() {
 	e.Writer.Close()
 }
@@ -352,6 +370,10 @@ func (e *Encoder) Close() {
 // d must be of the same type as the archetype struct that was used to
 // initialize the encoder.
 func (e *Encoder) Encode(d interface{}) error {
+	if !e.createdFromStruct {
+		panic("Encode can only be used for encoders created with " +
+			"NewEncoder. Try EncodeFields instead.")
+	}
 	v := reflect.ValueOf(d)
 	for i, j := range e.fieldIndices {
 		e.Writer.WriteAttribute(e.row, i, v.Field(j).Interface())
@@ -362,6 +384,22 @@ func (e *Encoder) Encode(d interface{}) error {
 		return err
 	}
 	e.Writer.Write(shape)
+	e.row++
+	return nil
+}
+
+// EncodeFields encodes the geometry 'g' and 'vals' values as a
+// shapefile record. The number of values should be the same as
+// the number of fields the shapefile was created with.
+func (e *Encoder) EncodeFields(g geom.T, vals ...interface{}) error {
+	shape, err := geom2Shp(g)
+	if err != nil {
+		return err
+	}
+	e.Writer.Write(shape)
+	for i, v := range vals {
+		e.Writer.WriteAttribute(e.row, i, v)
+	}
 	e.row++
 	return nil
 }
