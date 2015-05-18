@@ -104,7 +104,7 @@ func NewCoordinateTransform(src, dst SR) (
 	var srcproj, dstproj string
 	if !ct.sameProj {
 		srcproj, err = gdal.SpatialReference(src).ToProj4()
-		if err.Error() != "No Error" {
+		if err != nil && err.Error() != "No Error" {
 			return
 		}
 		ct.inputDegrees = strings.Contains(srcproj, "longlat") ||
@@ -115,7 +115,7 @@ func NewCoordinateTransform(src, dst SR) (
 		}
 
 		dstproj, err = gdal.SpatialReference(dst).ToProj4()
-		if err.Error() != "No Error" {
+		if err != nil && err.Error() != "No Error" {
 			return
 		}
 		ct.outputDegrees = strings.Contains(dstproj, "longlat") ||
@@ -146,7 +146,7 @@ func ReadPrj(f io.Reader) (SR, error) {
 		return SR{}, err
 	}
 	err = sr.FromWKT(string(prj))
-	if err.Error() == "No Error" {
+	if err != nil && err.Error() == "No Error" {
 		err = nil
 	}
 	return SR(sr), err
@@ -157,7 +157,7 @@ func ReadPrj(f io.Reader) (SR, error) {
 func FromProj4(proj4 string) (SR, error) {
 	sr := gdal.CreateSpatialReference("")
 	err := sr.FromProj4(proj4)
-	if err.Error() == "No Error" {
+	if err != nil && err.Error() == "No Error" {
 		err = nil
 	}
 	return SR(sr), err
