@@ -6,6 +6,7 @@ import (
 	"reflect"
 
 	"github.com/ctessum/geom"
+	"github.com/ctessum/geom/op"
 	"github.com/jonas-p/go-shp"
 )
 
@@ -76,6 +77,8 @@ func polygon2geom(s shp.Polygon) geom.T {
 			pg[i][j-start] = geom.Point(s.Points[j])
 		}
 	}
+	// Make sure the winding direction is correct
+	op.FixOrientation(pg)
 	return pg
 }
 func polygonM2geom(s shp.PolygonM) geom.T {
@@ -92,6 +95,8 @@ func polygonM2geom(s shp.PolygonM) geom.T {
 			jj--
 		}
 	}
+	// Make sure the winding direction is correct
+	op.FixOrientation(pg)
 	return pg
 }
 
@@ -110,6 +115,8 @@ func polygonZ2geom(s shp.PolygonZ) geom.T {
 			jj--
 		}
 	}
+	// Make sure the winding direction is correct
+	op.FixOrientation(pg)
 	return pg
 }
 func polyLine2geom(s shp.PolyLine) geom.T {
