@@ -57,7 +57,7 @@ func (s *sweepline) insert(item *endpoint) int {
 
 func segmentCompare(e1, e2 *endpoint) bool {
 	switch {
-	case e1 == e2:
+	case e1.equals(e2):
 		return false
 	case signedArea(e1.p, e1.other.p, e2.p) != 0:
 		fallthrough

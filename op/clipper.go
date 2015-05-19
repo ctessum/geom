@@ -515,11 +515,11 @@ func addProcessedSegment(q *eventQueue, segment segment, polyType polygonType) {
 	e1.other = e2
 
 	switch {
-	case e1.p.X < e2.p.X:
+	case e1.p.X < e2.p.X && !floatEquals(e1.p.X, e2.p.X):
 		e2.left = false
-	case e1.p.X > e2.p.X:
+	case e1.p.X > e2.p.X && !floatEquals(e1.p.X, e2.p.X):
 		e1.left = false
-	case e1.p.Y < e2.p.Y:
+	case e1.p.Y < e2.p.Y && !floatEquals(e1.p.Y, e2.p.Y):
 		// the line segment is vertical. The bottom endpoint is the left endpoint
 		e2.left = false
 	default:

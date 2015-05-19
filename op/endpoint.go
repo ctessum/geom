@@ -25,7 +25,9 @@ package op
 
 import (
 	"fmt"
+
 	"github.com/ctessum/geom"
+	"github.com/gonum/floats"
 )
 
 // A container for endpoint data. A endpoint represents a location of interest (vertex between two polygon edges)
@@ -53,10 +55,15 @@ func (e1 *endpoint) equals(e2 *endpoint) bool {
 	return PointEquals(e1.p, e2.p) &&
 		e1.left == e2.left &&
 		e1.polygonType == e2.polygonType &&
-		e1.other == e2.other &&
 		e1.inout == e2.inout &&
 		e1.edgeType == e2.edgeType &&
-		e1.inside == e2.inside
+		e1.inside == e2.inside &&
+		PointEquals(e1.other.p, e2.other.p) &&
+		e1.other.left == e2.other.left &&
+		e1.other.polygonType == e2.other.polygonType &&
+		e1.other.inout == e2.other.inout &&
+		e1.other.edgeType == e2.other.edgeType &&
+		e1.other.inside == e2.other.inside
 }
 
 func (se *endpoint) segment() segment {
@@ -71,9 +78,11 @@ func signedArea(p0, p1, p2 geom.Point) float64 {
 // Checks if this sweep event is below point p.
 func (se *endpoint) below(x geom.Point) bool {
 	if se.left {
-		return signedArea(se.p, se.other.p, x) > 0
+		a := signedArea(se.p, se.other.p, x)
+		return !floats.EqualWithinULP(a, 0, 2) && a > 0
 	}
-	return signedArea(se.other.p, se.p, x) > 0
+	a := signedArea(se.other.p, se.p, x)
+	return !floats.EqualWithinULP(a, 0, 2) && a > 0
 }
 
 func (se *endpoint) above(x geom.Point) bool {

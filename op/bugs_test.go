@@ -18,10 +18,10 @@ func (s sorter) Less(i, j int) bool {
 	}
 	for k := range s[i] {
 		pi, pj := s[i][k], s[j][k]
-		if pi.X != pj.X {
+		if !floatEquals(pi.X, pj.X) {
 			return pi.X < pj.X
 		}
-		if pi.Y != pj.Y {
+		if !floatEquals(pi.Y, pj.Y) {
 			return pi.Y < pj.Y
 		}
 	}
@@ -38,7 +38,7 @@ func normalize(poly geom.Polygon) geom.Polygon {
 		// find bottom-most of leftmost points, to have fixed anchor
 		min := 0
 		for j, p := range c {
-			if p.X < c[min].X || p.X == c[min].X && p.Y < c[min].Y {
+			if p.X < c[min].X || floatEquals(p.X, c[min].X) && p.Y < c[min].Y {
 				min = j
 			}
 		}
