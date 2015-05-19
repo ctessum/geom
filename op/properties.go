@@ -239,6 +239,7 @@ func polyInPoly(outer, inner contour) bool {
 	return true
 }
 
+// Within checks whether inner is within outer.
 func Within(inner, outer geom.T) (bool, error) {
 	switch outer.(type) {
 	case geom.Polygon:

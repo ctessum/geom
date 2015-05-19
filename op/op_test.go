@@ -1171,6 +1171,27 @@ func TestPointOnSurface(t *testing.T) {
 	drawShapes(blockGroup, county, ps, "testPointOnSurface.png")
 }
 
+func TestWithin(t *testing.T) {
+	p := geom.Point{620858.7034230313, -1.3334340701764394e+06}
+	b := geom.Polygon{
+		[]geom.Point{
+			{-2.758081092115788e+06, -2.1035219712004187e+06},
+			{-2.7580810921157864e+06, 1.9603377468041454e+06},
+			{2.6080741578387334e+06, 1.954523927465083e+06},
+			{2.60226033849967e+06, -2.10352197120042e+06},
+			{-2.758081092115788e+06, -2.1035219712004187e+06},
+		},
+	}
+	// If the orientation is wrong, within won't give the correct answer
+	err := FixOrientation(b)
+	handle(err)
+	in, err := Within(p, b)
+	handle(err)
+	if !in {
+		t.Fail()
+	}
+}
+
 func TestCentroid(t *testing.T) {
 	shape := geom.T(geom.Polygon{
 		{{0, 0}, {1, 0}, {2, 1}, {2, 2}, {1, 3}, {0, 3}, {-1, 2}, {-1, 1}, {0, 0}},
