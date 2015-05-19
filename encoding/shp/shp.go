@@ -120,9 +120,9 @@ func (r *Decoder) DecodeRow(rec interface{}) bool {
 // and whether there are still more records to be read from the
 // shapefile (more).
 func (r *Decoder) DecodeRowFields(fieldNames ...string) (
-	g geom.T, fields map[string]interface{}, more bool) {
+	g geom.T, fields map[string]string, more bool) {
 
-	fields = make(map[string]interface{})
+	fields = make(map[string]string)
 	var err error
 
 	more = r.Next()
@@ -143,7 +143,10 @@ func (r *Decoder) DecodeRowFields(fieldNames ...string) (
 	// Get fields
 	for _, name := range fieldNames {
 		if i, ok := r.fieldIndices[strings.ToLower(name)]; ok {
-			fields[name] = r.getField(i)
+			fields[name] = r.ReadAttribute(r.row, i)
+			if r.err != nil {
+				return
+			}
 		} else {
 			r.err = fmt.Errorf("Shapefile does not contain field `%s`", name)
 			return
@@ -184,14 +187,14 @@ func shpFieldName2String(name [11]byte) string {
 	return strings.TrimSpace(string(b[0:n]))
 }
 
-// ShpAttrbute2Float converts a shapefile attribute (which may contain
+// shpAttrbuteToFloat converts a shapefile attribute (which may contain
 // "\x00" characters to a float.
 func shpAttributeToFloat(attr string) (float64, error) {
 	f, err := strconv.ParseFloat(strings.Trim(attr, "\x00"), 64)
 	return f, err
 }
 
-// ShpAttrbute2Int converts a shapefile attribute (which may contain
+// shpAttrbuteToInt converts a shapefile attribute (which may contain
 // "\x00" characters to an int.
 func shpAttributeToInt(attr string) (int64, error) {
 	i, err := strconv.ParseInt(strings.Trim(attr, "\x00"), 10, 64)
@@ -221,30 +224,6 @@ func (r Decoder) setFieldToAttribute(fValue reflect.Value,
 	default:
 		panic("Struct field type can only be float64, int, or string.")
 	}
-}
-
-func (r Decoder) getField(index int) (out interface{}) {
-	dataStr := r.ReadAttribute(r.row, index)
-	var err error
-	switch r.Fields()[index].Fieldtype {
-	case 'F':
-		out, err = shpAttributeToFloat(dataStr)
-		if err != nil {
-			r.err = err
-			return
-		}
-	case 'N':
-		out, err = shpAttributeToInt(dataStr)
-		if err != nil {
-			r.err = err
-			return
-		}
-	case 'C', 'D': // Date fields not yet implemented
-		out = dataStr
-	default:
-		panic("Field type can only be float64, int, or string.")
-	}
-	return
 }
 
 // Encode is a wrapper around the github.com/jonas-p/go-shp shapefile
