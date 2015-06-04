@@ -18,8 +18,9 @@ import (
 // Canvas is a canvas for drawing maps.
 type Canvas struct {
 	draw.Canvas
-	Bounds *geom.Bounds // geographic boundaries of map
-	scale  float64
+	Bounds  *geom.Bounds // geographic boundaries of map
+	Polygon geom.Polygon
+	scale   float64
 }
 
 //type MarkerFunction func(*Canvas, float64, float64, float64) // Function for specifying the shape of the marker for points
@@ -73,10 +74,17 @@ type Canvas struct {
 
 func NewCanvas(N, S, E, W float64, c draw.Canvas) *Canvas {
 	m := &Canvas{
-		c,
-		geom.NewBoundsPoint(geom.Point{W, S}).
+		Canvas: c,
+		Bounds: geom.NewBoundsPoint(geom.Point{W, S}).
 			ExtendPoint(geom.Point{E, N}),
-		min(float64(c.Max.X-c.Min.X)/(E-W),
+		Polygon: geom.Polygon{
+			geom.Point{W, S},
+			geom.Point{E, S},
+			geom.Point{E, N},
+			geom.Point{W, N},
+			geom.Point{W, S},
+		},
+		scale: min(float64(c.Max.X-c.Min.X)/(E-W),
 			float64(c.Max.Y-c.Min.Y)/(N-S)),
 	}
 	return m
