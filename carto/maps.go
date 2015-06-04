@@ -18,7 +18,7 @@ import (
 // Canvas is a canvas for drawing maps.
 type Canvas struct {
 	draw.Canvas
-	bounds *geom.Bounds // geographic boundaries of map
+	Bounds *geom.Bounds // geographic boundaries of map
 	scale  float64
 }
 
@@ -94,9 +94,9 @@ func NewRasterMap(N, S, E, W float64, width int) *RasterMap {
 	m := &RasterMap{
 		Canvas: Canvas{
 			//Canvas: draw.New(vgimg.NewImage(I, vgimg.DPI(int(float64(width)/mapWidth)))),
-			Canvas: draw.New(vgimg.NewImage(I)),
+			Canvas: draw.New(vgimg.NewWith(vgimg.UseImage(I))),
 			//Canvas: draw.New(vgimg.New(vgimg.UseImage(I), vgimg.DPI(300))),
-			bounds: geom.NewBoundsPoint(geom.Point{W, S}).
+			Bounds: geom.NewBoundsPoint(geom.Point{W, S}).
 				ExtendPoint(geom.Point{E, N}),
 		},
 		I: I,
@@ -121,7 +121,7 @@ func (m *Canvas) DrawVector(g geom.T, fillColor color.NRGBA,
 		return nil
 	}
 	gbounds := g.Bounds(nil)
-	if !gbounds.Overlaps(m.bounds) {
+	if !gbounds.Overlaps(m.Bounds) {
 		return nil
 	}
 	m.SetLineStyle(lineStyle)
@@ -210,8 +210,8 @@ func (m *Canvas) DrawVector(g geom.T, fillColor color.NRGBA,
 // on the canvas.
 func (m *Canvas) Coordinates(p geom.Point) draw.Point {
 	var pOut draw.Point
-	pOut.X = m.Min.X + vg.Length(m.scale*(p.X-m.bounds.Min.X))
-	pOut.Y = m.Min.Y + vg.Length(m.scale*(p.Y-m.bounds.Min.Y))
+	pOut.X = m.Min.X + vg.Length(m.scale*(p.X-m.Bounds.Min.X))
+	pOut.Y = m.Min.Y + vg.Length(m.scale*(p.Y-m.Bounds.Min.Y))
 	return pOut
 }
 
