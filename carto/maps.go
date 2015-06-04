@@ -77,13 +77,13 @@ func NewCanvas(N, S, E, W float64, c draw.Canvas) *Canvas {
 		Canvas: c,
 		Bounds: geom.NewBoundsPoint(geom.Point{W, S}).
 			ExtendPoint(geom.Point{E, N}),
-		Polygon: geom.Polygon{
+		Polygon: geom.Polygon{{
 			geom.Point{W, S},
 			geom.Point{E, S},
 			geom.Point{E, N},
 			geom.Point{W, N},
 			geom.Point{W, S},
-		},
+		}},
 		scale: min(float64(c.Max.X-c.Min.X)/(E-W),
 			float64(c.Max.Y-c.Min.Y)/(N-S)),
 	}
