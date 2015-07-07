@@ -1,3 +1,5 @@
+// +build !onlygo
+
 package proj
 
 import (

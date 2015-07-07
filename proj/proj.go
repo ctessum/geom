@@ -1,3 +1,5 @@
+// +build !onlygo
+
 /*
 Package projgeom is performs geodesic reprojections on
 Open GIS Consortium style geometry objects.
