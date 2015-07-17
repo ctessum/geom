@@ -1,3 +1,7 @@
+/*
+Package geom holds geometry geomotry objects that can be encoded, decoded,
+and operated on by the other packages in this repository.
+*/
 package geom
 
 type T interface {
