@@ -102,7 +102,7 @@ func polygonM2geom(s shp.PolygonM) geom.T {
 
 func polygonZ2geom(s shp.PolygonZ) geom.T {
 	var pg geom.PolygonZM = make([][]geom.PointZM, len(s.Parts))
-	jj := 0
+	jj := -1
 	for i := 0; i < len(s.Parts); i++ {
 		start, end := getStartEnd(s.Parts, s.Points, i)
 		jj += end - start
@@ -110,7 +110,7 @@ func polygonZ2geom(s shp.PolygonZ) geom.T {
 		// Go backwards around the rings to switch to OGC format
 		for j := end - 1; j >= start; j-- {
 			ss := s.Points[j]
-			pg[i][j-start] = geom.PointZM{ss.X, ss.Y, s.ZArray[j],
+			pg[i][j-start] = geom.PointZM{ss.X, ss.Y, s.ZArray[jj],
 				s.MArray[jj]}
 			jj--
 		}
