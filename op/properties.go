@@ -2,8 +2,9 @@ package op
 
 import (
 	"fmt"
-	"github.com/ctessum/geom"
 	"math"
+
+	"github.com/ctessum/geom"
 )
 
 const tolerance = 1.e-9
@@ -390,4 +391,20 @@ func distPointToSegment(p, segStart, segEnd geom.Point) float64 {
 
 func pointOnSegment(p, segStart, segEnd geom.Point) bool {
 	return distPointToSegment(p, segStart, segEnd) < tolerance
+}
+
+// Distance returns the distance between the closest parts of two geometries.
+// Currently, only points are supported.
+func Distance(a, b geom.T) float64 {
+	switch a.(type) {
+	case geom.Point:
+		switch b.(type) {
+		case geom.Point:
+			return d(a.(geom.Point), b.(geom.Point))
+		default:
+			panic("only points are currently supported")
+		}
+	default:
+		panic("only points are currently supported")
+	}
 }
