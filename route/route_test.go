@@ -21,7 +21,7 @@ var (
 	}
 )
 
-func ExampleRoute() {
+func Example() {
 	link1 := geom.LineString{
 		geom.Point{X: 0, Y: 0},
 		geom.Point{X: 0, Y: 1},

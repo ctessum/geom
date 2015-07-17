@@ -1,6 +1,6 @@
-// Package route finds the shortest route between two points along a geographical
+// Package route finds the shortest route between two points along a geometrical
 // network (e.g., a road network). For now, all network links are assumed to be
-// bi-directional (i.e., all roads are two-way).
+// bi-directional (e.g., all roads are two-way).
 package route
 
 import (
