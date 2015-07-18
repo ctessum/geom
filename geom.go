@@ -8,18 +8,14 @@ type T interface {
 	Bounds(*Bounds) *Bounds
 }
 
-type Geom interface {
+type Linear interface {
 	T
 }
 
-type GeomZ interface {
+type Polygonal interface {
 	T
 }
 
-type GeomM interface {
-	T
-}
-
-type GeomZM interface {
+type PointLike interface {
 	T
 }

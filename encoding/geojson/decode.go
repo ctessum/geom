@@ -57,34 +57,12 @@ func makeLinearRing(coordinates [][]float64) []geom.Point {
 	return points
 }
 
-func makeLinearRingZ(coordinates [][]float64) []geom.PointZ {
-	pointZs := make([]geom.PointZ, len(coordinates))
-	for i, element := range coordinates {
-		if len(element) == 3 {
-			pointZs[i].X = element[0]
-			pointZs[i].Y = element[1]
-			pointZs[i].Z = element[2]
-		} else {
-			panic(&InvalidGeometryError{})
-		}
-	}
-	return pointZs
-}
-
 func makeLinearRings(coordinates [][][]float64) [][]geom.Point {
 	pointss := make([][]geom.Point, len(coordinates))
 	for i, element := range coordinates {
 		pointss[i] = makeLinearRing(element)
 	}
 	return pointss
-}
-
-func makeLinearRingZs(coordinates [][][]float64) [][]geom.PointZ {
-	pointZss := make([][]geom.PointZ, len(coordinates))
-	for i, element := range coordinates {
-		pointZss[i] = makeLinearRingZ(element)
-	}
-	return pointZss
 }
 
 func doFromGeoJSON(g *Geometry) geom.T {
@@ -94,8 +72,6 @@ func doFromGeoJSON(g *Geometry) geom.T {
 		switch len(coordinates) {
 		case 2:
 			return geom.Point{coordinates[0], coordinates[1]}
-		case 3:
-			return geom.PointZ{coordinates[0], coordinates[1], coordinates[2]}
 		default:
 			panic(&InvalidGeometryError{})
 		}
@@ -107,8 +83,6 @@ func doFromGeoJSON(g *Geometry) geom.T {
 		switch len(coordinates[0]) {
 		case 2:
 			return geom.LineString(makeLinearRing(coordinates))
-		case 3:
-			return geom.LineStringZ(makeLinearRingZ(coordinates))
 		default:
 			panic(&InvalidGeometryError{})
 		}
@@ -120,8 +94,6 @@ func doFromGeoJSON(g *Geometry) geom.T {
 		switch len(coordinates[0][0]) {
 		case 2:
 			return geom.Polygon(makeLinearRings(coordinates))
-		case 3:
-			return geom.PolygonZ(makeLinearRingZs(coordinates))
 		default:
 			panic(&InvalidGeometryError{})
 		}

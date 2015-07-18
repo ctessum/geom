@@ -1,9 +1,0 @@
-package geom
-
-type T interface {
-	Bounds(*Bounds) *Bounds
-}{{range .Dims}}
-
-type Geom{{.ZM}} interface {
-	T
-}{{end}}

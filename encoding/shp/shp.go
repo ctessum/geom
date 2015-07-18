@@ -1,3 +1,6 @@
+// Package shp decodes and encodes shapefiles to and from
+// geometry objects. Z and M data in the shapefile geometry
+// is ignored.
 package shp
 
 import (

@@ -53,10 +53,10 @@ func point2geom(s shp.Point) geom.T {
 	return geom.Point(s)
 }
 func pointM2geom(s shp.PointM) geom.T {
-	return geom.PointM(s)
+	return geom.Point{s.X, s.Y}
 }
 func pointZ2geom(s shp.PointZ) geom.T {
-	return geom.PointZM(s)
+	return geom.Point{s.X, s.Y}
 }
 func getStartEnd(parts []int32, points []shp.Point, i int) (start, end int) {
 	start = int(parts[i])
@@ -82,16 +82,16 @@ func polygon2geom(s shp.Polygon) geom.T {
 	return pg
 }
 func polygonM2geom(s shp.PolygonM) geom.T {
-	var pg geom.PolygonM = make([][]geom.PointM, len(s.Parts))
+	var pg geom.Polygon = make([][]geom.Point, len(s.Parts))
 	jj := 0
 	for i := 0; i < len(s.Parts); i++ {
 		start, end := getStartEnd(s.Parts, s.Points, i)
 		jj += end - start
-		pg[i] = make([]geom.PointM, end-start)
+		pg[i] = make([]geom.Point, end-start)
 		// Go backwards around the rings to switch to OGC format
 		for j := end - 1; j >= start; j-- {
 			ss := s.Points[j]
-			pg[i][j-start] = geom.PointM{ss.X, ss.Y, s.MArray[jj]}
+			pg[i][j-start] = geom.Point{ss.X, ss.Y} //, s.MArray[jj]}
 			jj--
 		}
 	}
@@ -101,17 +101,16 @@ func polygonM2geom(s shp.PolygonM) geom.T {
 }
 
 func polygonZ2geom(s shp.PolygonZ) geom.T {
-	var pg geom.PolygonZM = make([][]geom.PointZM, len(s.Parts))
+	var pg geom.Polygon = make([][]geom.Point, len(s.Parts))
 	jj := -1
 	for i := 0; i < len(s.Parts); i++ {
 		start, end := getStartEnd(s.Parts, s.Points, i)
 		jj += end - start
-		pg[i] = make([]geom.PointZM, end-start)
+		pg[i] = make([]geom.Point, end-start)
 		// Go backwards around the rings to switch to OGC format
 		for j := end - 1; j >= start; j-- {
 			ss := s.Points[j]
-			pg[i][j-start] = geom.PointZM{ss.X, ss.Y, s.ZArray[jj],
-				s.MArray[jj]}
+			pg[i][j-start] = geom.Point{ss.X, ss.Y} //, s.ZArray[jj], s.MArray[jj]}
 			jj--
 		}
 	}
@@ -131,30 +130,30 @@ func polyLine2geom(s shp.PolyLine) geom.T {
 	return pl
 }
 func polyLineM2geom(s shp.PolyLineM) geom.T {
-	var pl geom.MultiLineStringM = make([]geom.LineStringM, len(s.Parts))
+	var pl geom.MultiLineString = make([]geom.LineString, len(s.Parts))
 	jj := 0
 	for i := 0; i < len(s.Parts); i++ {
 		start, end := getStartEnd(s.Parts, s.Points, i)
-		pl[i] = make([]geom.PointM, end-start)
+		pl[i] = make([]geom.Point, end-start)
 		for j := start; j < end; j++ {
 			ss := s.Points[j]
 			pl[i][j-start] =
-				geom.PointM{ss.X, ss.Y, s.MArray[jj]}
+				geom.Point{ss.X, ss.Y} //, s.MArray[jj]}
 			jj++
 		}
 	}
 	return pl
 }
 func polyLineZ2geom(s shp.PolyLineZ) geom.T {
-	var pl geom.MultiLineStringZM = make([]geom.LineStringZM, len(s.Parts))
+	var pl geom.MultiLineString = make([]geom.LineString, len(s.Parts))
 	jj := 0
 	for i := 0; i < len(s.Parts); i++ {
 		start, end := getStartEnd(s.Parts, s.Points, i)
-		pl[i] = make([]geom.PointZM, end-start)
+		pl[i] = make([]geom.Point, end-start)
 		for j := start; j < end; j++ {
 			ss := s.Points[j]
 			pl[i][j-start] =
-				geom.PointZM{ss.X, ss.Y, s.ZArray[jj], s.MArray[jj]}
+				geom.Point{ss.X, ss.Y} //, s.ZArray[jj], s.MArray[jj]}
 			jj++
 		}
 	}
@@ -168,16 +167,16 @@ func multiPoint2geom(s shp.MultiPoint) geom.T {
 	return mp
 }
 func multiPointM2geom(s shp.MultiPointM) geom.T {
-	var mp geom.MultiPointM = make([]geom.PointM, len(s.Points))
+	var mp geom.MultiPoint = make([]geom.Point, len(s.Points))
 	for i, p := range s.Points {
-		mp[i] = geom.PointM{p.X, p.Y, s.MArray[i]}
+		mp[i] = geom.Point{p.X, p.Y} //, s.MArray[i]}
 	}
 	return mp
 }
 func multiPointZ2geom(s shp.MultiPointZ) geom.T {
-	var mp geom.MultiPointZM = make([]geom.PointZM, len(s.Points))
+	var mp geom.MultiPoint = make([]geom.Point, len(s.Points))
 	for i, p := range s.Points {
-		mp[i] = geom.PointZM{p.X, p.Y, s.ZArray[i], s.MArray[i]}
+		mp[i] = geom.Point{p.X, p.Y} //, s.ZArray[i], s.MArray[i]}
 	}
 	return mp
 }
@@ -190,29 +189,13 @@ func geom2Shp(g geom.T) (shp.Shape, error) {
 	switch t := g.(type) {
 	case geom.Point:
 		return geom2point(g.(geom.Point)), nil
-	case geom.PointM:
-		return geom2pointM(g.(geom.PointM)), nil
-	case geom.PointZM:
-		return geom2pointZ(g.(geom.PointZM)), nil
 	case geom.Polygon:
 		return geom2polygon(g.(geom.Polygon)), nil
-	case geom.PolygonM:
-		return geom2polygonM(g.(geom.PolygonM)), nil
-	case geom.PolygonZM:
-		return geom2polygonZ(g.(geom.PolygonZM)), nil
 	case geom.MultiLineString:
 		return geom2polyLine(g.(geom.MultiLineString)), nil
-	case geom.MultiLineStringM:
-		return geom2polyLineM(g.(geom.MultiLineStringM)), nil
-	case geom.MultiLineStringZM:
-		return geom2polyLineZ(g.(geom.MultiLineStringZM)), nil
 	//case t == "MultiPatch": // not yet supported
 	case geom.MultiPoint:
 		return geom2multiPoint(g.(geom.MultiPoint)), nil
-	case geom.MultiPointM:
-		return geom2multiPointM(g.(geom.MultiPointM)), nil
-	case geom.MultiPointZM:
-		return geom2multiPointZ(g.(geom.MultiPointZM)), nil
 	default:
 		return nil, fmt.Errorf("Unsupported geom type: %v", t)
 	}
@@ -222,14 +205,6 @@ func geom2Shp(g geom.T) (shp.Shape, error) {
 
 func geom2point(g geom.Point) shp.Shape {
 	p := shp.Point(g)
-	return &p
-}
-func geom2pointM(g geom.PointM) shp.Shape {
-	p := shp.PointM(g)
-	return &p
-}
-func geom2pointZ(g geom.PointZM) shp.Shape {
-	p := shp.PointZ(g)
 	return &p
 }
 func geom2polygon(g geom.Polygon) shp.Shape {
@@ -256,49 +231,6 @@ func valrange(a []float64) [2]float64 {
 	}
 	return out
 }
-func geom2polygonM(g geom.PolygonM) shp.Shape {
-	parts := make([][]shp.Point, len(g))
-	m := make([]float64, 0)
-	jj := 0
-	for i, r := range g {
-		m = append(m, make([]float64, len(r))...)
-		parts[i] = make([]shp.Point, len(r))
-		// switch the winding direction
-		for j := len(r) - 1; j >= 0; j-- {
-			p := r[j]
-			parts[i][j] = shp.Point{p.X, p.Y}
-			m[jj] = p.M
-			jj++
-		}
-	}
-	l := shp.NewPolyLine(parts)
-	p := shp.PolygonM{l.Box, l.NumParts, l.NumPoints,
-		l.Parts, l.Points, [2]float64{}, nil, valrange(m), m}
-	return &p
-}
-func geom2polygonZ(g geom.PolygonZM) shp.Shape {
-	parts := make([][]shp.Point, len(g))
-	m := make([]float64, 0)
-	z := make([]float64, 0)
-	jj := 0
-	for i, r := range g {
-		m = append(m, make([]float64, len(r))...)
-		z = append(z, make([]float64, len(r))...)
-		parts[i] = make([]shp.Point, len(r))
-		// switch the winding direction
-		for j := len(r) - 1; j >= 0; j-- {
-			p := r[j]
-			parts[i][j] = shp.Point{p.X, p.Y}
-			m[jj] = p.M
-			z[jj] = p.Z
-			jj++
-		}
-	}
-	l := shp.NewPolyLine(parts)
-	p := shp.PolygonZ{l.Box, l.NumParts, l.NumPoints,
-		l.Parts, l.Points, valrange(z), z, valrange(m), m}
-	return &p
-}
 func geom2polyLine(g geom.MultiLineString) shp.Shape {
 	parts := make([][]shp.Point, len(g))
 	for i, r := range g {
@@ -308,49 +240,6 @@ func geom2polyLine(g geom.MultiLineString) shp.Shape {
 		}
 	}
 	return shp.NewPolyLine(parts)
-}
-func geom2polyLineM(g geom.MultiLineStringM) shp.Shape {
-	parts := make([][]shp.Point, len(g))
-	m := make([]float64, 0)
-	jj := 0
-	for i, r := range g {
-		m = append(m, make([]float64, len(r))...)
-		parts[i] = make([]shp.Point, len(r))
-		for j, l := range r {
-			parts[i][j] = shp.Point{l.X, l.Y}
-			m[jj] = l.M
-			jj++
-		}
-	}
-	l := shp.NewPolyLine(parts)
-	p := shp.PolyLineM{l.Box, l.NumParts, l.NumPoints,
-		l.Parts, l.Points, valrange(m), m}
-	return &p
-}
-func geom2polyLineZ(g geom.MultiLineStringZM) shp.Shape {
-	parts := make([][]shp.Point, len(g))
-	m := make([]float64, 0)
-	z := make([]float64, 0)
-	jj := 0
-	for i, r := range g {
-		m = append(m, make([]float64, len(r))...)
-		z = append(z, make([]float64, len(r))...)
-		parts[i] = make([]shp.Point, len(r))
-		for j, l := range r {
-			parts[i][j] = shp.Point{l.X, l.Y}
-			m[jj] = l.M
-			z[jj] = l.Z
-			jj++
-		}
-	}
-	l := shp.NewPolyLine(parts)
-	p := shp.PolyLineZ{l.Box, l.NumParts, l.NumPoints,
-		l.Parts, l.Points, valrange(z), z, valrange(m), m}
-	return &p
-}
-func bounds2box(g geom.T) shp.Box {
-	b := g.Bounds(nil)
-	return shp.Box{b.Min.X, b.Min.Y, b.Max.X, b.Max.Y}
 }
 func geom2multiPoint(g geom.MultiPoint) shp.Shape {
 	mp := new(shp.MultiPoint)
@@ -362,35 +251,7 @@ func geom2multiPoint(g geom.MultiPoint) shp.Shape {
 	}
 	return mp
 }
-func geom2multiPointM(g geom.MultiPointM) shp.Shape {
-	mp := new(shp.MultiPointM)
-	mp.Box = bounds2box(g)
-	mp.NumPoints = int32(len(g))
-	m := make([]float64, len(g))
-	mp.Points = make([]shp.Point, len(g))
-	for i, p := range g {
-		mp.Points[i] = shp.Point{p.X, p.Y}
-		m[i] = p.M
-	}
-	mp.MArray = m
-	mp.MRange = valrange(m)
-	return mp
-}
-func geom2multiPointZ(g geom.MultiPointZM) shp.Shape {
-	mp := new(shp.MultiPointZ)
-	mp.Box = bounds2box(g)
-	mp.NumPoints = int32(len(g))
-	m := make([]float64, len(g))
-	z := make([]float64, len(g))
-	mp.Points = make([]shp.Point, len(g))
-	for i, p := range g {
-		mp.Points[i] = shp.Point{p.X, p.Y}
-		m[i] = p.M
-		z[i] = p.Z
-	}
-	mp.MArray = m
-	mp.MRange = valrange(m)
-	mp.ZArray = z
-	mp.ZRange = valrange(z)
-	return mp
+func bounds2box(g geom.T) shp.Box {
+	b := g.Bounds(nil)
+	return shp.Box{b.Min.X, b.Min.Y, b.Max.X, b.Max.Y}
 }

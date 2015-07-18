@@ -11,11 +11,11 @@ func geometryCollectionReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, 
 	if err := binary.Read(r, byteOrder, &numGeometries); err != nil {
 		return nil, err
 	}
-	geoms := make([]geom.Geom, numGeometries)
+	geoms := make([]geom.T, numGeometries)
 	for i := uint32(0); i < numGeometries; i++ {
 		if g, err := Read(r); err == nil {
 			var ok bool
-			geoms[i], ok = g.(geom.Geom)
+			geoms[i], ok = g.(geom.T)
 			if !ok {
 				return nil, &UnexpectedGeometryError{g}
 			}
@@ -32,102 +32,6 @@ func writeGeometryCollection(w io.Writer, byteOrder binary.ByteOrder, geometryCo
 	}
 	for _, geom := range geometryCollection {
 		if err := Write(w, byteOrder, geom); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func geometryCollectionZReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
-	var numGeometries uint32
-	if err := binary.Read(r, byteOrder, &numGeometries); err != nil {
-		return nil, err
-	}
-	geomZs := make([]geom.GeomZ, numGeometries)
-	for i := uint32(0); i < numGeometries; i++ {
-		if g, err := Read(r); err == nil {
-			var ok bool
-			geomZs[i], ok = g.(geom.GeomZ)
-			if !ok {
-				return nil, &UnexpectedGeometryError{g}
-			}
-		} else {
-			return nil, err
-		}
-	}
-	return geom.GeometryCollectionZ(geomZs), nil
-}
-
-func writeGeometryCollectionZ(w io.Writer, byteOrder binary.ByteOrder, geometryCollectionZ geom.GeometryCollectionZ) error {
-	if err := binary.Write(w, byteOrder, uint32(len(geometryCollectionZ))); err != nil {
-		return err
-	}
-	for _, geomZ := range geometryCollectionZ {
-		if err := Write(w, byteOrder, geomZ); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func geometryCollectionMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
-	var numGeometries uint32
-	if err := binary.Read(r, byteOrder, &numGeometries); err != nil {
-		return nil, err
-	}
-	geomMs := make([]geom.GeomM, numGeometries)
-	for i := uint32(0); i < numGeometries; i++ {
-		if g, err := Read(r); err == nil {
-			var ok bool
-			geomMs[i], ok = g.(geom.GeomM)
-			if !ok {
-				return nil, &UnexpectedGeometryError{g}
-			}
-		} else {
-			return nil, err
-		}
-	}
-	return geom.GeometryCollectionM(geomMs), nil
-}
-
-func writeGeometryCollectionM(w io.Writer, byteOrder binary.ByteOrder, geometryCollectionM geom.GeometryCollectionM) error {
-	if err := binary.Write(w, byteOrder, uint32(len(geometryCollectionM))); err != nil {
-		return err
-	}
-	for _, geomM := range geometryCollectionM {
-		if err := Write(w, byteOrder, geomM); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func geometryCollectionZMReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
-	var numGeometries uint32
-	if err := binary.Read(r, byteOrder, &numGeometries); err != nil {
-		return nil, err
-	}
-	geomZMs := make([]geom.GeomZM, numGeometries)
-	for i := uint32(0); i < numGeometries; i++ {
-		if g, err := Read(r); err == nil {
-			var ok bool
-			geomZMs[i], ok = g.(geom.GeomZM)
-			if !ok {
-				return nil, &UnexpectedGeometryError{g}
-			}
-		} else {
-			return nil, err
-		}
-	}
-	return geom.GeometryCollectionZM(geomZMs), nil
-}
-
-func writeGeometryCollectionZM(w io.Writer, byteOrder binary.ByteOrder, geometryCollectionZM geom.GeometryCollectionZM) error {
-	if err := binary.Write(w, byteOrder, uint32(len(geometryCollectionZM))); err != nil {
-		return err
-	}
-	for _, geomZM := range geometryCollectionZM {
-		if err := Write(w, byteOrder, geomZM); err != nil {
 			return err
 		}
 	}

@@ -15,46 +15,16 @@ const (
 )
 
 const (
-	wkbPoint                = 1
-	wkbPointZ               = 1001
-	wkbPointM               = 2001
-	wkbPointZM              = 3001
-	wkbLineString           = 2
-	wkbLineStringZ          = 1002
-	wkbLineStringM          = 2002
-	wkbLineStringZM         = 3002
-	wkbPolygon              = 3
-	wkbPolygonZ             = 1003
-	wkbPolygonM             = 2003
-	wkbPolygonZM            = 3003
-	wkbMultiPoint           = 4
-	wkbMultiPointZ          = 1004
-	wkbMultiPointM          = 2004
-	wkbMultiPointZM         = 3004
-	wkbMultiLineString      = 5
-	wkbMultiLineStringZ     = 1005
-	wkbMultiLineStringM     = 2005
-	wkbMultiLineStringZM    = 3005
-	wkbMultiPolygon         = 6
-	wkbMultiPolygonZ        = 1006
-	wkbMultiPolygonM        = 2006
-	wkbMultiPolygonZM       = 3006
-	wkbGeometryCollection   = 7
-	wkbGeometryCollectionZ  = 1007
-	wkbGeometryCollectionM  = 2007
-	wkbGeometryCollectionZM = 3007
-	wkbPolyhedralSurface    = 15
-	wkbPolyhedralSurfaceZ   = 1015
-	wkbPolyhedralSurfaceM   = 2015
-	wkbPolyhedralSurfaceZM  = 3015
-	wkbTIN                  = 16
-	wkbTINZ                 = 1016
-	wkbTINM                 = 2016
-	wkbTINZM                = 3016
-	wkbTriangle             = 17
-	wkbTriangleZ            = 1017
-	wkbTriangleM            = 2017
-	wkbTriangleZM           = 3017
+	wkbPoint              = 1
+	wkbLineString         = 2
+	wkbPolygon            = 3
+	wkbMultiPoint         = 4
+	wkbMultiLineString    = 5
+	wkbMultiPolygon       = 6
+	wkbGeometryCollection = 7
+	wkbPolyhedralSurface  = 15
+	wkbTIN                = 16
+	wkbTriangle           = 17
 )
 
 var (
@@ -85,33 +55,12 @@ var wkbReaders map[uint32]wkbReader
 func init() {
 	wkbReaders = make(map[uint32]wkbReader)
 	wkbReaders[wkbPoint] = pointReader
-	wkbReaders[wkbPointZ] = pointZReader
-	wkbReaders[wkbPointM] = pointMReader
-	wkbReaders[wkbPointZM] = pointZMReader
 	wkbReaders[wkbLineString] = lineStringReader
-	wkbReaders[wkbLineStringZ] = lineStringZReader
-	wkbReaders[wkbLineStringM] = lineStringMReader
-	wkbReaders[wkbLineStringZM] = lineStringZMReader
 	wkbReaders[wkbPolygon] = polygonReader
-	wkbReaders[wkbPolygonZ] = polygonZReader
-	wkbReaders[wkbPolygonM] = polygonMReader
-	wkbReaders[wkbPolygonZM] = polygonZMReader
 	wkbReaders[wkbMultiPoint] = multiPointReader
-	wkbReaders[wkbMultiPointZ] = multiPointZReader
-	wkbReaders[wkbMultiPointM] = multiPointMReader
-	wkbReaders[wkbMultiPointZM] = multiPointZMReader
 	wkbReaders[wkbMultiLineString] = multiLineStringReader
-	wkbReaders[wkbMultiLineStringZ] = multiLineStringZReader
-	wkbReaders[wkbMultiLineStringM] = multiLineStringMReader
-	wkbReaders[wkbMultiLineStringZM] = multiLineStringZMReader
 	wkbReaders[wkbMultiPolygon] = multiPolygonReader
-	wkbReaders[wkbMultiPolygonZ] = multiPolygonZReader
-	wkbReaders[wkbMultiPolygonM] = multiPolygonMReader
-	wkbReaders[wkbMultiPolygonZM] = multiPolygonZMReader
 	wkbReaders[wkbGeometryCollection] = geometryCollectionReader
-	wkbReaders[wkbGeometryCollectionZ] = geometryCollectionZReader
-	wkbReaders[wkbGeometryCollectionM] = geometryCollectionMReader
-	wkbReaders[wkbGeometryCollectionZM] = geometryCollectionZMReader
 }
 
 func Read(r io.Reader) (geom.T, error) {
@@ -173,60 +122,18 @@ func Write(w io.Writer, byteOrder binary.ByteOrder, g geom.T) error {
 	switch g.(type) {
 	case geom.Point:
 		wkbGeometryType = wkbPoint
-	case geom.PointZ:
-		wkbGeometryType = wkbPointZ
-	case geom.PointM:
-		wkbGeometryType = wkbPointM
-	case geom.PointZM:
-		wkbGeometryType = wkbPointZM
 	case geom.LineString:
 		wkbGeometryType = wkbLineString
-	case geom.LineStringZ:
-		wkbGeometryType = wkbLineStringZ
-	case geom.LineStringM:
-		wkbGeometryType = wkbLineStringM
-	case geom.LineStringZM:
-		wkbGeometryType = wkbLineStringZM
 	case geom.Polygon:
 		wkbGeometryType = wkbPolygon
-	case geom.PolygonZ:
-		wkbGeometryType = wkbPolygonZ
-	case geom.PolygonM:
-		wkbGeometryType = wkbPolygonM
-	case geom.PolygonZM:
-		wkbGeometryType = wkbPolygonZM
 	case geom.MultiPoint:
 		wkbGeometryType = wkbMultiPoint
-	case geom.MultiPointZ:
-		wkbGeometryType = wkbMultiPointZ
-	case geom.MultiPointM:
-		wkbGeometryType = wkbMultiPointM
-	case geom.MultiPointZM:
-		wkbGeometryType = wkbMultiPointZM
 	case geom.MultiLineString:
 		wkbGeometryType = wkbMultiLineString
-	case geom.MultiLineStringZ:
-		wkbGeometryType = wkbMultiLineStringZ
-	case geom.MultiLineStringM:
-		wkbGeometryType = wkbMultiLineStringM
-	case geom.MultiLineStringZM:
-		wkbGeometryType = wkbMultiLineStringZM
 	case geom.MultiPolygon:
 		wkbGeometryType = wkbMultiPolygon
-	case geom.MultiPolygonZ:
-		wkbGeometryType = wkbMultiPolygonZ
-	case geom.MultiPolygonM:
-		wkbGeometryType = wkbMultiPolygonM
-	case geom.MultiPolygonZM:
-		wkbGeometryType = wkbMultiPolygonZM
 	case geom.GeometryCollection:
 		wkbGeometryType = wkbGeometryCollection
-	case geom.GeometryCollectionZ:
-		wkbGeometryType = wkbGeometryCollectionZ
-	case geom.GeometryCollectionM:
-		wkbGeometryType = wkbGeometryCollectionM
-	case geom.GeometryCollectionZM:
-		wkbGeometryType = wkbGeometryCollectionZM
 	default:
 		return &UnsupportedGeometryError{reflect.TypeOf(g)}
 	}
@@ -236,60 +143,18 @@ func Write(w io.Writer, byteOrder binary.ByteOrder, g geom.T) error {
 	switch g.(type) {
 	case geom.Point:
 		return writePoint(w, byteOrder, g.(geom.Point))
-	case geom.PointZ:
-		return writePointZ(w, byteOrder, g.(geom.PointZ))
-	case geom.PointM:
-		return writePointM(w, byteOrder, g.(geom.PointM))
-	case geom.PointZM:
-		return writePointZM(w, byteOrder, g.(geom.PointZM))
 	case geom.LineString:
 		return writeLineString(w, byteOrder, g.(geom.LineString))
-	case geom.LineStringZ:
-		return writeLineStringZ(w, byteOrder, g.(geom.LineStringZ))
-	case geom.LineStringM:
-		return writeLineStringM(w, byteOrder, g.(geom.LineStringM))
-	case geom.LineStringZM:
-		return writeLineStringZM(w, byteOrder, g.(geom.LineStringZM))
 	case geom.Polygon:
 		return writePolygon(w, byteOrder, g.(geom.Polygon))
-	case geom.PolygonZ:
-		return writePolygonZ(w, byteOrder, g.(geom.PolygonZ))
-	case geom.PolygonM:
-		return writePolygonM(w, byteOrder, g.(geom.PolygonM))
-	case geom.PolygonZM:
-		return writePolygonZM(w, byteOrder, g.(geom.PolygonZM))
 	case geom.MultiPoint:
 		return writeMultiPoint(w, byteOrder, g.(geom.MultiPoint))
-	case geom.MultiPointZ:
-		return writeMultiPointZ(w, byteOrder, g.(geom.MultiPointZ))
-	case geom.MultiPointM:
-		return writeMultiPointM(w, byteOrder, g.(geom.MultiPointM))
-	case geom.MultiPointZM:
-		return writeMultiPointZM(w, byteOrder, g.(geom.MultiPointZM))
 	case geom.MultiLineString:
 		return writeMultiLineString(w, byteOrder, g.(geom.MultiLineString))
-	case geom.MultiLineStringZ:
-		return writeMultiLineStringZ(w, byteOrder, g.(geom.MultiLineStringZ))
-	case geom.MultiLineStringM:
-		return writeMultiLineStringM(w, byteOrder, g.(geom.MultiLineStringM))
-	case geom.MultiLineStringZM:
-		return writeMultiLineStringZM(w, byteOrder, g.(geom.MultiLineStringZM))
 	case geom.MultiPolygon:
 		return writeMultiPolygon(w, byteOrder, g.(geom.MultiPolygon))
-	case geom.MultiPolygonZ:
-		return writeMultiPolygonZ(w, byteOrder, g.(geom.MultiPolygonZ))
-	case geom.MultiPolygonM:
-		return writeMultiPolygonM(w, byteOrder, g.(geom.MultiPolygonM))
-	case geom.MultiPolygonZM:
-		return writeMultiPolygonZM(w, byteOrder, g.(geom.MultiPolygonZM))
 	case geom.GeometryCollection:
 		return writeGeometryCollection(w, byteOrder, g.(geom.GeometryCollection))
-	case geom.GeometryCollectionZ:
-		return writeGeometryCollectionZ(w, byteOrder, g.(geom.GeometryCollectionZ))
-	case geom.GeometryCollectionM:
-		return writeGeometryCollectionM(w, byteOrder, g.(geom.GeometryCollectionM))
-	case geom.GeometryCollectionZM:
-		return writeGeometryCollectionZM(w, byteOrder, g.(geom.GeometryCollectionZM))
 	default:
 		return &UnsupportedGeometryError{reflect.TypeOf(g)}
 	}
