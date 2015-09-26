@@ -41,6 +41,7 @@ type Decoder struct {
 	err          error
 }
 
+// NewDecoder creates a new Decoder.
 func NewDecoder(filename string) (*Decoder, error) {
 	fname := strings.TrimSuffix(filename, ".shp")
 	r := new(Decoder)
@@ -52,6 +53,7 @@ func NewDecoder(filename string) (*Decoder, error) {
 	return r, err
 }
 
+// Close closes the underlying Reader.
 func (r *Decoder) Close() {
 	r.Reader.Close()
 }
@@ -229,7 +231,7 @@ func (r Decoder) setFieldToAttribute(fValue reflect.Value,
 	}
 }
 
-// Encode is a wrapper around the github.com/jonas-p/go-shp shapefile
+// Encoder is a wrapper around the github.com/jonas-p/go-shp shapefile
 // reader.
 type Encoder struct {
 	shp.Writer
@@ -276,6 +278,9 @@ func NewEncoder(filename string, archetype interface{}) (*Encoder, error) {
 				shpType = shp.POINT
 				e.geomIndex = i
 			case "LineString":
+				shpType = shp.POLYLINE
+				e.geomIndex = i
+			case "MultiLineString":
 				shpType = shp.POLYLINE
 				e.geomIndex = i
 			case "Polygon":
@@ -328,6 +333,8 @@ func NewEncoder(filename string, archetype interface{}) (*Encoder, error) {
 	return e, nil
 }
 
+// NewEncoderFromFields creates a new Encoder from a given file name,
+// geometry type, and data field names.
 func NewEncoderFromFields(filename string, t shp.ShapeType,
 	fields ...shp.Field) (*Encoder, error) {
 
@@ -344,6 +351,7 @@ func NewEncoderFromFields(filename string, t shp.ShapeType,
 	return e, nil
 }
 
+// Close closes the underlying Writer.
 func (e *Encoder) Close() {
 	e.Writer.Close()
 }
@@ -356,7 +364,7 @@ func (e *Encoder) Encode(d interface{}) error {
 		panic("Encode can only be used for encoders created with " +
 			"NewEncoder. Try EncodeFields instead.")
 	}
-	v := reflect.ValueOf(d)
+	v := reflect.Indirect(reflect.ValueOf(d))
 	for i, j := range e.fieldIndices {
 		e.Writer.WriteAttribute(e.row, i, v.Field(j).Interface())
 	}
