@@ -10,6 +10,10 @@ import (
 	"github.com/jonas-p/go-shp"
 )
 
+// FixOrientation specifies whether to automatically check and fix the
+// orientation of polygons imported from shapefiles.
+var FixOrientation = false
+
 // Shp2Geom converts a shapefile shape to a geometry
 // object that can be used with other packages.
 // This function can be used to wrap the go-shp "Shape()" method.
@@ -78,7 +82,9 @@ func polygon2geom(s shp.Polygon) geom.T {
 		}
 	}
 	// Make sure the winding direction is correct
-	op.FixOrientation(pg)
+	if FixOrientation {
+		op.FixOrientation(pg)
+	}
 	return pg
 }
 func polygonM2geom(s shp.PolygonM) geom.T {
