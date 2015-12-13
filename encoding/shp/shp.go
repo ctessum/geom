@@ -196,6 +196,9 @@ func shpFieldName2String(name [11]byte) string {
 // "\x00" characters to a float.
 func shpAttributeToFloat(attr string) (float64, error) {
 	f, err := strconv.ParseFloat(strings.Trim(attr, "\x00"), 64)
+	if err != nil {
+		err = fmt.Errorf("shp: %v", err)
+	}
 	return f, err
 }
 
@@ -203,6 +206,9 @@ func shpAttributeToFloat(attr string) (float64, error) {
 // "\x00" characters to an int.
 func shpAttributeToInt(attr string) (int64, error) {
 	i, err := strconv.ParseInt(strings.Trim(attr, "\x00"), 10, 64)
+	if err != nil {
+		err = fmt.Errorf("shp: %v", err)
+	}
 	return i, err
 }
 

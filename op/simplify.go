@@ -1,6 +1,9 @@
 package op
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/ctessum/geom"
 )
 
@@ -13,7 +16,29 @@ import (
 // J. L. G. Pallero, Robust line simplification on the plane.
 // Comput. Geosci. 61, 152–159 (2013).
 func Simplify(g geom.T, tolerance float64) (geom.T, error) {
+	if g == nil {
+		return nil, nil
+	}
 
+	var err error
+	resultChan := make(chan geom.T)
+	go func() {
+		// Run the simplifier, while checking for an infinite loop.
+		var gg geom.T
+		gg, err = simplify(g, tolerance)
+		resultChan <- gg
+	}()
+	timer := time.NewTimer(1 * time.Minute)
+	select {
+	case result := <-resultChan:
+		timer.Stop()
+		return result, err
+	case <-timer.C:
+		return nil, newSimplifyInfiniteLoopError(g)
+	}
+}
+
+func simplify(g geom.T, tolerance float64) (geom.T, error) {
 	switch g.(type) {
 	case geom.Point, geom.MultiPoint:
 		return g, nil
@@ -28,8 +53,13 @@ func Simplify(g geom.T, tolerance float64) (geom.T, error) {
 		mp := g.(geom.MultiPolygon)
 		var out geom.MultiPolygon = make([]geom.Polygon, len(mp))
 		for i, p := range mp {
-			o, _ := Simplify(p, tolerance)
-			out[i] = o.(geom.Polygon)
+			o, err := Simplify(p, tolerance)
+			if err != nil {
+				return out, err
+			}
+			if o != nil {
+				out[i] = o.(geom.Polygon)
+			}
 		}
 		return out, nil
 	case geom.LineString:
@@ -40,8 +70,13 @@ func Simplify(g geom.T, tolerance float64) (geom.T, error) {
 		ml := g.(geom.MultiLineString)
 		var out geom.MultiLineString = make([]geom.LineString, len(ml))
 		for i, l := range ml {
-			o, _ := Simplify(l, tolerance)
-			out[i] = o.(geom.LineString)
+			o, err := Simplify(l, tolerance)
+			if err != nil {
+				return out, err
+			}
+			if o != nil {
+				out[i] = o.(geom.LineString)
+			}
 		}
 		return out, nil
 	default:
@@ -114,4 +149,20 @@ func segMakesNotSimple(segStart, segEnd geom.Point, paths [][]geom.Point) bool {
 		}
 	}
 	return false
+}
+
+// SimplifyInfiniteLoopError indicates that the Simplify function has fallen
+// into an infinite loop.
+type SimplifyInfiniteLoopError struct {
+	g geom.T
+}
+
+func newSimplifyInfiniteLoopError(g geom.T) SimplifyInfiniteLoopError {
+	return SimplifyInfiniteLoopError{g: g}
+}
+
+func (e SimplifyInfiniteLoopError) Error() string {
+	return fmt.Sprintf(
+		"function op.Simplify appears to have fallen into an "+
+			"infinite loop. \n\ngeometry=%#v", e.g)
 }
