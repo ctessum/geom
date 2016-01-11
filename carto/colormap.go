@@ -95,7 +95,6 @@ const (
 
 type ColorMap struct {
 	draw.Canvas
-	cutoff            float64
 	maxval            float64
 	minval            float64
 	cutptlist         []float64
@@ -383,7 +382,7 @@ func (c *ColorMap) Set() {
 	loc := 0.
 	for i, stop := range c.colorstops {
 		if i != 0 {
-			if c.negativeOutlier && i == 0 ||
+			if c.negativeOutlier && i == 1 ||
 				c.positiveOutlier && i == numstops-1 {
 				loc += 0.05
 			} else {
