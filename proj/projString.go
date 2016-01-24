@@ -27,12 +27,16 @@ type Proj struct {
 	from_greenwich             float64
 	nadGrids                   string
 	axis                       string
+	local                      bool
+	sphere                     bool
+	ellps                      string
 }
 
 // newProj initializes a Proj object and sets fields to default values.
 func newProj() *Proj {
 	p := new(Proj)
 	// TODO: Initialize floats and ints to NaN.
+	p.to_meter = 1.
 	return p
 }
 
