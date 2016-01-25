@@ -27,6 +27,7 @@ func (p *Proj) sExpr(v []interface{}) error {
 		case string:
 			switch vv.(string) {
 			case "PROJCS":
+				p.srsCode = v[i+1].(string)
 				// we are only interested in PROJCS
 				j := findWKTSectionEnd(i, v)
 				return p.parseWKTProjCS(v[i+2 : j])
@@ -55,6 +56,10 @@ func (p *Proj) parseWKTProjCS(v []interface{}) error {
 			switch s {
 			case "GEOCS":
 				p.parseWKTGeoCS(vvv[1:len(vvv)])
+			case "PRIMEM":
+				if err := p.parseWKTPrimeM(vvv[1:len(vvv)]); err != nil {
+					return err
+				}
 			case "PROJECTION":
 				p.parseWKTProjection(vvv[1:len(vvv)])
 			case "PARAMETER":
@@ -160,7 +165,55 @@ func (p *Proj) parseWKTProjection(v []interface{}) {
 	p.projName = v[0].(string)
 }
 
-func (p *Proj) parseWKTParameter(v []interface{}) {
+func (p *Proj) parseWKTParameter(v []interface{}) error {
+	name := v[0].(string)
+	val, err := strconv.ParseFloat(v[1].(string), 64)
+	if err != nil {
+		return fmt.Errorf("in proj.parseWKTParameter: %v", err)
+	}
+	switch name {
+	case "Standard_Parallel_1", "standard_parallel_1":
+		p.lat0 = d2r(val)
+		p.lat1 = d2r(val)
+	case "Standard_Parallel_2", "standard_parallel_2":
+		p.lat2 = d2r(val)
+	case "False_Easting":
+		p.x0 = p.toMeter(val)
+	case "False_Northing":
+		p.y0 = p.toMeter(val)
+	case "Central_Meridian":
+		p.long0 = d2r(val)
+	case "Latitude_Of_Origin":
+		p.lat0 = d2r(val)
+	case "Central_Parallel":
+		p.lat0 = d2r(val)
+	case "Scale_Factor", "scale_factor":
+		p.k0 = val
+	case "Latitude_of_center", "latitude_of_center":
+		p.lat0 = d2r(val)
+	case "longitude_of_center", "Longitude_Of_Center":
+		p.longc = d2r(val)
+	case "false_easting":
+		p.x0 = p.toMeter(val)
+	case "false_northing":
+		p.y0 = p.toMeter(val)
+	case "central_meridian":
+		p.long0 = d2r(val)
+	case "latitude_of_origin":
+		p.lat0 = d2r(val)
+	case "azimuth":
+		p.alpha = d2r(val)
+	}
+	return nil
+}
+
+func (p *Proj) parseWKTPrimeM(v []interface{}) error {
+	name := strings.ToLower(v[0].(string))
+	if name != "greenwich" {
+		return fmt.Errorf("in proj.parseWTKPrimeM: prime meridian is %s but"+
+			"only greenwich is supported", name)
+	}
+	return nil
 }
 
 func (p *Proj) parseWKTUnit(v []interface{}) error {
@@ -184,6 +237,10 @@ func (p *Proj) parseWKTUnit(v []interface{}) error {
 
 func d2r(input float64) float64 {
 	return input * D2R
+}
+
+func (p *Proj) toMeter(input float64) float64 {
+	return p.to_meter * input
 }
 
 var wktregexp *regexp.Regexp
