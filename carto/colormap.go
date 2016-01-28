@@ -350,12 +350,12 @@ func (c *ColorMap) Set() {
 	}
 	majorDelta := float64(majorMult) * tens
 	val := math.Floor(linmin/majorDelta) * majorDelta
-	tickThreshold := 0.01 // minimum distance for ticks
+	//tickThreshold := 0.02 // minimum distance for ticks
 	for val <= linmax {
 		if val >= linmin && val >= c.minval && val <= linmax &&
-			val <= c.maxval &&
-			math.Abs(val-c.minval) > tickThreshold*linabsmax &&
-			math.Abs(c.maxval-val) > tickThreshold*linabsmax {
+			val <= c.maxval {
+			//math.Abs(val-c.minval) > tickThreshold*linabsmax &&
+			//math.Abs(c.maxval-val) > tickThreshold*linabsmax {
 			c.colorstops = append(c.colorstops, val)
 			c.stopcolors = append(c.stopcolors,
 				c.ColorScheme.interpolate(val/linabsmax))
@@ -496,7 +496,7 @@ func (c *ColorMap) Legend(canvas *draw.Canvas, label string) (err error) {
 		if c.negativeOutlier && i == 0 ||
 			c.positiveOutlier && i == len(c.ticklocs)-1 {
 			c.Canvas.FillText(textStyle, tickx, unitsYover, -0.5, 0, valStr)
-		} else {
+		} else if !(c.Type == Linear && (i == 0 || i == len(c.ticklocs)-1)) {
 			c.Canvas.FillText(textStyle, tickx, unitsYunder, -0.5, -1, valStr)
 		}
 		c.Canvas.StrokeLine2(ls, tickx, barBottom, tickx,
