@@ -2,46 +2,11 @@ package proj
 
 import (
 	"fmt"
-	"math"
 	"strconv"
 	"strings"
 )
 
 const D2R = 0.01745329251994329577
-
-// Proj holds information about a spatial projection.
-type Proj struct {
-	projName                   string
-	srsCode                    string
-	datumCode                  string
-	rf                         float64
-	lat0, lat1, lat2, lat_ts   float64
-	long0, long1, long2, longc float64
-	alpha                      float64
-	x0, y0, k0                 float64
-	a, b                       float64
-	R_A                        bool
-	zone                       int64
-	utmSouth                   bool
-	datum_params               []float64
-	to_meter                   float64
-	units                      string
-	from_greenwich             float64
-	nadGrids                   string
-	axis                       string
-	local                      bool
-	sphere                     bool
-	ellps                      string
-}
-
-// newProj initializes a Proj object and sets fields to default values.
-func newProj() *Proj {
-	p := new(Proj)
-	// TODO: Initialize floats and ints to NaN.
-	p.b = math.NaN()
-	p.to_meter = 1.
-	return p
-}
 
 func projString(defData string) (*Proj, error) {
 	self := newProj()
