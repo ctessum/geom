@@ -1,13 +1,13 @@
 package geom
 
+// MultiPoint is a holder for multiple related points.
 type MultiPoint []Point
 
-func (multiPoint MultiPoint) Bounds(b *Bounds) *Bounds {
-	if b == nil {
-		b = NewBounds()
-	}
+// Bounds gives the rectangular extents of the MultiPoint.
+func (multiPoint MultiPoint) Bounds() *Bounds {
+	b := NewBounds()
 	for _, point := range multiPoint {
-		b = point.Bounds(b)
+		b.extendPoint(point)
 	}
 	return b
 }

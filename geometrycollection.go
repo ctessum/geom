@@ -1,13 +1,14 @@
 package geom
 
+// GeometryCollection is a holder for multiple related geometry objects of
+// arbitrary type.
 type GeometryCollection []T
 
-func (geometryCollection GeometryCollection) Bounds(b *Bounds) *Bounds {
-	if b == nil {
-		b = NewBounds()
-	}
-	for _, geom := range geometryCollection {
-		b = geom.Bounds(b)
+// Bounds gives the rectangular extents of the GeometryCollection.
+func (gc GeometryCollection) Bounds() *Bounds {
+	b := NewBounds()
+	for _, geom := range gc {
+		b.Extend(geom.Bounds())
 	}
 	return b
 }
