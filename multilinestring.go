@@ -1,13 +1,13 @@
 package geom
 
+// MultiLineString is a holder for multiple related LineStrings.
 type MultiLineString []LineString
 
-func (multiLineString MultiLineString) Bounds(b *Bounds) *Bounds {
-	if b == nil {
-		b = NewBounds()
-	}
+// Bounds gives the rectangular extents of the MultiLineString.
+func (multiLineString MultiLineString) Bounds() *Bounds {
+	b := NewBounds()
 	for _, lineString := range multiLineString {
-		b = lineString.Bounds(b)
+		b.Extend(lineString.Bounds())
 	}
 	return b
 }

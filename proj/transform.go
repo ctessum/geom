@@ -14,7 +14,7 @@ func Transform(source, dest *Proj, point []float64) ([]float64, error) {
 		if err != nil {
 			return nil, err
 		}
-		point, err = transform(source, wgs84, point)
+		point, err = Transform(source, wgs84, point)
 		if err != nil {
 			return nil, err
 		}
