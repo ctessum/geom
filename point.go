@@ -11,6 +11,11 @@ func NewPoint(x, y float64) *Point {
 }
 
 // Bounds gives the rectangular extents of the Point.
-func (point Point) Bounds() *Bounds {
-	return NewBoundsPoint(point)
+func (p Point) Bounds() *Bounds {
+	return NewBoundsPoint(p)
+}
+
+// Within calculates whether p is within poly or touching its edge.
+func (p Point) Within(poly Polygonal) bool {
+	return pointInPolygonal(p, poly)
 }

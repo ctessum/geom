@@ -27,6 +27,21 @@ func (p Polygon) Intersection(p2 Polygonal) Polygonal {
 	return p.op(p2, polyclip.INTERSECTION)
 }
 
+// Union returns the combination of p and p2.
+func (p Polygon) Union(p2 Polygonal) Polygonal {
+	return p.op(p2, polyclip.UNION)
+}
+
+// XOr returns the area(s) occupied by either p or p2 but not both.
+func (p Polygon) XOr(p2 Polygonal) Polygonal {
+	return p.op(p2, polyclip.XOR)
+}
+
+// Difference subtracts p2 from p.
+func (p Polygon) Difference(p2 Polygonal) Polygonal {
+	return p.op(p2, polyclip.DIFFERENCE)
+}
+
 func (p Polygon) op(p2 Polygonal, op polyclip.Op) Polygonal {
 	var o MultiPolygon
 	pp := p.toPolyClip()
@@ -84,4 +99,44 @@ func area(polygon []Point) float64 {
 			polygon[i+1].X) * (polygon[i+1].Y - polygon[i].Y)
 	}
 	return A / 2.
+}
+
+// Centroid calculates the centroid of p, from
+// wikipedia: http://en.wikipedia.org/wiki/Centroid#Centroid_of_polygon.
+// The polygon can have holes, but each ring must be closed (i.e.,
+// p[0] == p[n-1], where the ring has n points) and must not be
+// self-intersecting.
+// The algorithm will not check to make sure the holes are
+// actually inside the outer rings.
+func (p Polygon) Centroid() Point {
+	var A, xA, yA float64
+	for _, r := range p {
+		a := area(r)
+		cx, cy := 0., 0.
+		for i := 0; i < len(r)-1; i++ {
+			cx += (r[i].X + r[i+1].X) *
+				(r[i].X*r[i+1].Y - r[i+1].X*r[i].Y)
+			cy += (r[i].Y + r[i+1].Y) *
+				(r[i].X*r[i+1].Y - r[i+1].X*r[i].Y)
+		}
+		cx /= 6 * a
+		cy /= 6 * a
+		A += a
+		xA += cx * a
+		yA += cy * a
+	}
+	return Point{X: xA / A, Y: yA / A}
+}
+
+// Within calculates whether p is completely within p2. Edges that touch are
+// considered to be within. It may not work correctly if p has holes.
+func (p Polygon) Within(p2 Polygonal) bool {
+	for _, r := range p {
+		for _, pp := range r {
+			if !pointInPolygonal(pp, p2) {
+				return false
+			}
+		}
+	}
+	return true
 }
