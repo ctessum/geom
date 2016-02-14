@@ -1,6 +1,10 @@
 package geom
 
-import "math"
+import (
+	"math"
+
+	"github.com/ctessum/polyclip-go"
+)
 
 // MultiPolygon is a holder for multiple related polygons.
 type MultiPolygon []Polygon
@@ -26,59 +30,35 @@ func (mp MultiPolygon) Area() float64 {
 }
 
 // Intersection returns the area(s) shared by mp and p2.
-func (mp MultiPolygon) Intersection(p2 Polygonal) Polygonal {
-	var o MultiPolygon
-	for _, pp := range p2.Polygons() {
-		o = append(o, pp.Intersection(mp).Polygons()...)
-	}
-	if len(o) == 0 {
-		return nil
-	} else if len(o) == 1 {
-		return o[0]
-	}
-	return o
+func (mp MultiPolygon) Intersection(p2 Polygonal) Polygon {
+	return mp.op(p2, polyclip.INTERSECTION)
 }
 
 // Union returns the combination of mp and p2.
-func (mp MultiPolygon) Union(p2 Polygonal) Polygonal {
-	var o MultiPolygon
-	for _, pp := range p2.Polygons() {
-		o = append(o, pp.Union(mp).Polygons()...)
-	}
-	if len(o) == 0 {
-		return nil
-	} else if len(o) == 1 {
-		return o[0]
-	}
-	return o
+func (mp MultiPolygon) Union(p2 Polygonal) Polygon {
+	return mp.op(p2, polyclip.UNION)
 }
 
 // XOr returns the area(s) occupied by either mp or p2 but not both.
-func (mp MultiPolygon) XOr(p2 Polygonal) Polygonal {
-	var o MultiPolygon
-	for _, pp := range p2.Polygons() {
-		o = append(o, pp.XOr(mp).Polygons()...)
-	}
-	if len(o) == 0 {
-		return nil
-	} else if len(o) == 1 {
-		return o[0]
-	}
-	return o
+func (mp MultiPolygon) XOr(p2 Polygonal) Polygon {
+	return mp.op(p2, polyclip.XOR)
 }
 
 // Difference subtracts p2 from mp.
-func (mp MultiPolygon) Difference(p2 Polygonal) Polygonal {
-	var o MultiPolygon
-	for _, pp := range p2.Polygons() {
-		o = append(o, pp.Difference(mp).Polygons()...)
+func (mp MultiPolygon) Difference(p2 Polygonal) Polygon {
+	return mp.op(p2, polyclip.DIFFERENCE)
+}
+
+func (mp MultiPolygon) op(p2 Polygonal, op polyclip.Op) Polygon {
+	var pp polyclip.Polygon
+	for _, ppx := range mp.Polygons() {
+		pp = append(pp, ppx.toPolyClip()...)
 	}
-	if len(o) == 0 {
-		return nil
-	} else if len(o) == 1 {
-		return o[0]
+	var pp2 polyclip.Polygon
+	for _, pp2x := range p2.Polygons() {
+		pp2 = append(pp2, pp2x.toPolyClip()...)
 	}
-	return o
+	return polyClipToPolygon(pp.Construct(op, pp2))
 }
 
 // Polygons returns the polygons that make up mp.

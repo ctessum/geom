@@ -3,7 +3,8 @@ package geom
 // Simplify simplifies p
 // by removing points according to the tolerance parameter,
 // while ensuring that the resulting shape is not self intersecting
-// (but only if the input shape is not self intersecting).
+// (but only if the input shape is not self intersecting). Self-intersecting
+// polygons may cause the algorithm to fall into an infinite loop.
 //
 // It is based on the algorithm:
 // J. L. G. Pallero, Robust line simplification on the plane.
@@ -19,7 +20,8 @@ func (p Polygon) Simplify(tolerance float64) Polygonal {
 // Simplify simplifies mp
 // by removing points according to the tolerance parameter,
 // while ensuring that the resulting shape is not self intersecting
-// (but only if the input shape is not self intersecting).
+// (but only if the input shape is not self intersecting). Self-intersecting
+// polygons may cause the algorithm to fall into an infinite loop.
 //
 // It is based on the algorithm:
 // J. L. G. Pallero, Robust line simplification on the plane.
@@ -40,7 +42,7 @@ func (mp MultiPolygon) Simplify(tolerance float64) Polygonal {
 // It is based on the algorithm:
 // J. L. G. Pallero, Robust line simplification on the plane.
 // Comput. Geosci. 61, 152–159 (2013).
-func (l LineString) Simplify(tolerance float64) LineString {
+func (l LineString) Simplify(tolerance float64) Linear {
 	return LineString(simplifyCurve(l, [][]Point{}, tolerance))
 }
 
@@ -52,10 +54,10 @@ func (l LineString) Simplify(tolerance float64) LineString {
 // It is based on the algorithm:
 // J. L. G. Pallero, Robust line simplification on the plane.
 // Comput. Geosci. 61, 152–159 (2013).
-func (ml MultiLineString) Simplify(tolerance float64) MultiLineString {
+func (ml MultiLineString) Simplify(tolerance float64) Linear {
 	out := make(MultiLineString, len(ml))
 	for i, l := range ml {
-		out[i] = l.Simplify(tolerance)
+		out[i] = l.Simplify(tolerance).(LineString)
 	}
 	return out
 }
