@@ -8,25 +8,26 @@ package geom
 type T interface {
 	Bounds() *Bounds
 	Within(Polygonal) bool
+	Similar(T, float64) bool
 }
 
 // Linear is an interface for types that are linear in nature.
 type Linear interface {
 	T
 	Length() float64
-	Clip(Polygonal) Linear
-	Intersection(Linear) MultiPoint
-	Simplify(tolerance float64) Polygonal
+	//Clip(Polygonal) Linear
+	//Intersection(Linear) MultiPoint
+	Simplify(tolerance float64) Linear
 }
 
 // Polygonal is an interface for types that are polygonal in nature.
 type Polygonal interface {
 	T
 	Polygons() []Polygon
-	Intersection(Polygonal) Polygonal
-	Union(Polygonal) Polygonal
-	XOr(Polygonal) Polygonal
-	Difference(Polygonal) Polygonal
+	Intersection(Polygonal) Polygon
+	Union(Polygonal) Polygon
+	XOr(Polygonal) Polygon
+	Difference(Polygonal) Polygon
 	Area() float64
 	Simplify(tolerance float64) Polygonal
 	FixOrientation()

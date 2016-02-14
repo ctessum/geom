@@ -1,9 +1,6 @@
 package geom
 
-import (
-	"math"
-	"reflect"
-)
+import "math"
 
 func similar(a, b, e float64) bool {
 	return math.Abs(a-b) < e
@@ -37,20 +34,176 @@ func pointssSimilar(p1ss, p2ss [][]Point, e float64) bool {
 	return true
 }
 
-func Similar(g1, g2 T, e float64) bool {
-	if reflect.TypeOf(g1) != reflect.TypeOf(g2) {
-		return false
-	}
-	switch g1.(type) {
+// Similar determines whether two geometries are similar within tolerance.
+func (p Point) Similar(g T, tolerance float64) bool {
+	switch g.(type) {
 	case Point:
-		return pointSimilar(g1.(Point), g2.(Point), e)
-	case LineString:
-		return pointsSimilar(g1.(LineString), g2.(LineString), e)
-	case Polygon:
-		return pointssSimilar(g1.(Polygon), g2.(Polygon), e)
-	case MultiPoint:
-		return pointsSimilar(g1.(MultiPoint), g2.(MultiPoint), e)
+		return pointSimilar(p, g.(Point), tolerance)
 	default:
 		return false
 	}
+}
+
+// Similar determines whether two geometries are similar within tolerance.
+func (mp MultiPoint) Similar(g T, tolerance float64) bool {
+	switch g.(type) {
+	case MultiPoint:
+		return pointsSimilar(mp, g.(MultiPoint), tolerance)
+	default:
+		return false
+	}
+}
+
+// Similar determines whether two geometries are similar within tolerance.
+// If two lines contain the same points but in different directions it will
+// return false.
+func (l LineString) Similar(g T, tolerance float64) bool {
+	switch g.(type) {
+	case LineString:
+		return pointsSimilar(l, g.(LineString), tolerance)
+	default:
+		return false
+	}
+}
+
+// Similar determines whether two geometries are similar within tolerance.
+// If ml and g have the similar linestrings but in a different order, it
+// will return true.
+func (ml MultiLineString) Similar(g T, tolerance float64) bool {
+	switch g.(type) {
+	case MultiLineString:
+		ml2 := g.(MultiLineString)
+		indices := make([]int, len(ml2))
+		for i := range ml2 {
+			indices[i] = i
+		}
+		for _, l := range ml {
+			matched := false
+			for ii, i := range indices {
+				if l.Similar(ml2[i], tolerance) { // we found a match
+					matched = true
+					// remove index i from futher consideration.
+					if ii == len(indices)-1 {
+						indices = indices[0:ii]
+					} else {
+						indices = append(indices[0:ii], indices[ii+1:len(indices)]...)
+					}
+					break
+				}
+			}
+			if !matched {
+				return false
+			}
+		}
+		return true
+	default:
+		return false
+	}
+}
+
+// Similar determines whether two geometries are similar within tolerance.
+// If ml and g have the similar polygons but in a different order, it
+// will return true.
+func (mp MultiPolygon) Similar(g T, tolerance float64) bool {
+	switch g.(type) {
+	case MultiPolygon:
+		mp2 := g.(MultiPolygon)
+		indices := make([]int, len(mp2))
+		for i := range mp2 {
+			indices[i] = i
+		}
+		for _, l := range mp {
+			matched := false
+			for ii, i := range indices {
+				if l.Similar(mp2[i], tolerance) { // we found a match
+					matched = true
+					// remove index i from futher consideration.
+					if ii == len(indices)-1 {
+						indices = indices[0:ii]
+					} else {
+						indices = append(indices[0:ii], indices[ii+1:len(indices)]...)
+					}
+					break
+				}
+			}
+			if !matched {
+				return false
+			}
+		}
+		return true
+	default:
+		return false
+	}
+}
+
+// Similar determines whether two geometries are similar within tolerance.
+// If p and g have the same points with the same winding direction, but a
+// different starting point, it will return true. If they have the same
+// rings but in a different order, it will return true. If the rings have the same
+// points but different winding directions, it will return false.
+func (p Polygon) Similar(g T, tolerance float64) bool {
+	switch g.(type) {
+	case Polygon:
+		p2 := g.(Polygon)
+		indices := make([]int, len(p2))
+		for i := range p2 {
+			indices[i] = i
+		}
+		for _, r1 := range p {
+			matched := false
+			for ii, i := range indices {
+				if ringSimilar(r1, p2[i], tolerance) { // we found a match
+					matched = true
+					// remove index i from futher consideration.
+					if ii == len(indices)-1 {
+						indices = indices[0:ii]
+					} else {
+						indices = append(indices[0:ii], indices[ii+1:len(indices)]...)
+					}
+					break
+				}
+			}
+			if !matched {
+				return false
+			}
+		}
+		return true
+	default:
+		return false
+	}
+}
+
+func ringSimilar(a, b []Point, e float64) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	ia := minPt(a)
+	ib := minPt(b)
+	for i := 0; i < len(a); i++ {
+		if !pointSimilar(a[ia], b[ib], e) {
+			return false
+		}
+		ia = nextPt(ia, len(a))
+		ib = nextPt(ib, len(b))
+	}
+	return true
+}
+
+// ring iterator function
+func nextPt(i, l int) int {
+	if i == l-2 { // Skip the last point that matches the first point.
+		return 0
+	}
+	return i + 1
+}
+
+// find bottom-most of leftmost points, to have fixed anchor
+func minPt(c []Point) int {
+	min := 0
+	for j, p := range c {
+		if p.X < c[min].X || p.X == c[min].X && p.Y < c[min].Y {
+			min = j
+		}
+	}
+	return min
 }
