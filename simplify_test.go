@@ -97,14 +97,13 @@ func TestSimplify(t *testing.T) {
 }
 
 func TestSimplifyInfiniteLoop(t *testing.T) {
+	// This is a self-intersecting shape.
 	geometry := Polygon{[]Point{
 		Point{X: -871773.1638742175, Y: 497165.8489278648},
 		Point{X: -871974.6604566738, Y: 496416.7107209433},
 		Point{X: -871878.9516291074, Y: 497176.64415429346},
-		Point{X: -871773.1638742175, Y: 497165.8489278648}}}
-	//		Point{X: -999958.0564939477, Y: 242680.11889008153}}}
-	// Adding the last point makes the test fail. However, adding the final
-	// point makes this an invalid polygon.
+		Point{X: -871773.1638742175, Y: 497165.8489278648},
+		Point{X: -999958.0564939477, Y: 242680.11889008153}}}
 
 	ch := make(chan int)
 	go func() {
