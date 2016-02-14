@@ -67,8 +67,8 @@ func simplifyCurve(curve []Point,
 	out := make([]Point, 0, len(curve))
 
 	i := 0
-	out = append(out, curve[i])
 	for {
+		out = append(out, curve[i])
 		breakTime := false
 		for j := i + 2; j < len(curve); j++ {
 			breakTime2 := false
@@ -79,12 +79,10 @@ func simplifyCurve(curve []Point,
 					for {
 						// Make sure this simplifcation doesn't cause any self
 						// intersections.
-						if segMakesNotSimple(curve[i], curve[j-1],
-							[][]Point{out[0 : len(out)-1]}) ||
-							segMakesNotSimple(curve[i], curve[j-1],
-								[][]Point{curve[j:]}) ||
-							segMakesNotSimple(curve[i], curve[j-1],
-								otherCurves) {
+						if j > i+2 &&
+							(segMakesNotSimple(curve[i], curve[j-1], [][]Point{out[0:i]}) ||
+								segMakesNotSimple(curve[i], curve[j-1], [][]Point{curve[j:]}) ||
+								segMakesNotSimple(curve[i], curve[j-1], otherCurves)) {
 							j--
 						} else {
 							i = j - 1
