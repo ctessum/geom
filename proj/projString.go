@@ -21,7 +21,7 @@ func projString(defData string) (*Proj, error) {
 	for paramName, paramVal := range paramObj {
 		switch paramName {
 		case "proj":
-			self.projName = paramVal
+			self.name = paramVal
 		case "datum":
 			self.datumCode = paramVal
 		case "rf":

@@ -33,13 +33,13 @@ func (p *Proj) sExpr(v []interface{}) error {
 				return p.parseWKTProjCS(v[i+2 : j])
 			case "GEOCS":
 				// This should only happen if there is no PROJCS.
-				p.projName = "longlat"
+				p.name = "longlat"
 				j := findWKTSectionEnd(i, v)
 				if err := p.parseWKTGeoCS(v[i+1 : j]); err != nil {
 					return err
 				}
 			case "LOCAL_CS":
-				p.projName = "identity"
+				p.name = "identity"
 				p.local = true
 			}
 		}
@@ -120,7 +120,7 @@ func (p *Proj) datumRename() {
 		p.datumCode = "nzgd49"
 	}
 	if p.datumCode == "wgs_1984" {
-		if p.projName == "Mercator_Auxiliary_Sphere" {
+		if p.name == "Mercator_Auxiliary_Sphere" {
 			p.sphere = true
 		}
 		p.datumCode = "wgs84"
@@ -162,7 +162,7 @@ func (p *Proj) parseWKTSpheroid(v []interface{}) error {
 }
 
 func (p *Proj) parseWKTProjection(v []interface{}) {
-	p.projName = v[0].(string)
+	p.name = v[0].(string)
 }
 
 func (p *Proj) parseWKTParameter(v []interface{}) error {
@@ -226,7 +226,7 @@ func (p *Proj) parseWKTUnit(v []interface{}) error {
 		if err != nil {
 			return fmt.Errorf("in proj.parseWKTUnit: %v", err)
 		}
-		if p.projName == "longlat" {
+		if p.name == "longlat" {
 			p.to_meter = convert * p.a
 		} else {
 			p.to_meter = convert
