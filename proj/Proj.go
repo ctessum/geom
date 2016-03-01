@@ -17,7 +17,7 @@ var projections map[string]Transformer
 
 // Proj holds information about a spatial projection.
 type Proj struct {
-	projName                   string
+	name                       string
 	srsCode                    string
 	datumCode                  string
 	rf                         float64
@@ -75,10 +75,10 @@ func registerTrans(proj Transformer, names ...string) {
 // TransformFuncs returns forward and inverse transformation functions for
 // this projection.
 func (p *Proj) TransformFuncs() (forward, inverse TransformFunc, err error) {
-	t, ok := projections[strings.ToLower(p.projName)]
+	t, ok := projections[strings.ToLower(p.name)]
 	if !ok {
 		err = fmt.Errorf("in proj.Proj.TransformFuncs, could not find "+
-			"transformer for %s", p.projName)
+			"transformer for %s", p.name)
 	}
 	forward, inverse = t(p)
 	return

@@ -36,7 +36,7 @@ func Transform(source, dest *Proj, point []float64) ([]float64, error) {
 		adjust_axis(source, false, point)
 	}
 	// Transform source points to long/lat, if they aren't already.
-	if source.projName == "longlat" {
+	if source.name == "longlat" {
 		point[0] *= D2R // convert degrees to radians
 		point[1] *= D2R
 	} else {
@@ -67,7 +67,7 @@ func Transform(source, dest *Proj, point []float64) ([]float64, error) {
 	// Adjust for the prime meridian if necessary
 	point[0] -= dest.from_greenwich
 
-	if dest.projName == "longlat" {
+	if dest.name == "longlat" {
 		// convert radians to decimal degrees
 		point[0] *= R2D
 		point[0] *= R2D

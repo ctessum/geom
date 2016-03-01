@@ -44,7 +44,7 @@ func adjust_axis(crs *Proj, denorm bool, point []float64) ([]float64, error) {
 			break
 		default:
 			err := fmt.Errorf("in plot.adjust_axis: unknown axis (%s). check "+
-				"definition of %s", crs.axis[i], crs.projName)
+				"definition of %s", crs.axis[i], crs.name)
 			return nil, err
 		}
 	}
