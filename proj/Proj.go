@@ -17,7 +17,7 @@ var projections map[string]Transformer
 
 // SR holds information about a spatial reference (projection).
 type SR struct {
-	Name                       string
+	Name, Title                string
 	SRSCode                    string
 	DatumCode                  string
 	Rf                         float64
@@ -44,6 +44,7 @@ type SR struct {
 	K                          float64
 	Ep2                        float64
 	DatumName                  string
+	NoDefs                     bool
 	datum                      *datum
 }
 

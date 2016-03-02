@@ -10,18 +10,23 @@ const deg2rad = 0.01745329251994329577
 
 func projString(defData string) (*SR, error) {
 	self := newSR()
-	paramObj := make(map[string]string)
-	for _, a := range strings.Split(defData, "+") {
+	var err error
+	for i, a := range strings.Split(defData, "+") {
+		if i == 0 {
+			continue // skip everything to the left of the first +
+		}
 		a = strings.TrimSpace(a)
 		split := strings.Split(a, "=")
-		split = append(split, "true") // TODO: Not sure why this is done.
-		paramObj[strings.ToLower(split[0])] = split[1]
-	}
-	var err error
-	for paramName, paramVal := range paramObj {
+		split = append(split, "true")
+		fmt.Println(split)
+		paramName := strings.ToLower(split[0])
+		paramVal := split[1]
+
 		switch paramName {
 		case "proj":
 			self.Name = paramVal
+		case "title":
+			self.Title = paramVal
 		case "datum":
 			self.DatumCode = paramVal
 		case "rf":
@@ -63,12 +68,16 @@ func projString(defData string) (*SR, error) {
 			self.A, err = strconv.ParseFloat(paramVal, 64)
 		case "b":
 			self.B, err = strconv.ParseFloat(paramVal, 64)
+		case "ellps":
+			self.Ellps = paramVal
 		case "r_a":
 			self.Ra = true
 		case "zone":
 			self.Zone, err = strconv.ParseInt(paramVal, 10, 64)
 		case "south":
 			self.UTMSouth = true
+		case "no_defs":
+			self.NoDefs = true
 		case "towgs84":
 			split := strings.Split(paramVal, ",")
 			self.DatumParams = make([]float64, len(split))
@@ -109,7 +118,7 @@ func projString(defData string) (*SR, error) {
 				self.Axis = paramVal
 			}
 		default:
-			err = fmt.Errorf("proj: invalid field %s", paramName)
+			err = fmt.Errorf("proj: invalid field '%s'", paramName)
 		}
 		if err != nil {
 			return nil, err
