@@ -6,12 +6,12 @@ import (
 )
 
 const (
-	SRS_WGS84_SEMIMAJOR = 6378137              // only used in grid shift transforms
-	SRS_WGS84_ESQUARED  = 0.006694379990141316 //DGR: 2012-07-29
+	srsWGS84SemiMajor = 6378137              // only used in grid shift transforms
+	srsWGS84ESquared  = 0.006694379990141316 //DGR: 2012-07-29
 )
 
 func checkDatumParams(fallback datumType) bool {
-	return (fallback == PJD_3PARAM || fallback == PJD_7PARAM)
+	return (fallback == pjd3Param || fallback == pjd7Param)
 }
 
 func datumTransform(source, dest *datum, x, y, z float64) (float64, float64, float64, error) {
@@ -25,7 +25,7 @@ func datumTransform(source, dest *datum, x, y, z float64) (float64, float64, flo
 	}
 
 	// Explicitly skip datum transform by setting 'datum=none' as parameter for either source or dest
-	if source.datum_type == PJD_NODATUM || dest.datum_type == PJD_NODATUM {
+	if source.datum_type == pjdNoDatum || dest.datum_type == pjdNoDatum {
 		return x, y, z, nil
 	}
 
@@ -38,7 +38,7 @@ func datumTransform(source, dest *datum, x, y, z float64) (float64, float64, flo
 
 	var fallback = source.datum_type
 	// If this datum requires grid shifts, then apply it to geodetic coordinates.
-	if fallback == PJD_GRIDSHIFT {
+	if fallback == pjdGridShift {
 		err := fmt.Errorf("in proj.datumTransform: gridshift not supported")
 		return math.NaN(), math.NaN(), math.NaN(), err
 		/*if this.apply_gridshift(source, 0, x, y, z) == 0 {
@@ -67,9 +67,9 @@ func datumTransform(source, dest *datum, x, y, z float64) (float64, float64, flo
 			}
 		}*/
 	}
-	if dest.datum_type == PJD_GRIDSHIFT {
-		dest.a = SRS_WGS84_SEMIMAJOR
-		dest.es = SRS_WGS84_ESQUARED
+	if dest.datum_type == pjdGridShift {
+		dest.a = srsWGS84SemiMajor
+		dest.es = srsWGS84ESquared
 	}
 	// Do we need to go through geocentric coordinates?
 	if source.es != dest.es || source.a != dest.a || checkDatumParams(fallback) ||
@@ -95,7 +95,7 @@ func datumTransform(source, dest *datum, x, y, z float64) (float64, float64, flo
 		// CHECK_RETURN;
 	}
 	// Apply grid shift to destination if required
-	if dest.datum_type == PJD_GRIDSHIFT {
+	if dest.datum_type == pjdGridShift {
 		err := fmt.Errorf("in proj.datumTransform: gridshift not supported")
 		return math.NaN(), math.NaN(), math.NaN(), err
 		//this.apply_gridshift(dest, 1, x, y, z)

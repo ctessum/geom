@@ -1,10 +1,10 @@
 package proj
 
-var defs map[string]*Proj
+var defs map[string]*SR
 
 func addDef(name, def string) error {
 	if defs == nil {
-		defs = make(map[string]*Proj)
+		defs = make(map[string]*SR)
 	}
 	proj, err := Parse(def)
 	if err != nil {

@@ -1,12 +1,12 @@
 package proj
 
-func checkNotWGS(source, dest *Proj) bool {
-	return ((source.datum.datum_type == PJD_3PARAM || source.datum.datum_type == PJD_7PARAM) && dest.datumCode != "WGS84")
+func checkNotWGS(source, dest *SR) bool {
+	return ((source.datum.datum_type == pjd3Param || source.datum.datum_type == pjd7Param) && dest.DatumCode != "WGS84")
 }
 
 // Transform transforms a point from the source to destination spatial reference.
-func Transform(source, dest *Proj, point []float64) ([]float64, error) {
-	var wgs84 *Proj
+func Transform(source, dest *SR, point []float64) ([]float64, error) {
+	var wgs84 *SR
 	var err error
 	// Workaround for datum shifts towgs84, if either source or destination projection is not wgs84
 	if checkNotWGS(source, dest) || checkNotWGS(dest, source) {
@@ -32,23 +32,23 @@ func Transform(source, dest *Proj, point []float64) ([]float64, error) {
 	}
 
 	// DGR, 2010/11/12
-	if source.axis != "enu" {
+	if source.Axis != "enu" {
 		adjust_axis(source, false, point)
 	}
 	// Transform source points to long/lat, if they aren't already.
-	if source.name == "longlat" {
-		point[0] *= D2R // convert degrees to radians
-		point[1] *= D2R
+	if source.Name == "longlat" {
+		point[0] *= deg2rad // convert degrees to radians
+		point[1] *= deg2rad
 	} else {
-		point[0] *= source.to_meter
-		point[1] *= source.to_meter
+		point[0] *= source.ToMeter
+		point[1] *= source.ToMeter
 		point[0], point[1], err = sourceInverse(point[0], point[1]) // Convert Cartesian to longlat
 		if err != nil {
 			return nil, err
 		}
 	}
 	// Adjust for the prime meridian if necessary
-	point[0] += source.from_greenwich
+	point[0] += source.FromGreenwich
 
 	// Convert datums if needed, and if possible.
 	z := 0.
@@ -65,23 +65,23 @@ func Transform(source, dest *Proj, point []float64) ([]float64, error) {
 	}
 
 	// Adjust for the prime meridian if necessary
-	point[0] -= dest.from_greenwich
+	point[0] -= dest.FromGreenwich
 
-	if dest.name == "longlat" {
+	if dest.Name == "longlat" {
 		// convert radians to decimal degrees
-		point[0] *= R2D
-		point[0] *= R2D
+		point[0] *= r2d
+		point[0] *= r2d
 	} else { // else project
 		point[0], point[1], err = destForward(point[0], point[1])
 		if err != nil {
 			return nil, err
 		}
-		point[0] /= dest.to_meter
-		point[1] /= dest.to_meter
+		point[0] /= dest.ToMeter
+		point[1] /= dest.ToMeter
 	}
 
 	// DGR, 2010/11/12
-	if dest.axis != "enu" {
+	if dest.Axis != "enu" {
 		point, err = adjust_axis(dest, true, point)
 		if err != nil {
 			return nil, err

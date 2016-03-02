@@ -6,33 +6,33 @@ import (
 )
 
 const (
-	R2D    = 57.29577951308232088
-	FORTPI = math.Pi / 4
+	r2d    = 57.29577951308232088
+	fortPi = math.Pi / 4
 )
 
 // Merc is a mercator projection.
-func Merc(this *Proj) (forward, inverse TransformFunc) {
-	var con = this.b / this.a
-	this.es = 1 - con*con
-	if math.IsNaN(this.x0) {
-		this.x0 = 0
+func Merc(this *SR) (forward, inverse TransformFunc) {
+	var con = this.B / this.A
+	this.Es = 1 - con*con
+	if math.IsNaN(this.X0) {
+		this.X0 = 0
 	}
-	if math.IsNaN(this.y0) {
-		this.y0 = 0
+	if math.IsNaN(this.Y0) {
+		this.Y0 = 0
 	}
-	this.e = math.Sqrt(this.es)
-	if !math.IsNaN(this.lat_ts) {
+	this.E = math.Sqrt(this.Es)
+	if !math.IsNaN(this.LatTS) {
 		if this.sphere {
-			this.k0 = math.Cos(this.lat_ts)
+			this.K0 = math.Cos(this.LatTS)
 		} else {
-			this.k0 = msfnz(this.e, math.Sin(this.lat_ts), math.Cos(this.lat_ts))
+			this.K0 = msfnz(this.E, math.Sin(this.LatTS), math.Cos(this.LatTS))
 		}
 	} else {
-		if math.IsNaN(this.k0) {
-			if !math.IsNaN(this.k) {
-				this.k0 = this.k
+		if math.IsNaN(this.K0) {
+			if !math.IsNaN(this.K) {
+				this.K0 = this.K
 			} else {
-				this.k0 = 1
+				this.K0 = 1
 			}
 		}
 	}
@@ -40,42 +40,42 @@ func Merc(this *Proj) (forward, inverse TransformFunc) {
 	// Mercator forward equations--mapping lat,long to x,y
 	forward = func(lon, lat float64) (x, y float64, err error) {
 		// convert to radians
-		if lat*R2D > 90 || lat*R2D < -90 || lon*R2D > 180 || lon*R2D < -180 {
+		if lat*r2d > 90 || lat*r2d < -90 || lon*r2d > 180 || lon*r2d < -180 {
 			err = fmt.Errorf("in proj.Merc forward: invalid longitude (%g) or latitude (%g)", lon, lat)
 			return
 		}
 
-		if math.Abs(math.Abs(lat)-HALF_PI) <= EPSLN {
+		if math.Abs(math.Abs(lat)-halfPi) <= epsln {
 			err = fmt.Errorf("in proj.Merc forward, abs(lat)==pi/2")
 			return
 		}
 		if this.sphere {
-			x = this.x0 + this.a*this.k0*adjust_lon(lon-this.long0)
-			y = this.y0 + this.a*this.k0*math.Log(math.Tan(FORTPI+0.5*lat))
+			x = this.X0 + this.A*this.K0*adjust_lon(lon-this.Long0)
+			y = this.Y0 + this.A*this.K0*math.Log(math.Tan(fortPi+0.5*lat))
 		} else {
 			var sinphi = math.Sin(lat)
-			var ts = tsfnz(this.e, lat, sinphi)
-			x = this.x0 + this.a*this.k0*adjust_lon(lon-this.long0)
-			y = this.y0 - this.a*this.k0*math.Log(ts)
+			var ts = tsfnz(this.E, lat, sinphi)
+			x = this.X0 + this.A*this.K0*adjust_lon(lon-this.Long0)
+			y = this.Y0 - this.A*this.K0*math.Log(ts)
 		}
 		return
 	}
 
 	// Mercator inverse equations--mapping x,y to lat/long
 	inverse = func(x, y float64) (lon, lat float64, err error) {
-		x -= this.x0
-		y -= this.y0
+		x -= this.X0
+		y -= this.Y0
 
 		if this.sphere {
-			lat = HALF_PI - 2*math.Atan(math.Exp(-y/(this.a*this.k0)))
+			lat = halfPi - 2*math.Atan(math.Exp(-y/(this.A*this.K0)))
 		} else {
-			var ts = math.Exp(-y / (this.a * this.k0))
-			lat, err = phi2z(this.e, ts)
+			var ts = math.Exp(-y / (this.A * this.K0))
+			lat, err = phi2z(this.E, ts)
 			if err != nil {
 				return
 			}
 		}
-		lon = adjust_lon(this.long0 + x/(this.a*this.k0))
+		lon = adjust_lon(this.Long0 + x/(this.A*this.K0))
 		return
 	}
 	return
