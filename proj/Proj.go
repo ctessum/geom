@@ -74,12 +74,12 @@ func registerTrans(proj Transformer, names ...string) {
 
 // TransformFuncs returns forward and inverse transformation functions for
 // this projection.
-func (p *SR) TransformFuncs() (forward, inverse TransformFunc, err error) {
-	t, ok := projections[strings.ToLower(p.Name)]
+func (sr *SR) TransformFuncs() (forward, inverse TransformFunc, err error) {
+	t, ok := projections[strings.ToLower(sr.Name)]
 	if !ok {
 		err = fmt.Errorf("in proj.Proj.TransformFuncs, could not find "+
-			"transformer for %s", p.Name)
+			"transformer for %s", sr.Name)
 	}
-	forward, inverse = t(p)
+	forward, inverse = t(sr)
 	return
 }

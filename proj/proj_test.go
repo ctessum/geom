@@ -50,9 +50,16 @@ func TestProj2Proj(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	rslt, err := Transform(sweref99tm, rt90, []float64{319180, 6399862})
-	closeTo(t, rslt[0], 1271137.927154, 0.000001, "x")
-	closeTo(t, rslt[1], 6404230.291456, 0.000001, "y")
+	trans, err := sweref99tm.NewTransformFunc(rt90)
+	if err != nil {
+		t.Error(err)
+	}
+	rsltx, rslty, err := trans(319180, 6399862)
+	if err != nil {
+		t.Error(err)
+	}
+	closeTo(t, rsltx, 1271137.927154, 0.000001, "x")
+	closeTo(t, rslty, 6404230.291456, 0.000001, "y")
 }
 
 func TestProj4(t *testing.T) {
@@ -92,15 +99,26 @@ func TestProj4(t *testing.T) {
 		if err != nil {
 			t.Errorf("%s: %s", testPoint.code, err)
 		}
-		xy, err := Transform(wgs84, proj, testPoint.ll)
+		trans, err := wgs84.NewTransformFunc(proj)
 		if err != nil {
 			t.Errorf("%s: %s", testPoint.code, err)
 		}
-		closeTo(t, xy[0], testPoint.xy[0], xyEPSLN, fmt.Sprintf("%s fwd x", testPoint.code))
-		closeTo(t, xy[1], testPoint.xy[1], xyEPSLN, fmt.Sprintf("%s fwd y", testPoint.code))
-		ll, err := Transform(proj, wgs84, testPoint.xy)
-		closeTo(t, ll[0], testPoint.ll[0], llEPSLN, fmt.Sprintf("%s inv x", testPoint.code))
-		closeTo(t, ll[1], testPoint.ll[1], llEPSLN, fmt.Sprintf("%s inv y", testPoint.code))
+		x, y, err := trans(testPoint.ll[0], testPoint.ll[1])
+		if err != nil {
+			t.Errorf("%s: %s", testPoint.code, err)
+		}
+		closeTo(t, x, testPoint.xy[0], xyEPSLN, fmt.Sprintf("%s fwd x", testPoint.code))
+		closeTo(t, y, testPoint.xy[1], xyEPSLN, fmt.Sprintf("%s fwd y", testPoint.code))
+		trans, err = proj.NewTransformFunc(wgs84)
+		if err != nil {
+			t.Errorf("%s: %s", testPoint.code, err)
+		}
+		lon, lat, err := trans(testPoint.xy[0], testPoint.xy[1])
+		if err != nil {
+			t.Errorf("%s: %s", testPoint.code, err)
+		}
+		closeTo(t, lon, testPoint.ll[0], llEPSLN, fmt.Sprintf("%s inv x", testPoint.code))
+		closeTo(t, lat, testPoint.ll[1], llEPSLN, fmt.Sprintf("%s inv y", testPoint.code))
 	}
 }
 
@@ -142,16 +160,24 @@ func TestDatum(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	point, err := Transform(wgs84, to, []float64{12.806988, 49.452262})
+	trans, err := wgs84.NewTransformFunc(to)
 	if err != nil {
 		t.Fatal(err)
 	}
-	closeTo(t, point[0], -868208.61, 1.e-8, "Longitude of point from WGS84")
-	closeTo(t, point[1], -1095793.64, 1.e-9, "Latitude of point from WGS84")
-	point2, err := Transform(wgs84, to, []float64{12.806988, 49.452262})
+	x, y, err := trans(12.806988, 49.452262)
 	if err != nil {
 		t.Fatal(err)
 	}
-	closeTo(t, point2[0], -868208.61, 1.e-8, "Longitude 2nd of point from WGS84")
-	closeTo(t, point2[1], -1095793.64, 1.e-9, "Latitude of 2nd point from WGS84")
+	closeTo(t, x, -868208.61, 1.e-8, "Longitude of point from WGS84")
+	closeTo(t, y, -1095793.64, 1.e-9, "Latitude of point from WGS84")
+	trans2, err := wgs84.NewTransformFunc(to)
+	if err != nil {
+		t.Fatal(err)
+	}
+	x2, y2, err := trans2(12.806988, 49.452262)
+	if err != nil {
+		t.Fatal(err)
+	}
+	closeTo(t, x2, -868208.61, 1.e-8, "Longitude 2nd of point from WGS84")
+	closeTo(t, y2, -1095793.64, 1.e-9, "Latitude of 2nd point from WGS84")
 }
