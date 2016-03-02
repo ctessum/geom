@@ -6,10 +6,10 @@ import (
 	"strings"
 )
 
-const D2R = 0.01745329251994329577
+const deg2rad = 0.01745329251994329577
 
-func projString(defData string) (*Proj, error) {
-	self := newProj()
+func projString(defData string) (*SR, error) {
+	self := newSR()
 	paramObj := make(map[string]string)
 	for _, a := range strings.Split(defData, "+") {
 		a = strings.TrimSpace(a)
@@ -21,92 +21,92 @@ func projString(defData string) (*Proj, error) {
 	for paramName, paramVal := range paramObj {
 		switch paramName {
 		case "proj":
-			self.name = paramVal
+			self.Name = paramVal
 		case "datum":
-			self.datumCode = paramVal
+			self.DatumCode = paramVal
 		case "rf":
-			self.rf, err = strconv.ParseFloat(paramVal, 64)
+			self.Rf, err = strconv.ParseFloat(paramVal, 64)
 		case "lat_0":
-			self.lat0, err = strconv.ParseFloat(paramVal, 64)
-			self.lat0 *= D2R
+			self.Lat0, err = strconv.ParseFloat(paramVal, 64)
+			self.Lat0 *= deg2rad
 		case "lat_1":
-			self.lat1, err = strconv.ParseFloat(paramVal, 64)
-			self.lat1 *= D2R
+			self.Lat1, err = strconv.ParseFloat(paramVal, 64)
+			self.Lat1 *= deg2rad
 		case "lat_2":
-			self.lat2, err = strconv.ParseFloat(paramVal, 64)
-			self.lat2 *= D2R
+			self.Lat2, err = strconv.ParseFloat(paramVal, 64)
+			self.Lat2 *= deg2rad
 		case "lat_ts":
-			self.lat_ts, err = strconv.ParseFloat(paramVal, 64)
-			self.lat_ts *= D2R
+			self.LatTS, err = strconv.ParseFloat(paramVal, 64)
+			self.LatTS *= deg2rad
 		case "lon_0":
-			self.long0, err = strconv.ParseFloat(paramVal, 64)
-			self.long0 *= D2R
+			self.Long0, err = strconv.ParseFloat(paramVal, 64)
+			self.Long0 *= deg2rad
 		case "lon_1":
-			self.long1, err = strconv.ParseFloat(paramVal, 64)
-			self.long1 *= D2R
+			self.Long1, err = strconv.ParseFloat(paramVal, 64)
+			self.Long1 *= deg2rad
 		case "lon_2":
-			self.long2, err = strconv.ParseFloat(paramVal, 64)
-			self.long2 *= D2R
+			self.Long2, err = strconv.ParseFloat(paramVal, 64)
+			self.Long2 *= deg2rad
 		case "alpha":
-			self.alpha, err = strconv.ParseFloat(paramVal, 64)
-			self.alpha *= D2R
+			self.Alpha, err = strconv.ParseFloat(paramVal, 64)
+			self.Alpha *= deg2rad
 		case "lonc":
-			self.longc, err = strconv.ParseFloat(paramVal, 64)
-			self.longc *= D2R
+			self.LongC, err = strconv.ParseFloat(paramVal, 64)
+			self.LongC *= deg2rad
 		case "x_0":
-			self.x0, err = strconv.ParseFloat(paramVal, 64)
+			self.X0, err = strconv.ParseFloat(paramVal, 64)
 		case "y_0":
-			self.y0, err = strconv.ParseFloat(paramVal, 64)
+			self.Y0, err = strconv.ParseFloat(paramVal, 64)
 		case "k_0", "k":
-			self.k0, err = strconv.ParseFloat(paramVal, 64)
+			self.K0, err = strconv.ParseFloat(paramVal, 64)
 		case "a":
-			self.a, err = strconv.ParseFloat(paramVal, 64)
+			self.A, err = strconv.ParseFloat(paramVal, 64)
 		case "b":
-			self.b, err = strconv.ParseFloat(paramVal, 64)
+			self.B, err = strconv.ParseFloat(paramVal, 64)
 		case "r_a":
-			self.R_A = true
+			self.Ra = true
 		case "zone":
-			self.zone, err = strconv.ParseInt(paramVal, 10, 64)
+			self.Zone, err = strconv.ParseInt(paramVal, 10, 64)
 		case "south":
-			self.utmSouth = true
+			self.UTMSouth = true
 		case "towgs84":
 			split := strings.Split(paramVal, ",")
-			self.datum_params = make([]float64, len(split))
+			self.DatumParams = make([]float64, len(split))
 			for i, s := range split {
-				self.datum_params[i], err = strconv.ParseFloat(s, 64)
+				self.DatumParams[i], err = strconv.ParseFloat(s, 64)
 				if err != nil {
 					return nil, err
 				}
 			}
 		case "to_meter":
-			self.to_meter, err = strconv.ParseFloat(paramVal, 64)
+			self.ToMeter, err = strconv.ParseFloat(paramVal, 64)
 		case "units":
-			self.units = paramVal
+			self.Units = paramVal
 			if u, ok := units[paramVal]; ok {
-				self.to_meter = u.to_meter
+				self.ToMeter = u.to_meter
 			}
 		case "from_greenwich":
-			self.from_greenwich, err = strconv.ParseFloat(paramVal, 64)
-			self.from_greenwich *= D2R
+			self.FromGreenwich, err = strconv.ParseFloat(paramVal, 64)
+			self.FromGreenwich *= deg2rad
 		case "pm":
 			if pm, ok := primeMeridian[paramVal]; ok {
-				self.from_greenwich = pm
+				self.FromGreenwich = pm
 			} else {
-				self.from_greenwich, err = strconv.ParseFloat(paramVal, 64)
-				self.from_greenwich *= D2R
+				self.FromGreenwich, err = strconv.ParseFloat(paramVal, 64)
+				self.FromGreenwich *= deg2rad
 			}
 		case "nadgrids":
 			if paramVal == "@null" {
-				self.datumCode = "none"
+				self.DatumCode = "none"
 			} else {
-				self.nadGrids = paramVal
+				self.NADGrids = paramVal
 			}
 		case "axis":
 			legalAxis := "ewnsud"
 			if len(paramVal) == 3 && strings.Index(legalAxis, paramVal[0:1]) != -1 &&
 				strings.Index(legalAxis, paramVal[1:2]) != -1 &&
 				strings.Index(legalAxis, paramVal[2:3]) != -1 {
-				self.axis = paramVal
+				self.Axis = paramVal
 			}
 		default:
 			err = fmt.Errorf("proj: invalid field %s", paramName)
@@ -115,8 +115,8 @@ func projString(defData string) (*Proj, error) {
 			return nil, err
 		}
 	}
-	if self.datumCode != "WGS84" {
-		self.datumCode = strings.ToLower(self.datumCode)
+	if self.DatumCode != "WGS84" {
+		self.DatumCode = strings.ToLower(self.DatumCode)
 	}
 	return self, nil
 }

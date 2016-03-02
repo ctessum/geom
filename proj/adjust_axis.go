@@ -2,7 +2,7 @@ package proj
 
 import "fmt"
 
-func adjust_axis(crs *Proj, denorm bool, point []float64) ([]float64, error) {
+func adjust_axis(crs *SR, denorm bool, point []float64) ([]float64, error) {
 	var v float64
 	var t int
 	for i := 0; i < 3; i++ {
@@ -19,7 +19,7 @@ func adjust_axis(crs *Proj, denorm bool, point []float64) ([]float64, error) {
 			v = point[2]
 			t = 2
 		}
-		switch crs.axis[i] {
+		switch crs.Axis[i] {
 		case 'e':
 			point[t] = v
 			break
@@ -44,7 +44,7 @@ func adjust_axis(crs *Proj, denorm bool, point []float64) ([]float64, error) {
 			break
 		default:
 			err := fmt.Errorf("in plot.adjust_axis: unknown axis (%s). check "+
-				"definition of %s", crs.axis[i], crs.name)
+				"definition of %s", crs.Axis[i], crs.Name)
 			return nil, err
 		}
 	}

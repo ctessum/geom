@@ -11,45 +11,45 @@ import (
 type TransformFunc func(float64, float64) (float64, float64, error)
 
 // A Transformer creates forward and inverse TransformFuncs from a projection.
-type Transformer func(*Proj) (forward, inverse TransformFunc)
+type Transformer func(*SR) (forward, inverse TransformFunc)
 
 var projections map[string]Transformer
 
-// Proj holds information about a spatial projection.
-type Proj struct {
-	name                       string
-	srsCode                    string
-	datumCode                  string
-	rf                         float64
-	lat0, lat1, lat2, lat_ts   float64
-	long0, long1, long2, longc float64
-	alpha                      float64
-	x0, y0, k0                 float64
-	a, a2, b, b2               float64
-	R_A                        bool
-	zone                       int64
-	utmSouth                   bool
-	datum_params               []float64
-	to_meter                   float64
-	units                      string
-	from_greenwich             float64
-	nadGrids                   string
-	axis                       string
+// SR holds information about a spatial reference (projection).
+type SR struct {
+	Name                       string
+	SRSCode                    string
+	DatumCode                  string
+	Rf                         float64
+	Lat0, Lat1, Lat2, LatTS    float64
+	Long0, Long1, Long2, LongC float64
+	Alpha                      float64
+	X0, Y0, K0                 float64
+	A, A2, B, B2               float64
+	Ra                         bool
+	Zone                       int64
+	UTMSouth                   bool
+	DatumParams                []float64
+	ToMeter                    float64
+	Units                      string
+	FromGreenwich              float64
+	NADGrids                   string
+	Axis                       string
 	local                      bool
 	sphere                     bool
-	ellps                      string
-	ellipseName                string
-	es                         float64
-	e                          float64
-	k                          float64
-	ep2                        float64
-	datumName                  string
+	Ellps                      string
+	EllipseName                string
+	Es                         float64
+	E                          float64
+	K                          float64
+	Ep2                        float64
+	DatumName                  string
 	datum                      *datum
 }
 
-// newProj initializes a Proj object and sets fields to default values.
-func newProj() *Proj {
-	p := new(Proj)
+// newProj initializes a SR object and sets fields to default values.
+func newSR() *SR {
+	p := new(SR)
 	// Initialize floats to NaN.
 	v := reflect.ValueOf(p).Elem()
 	for i := 0; i < v.NumField(); i++ {
@@ -59,7 +59,7 @@ func newProj() *Proj {
 			f.SetFloat(math.NaN())
 		}
 	}
-	p.to_meter = 1.
+	p.ToMeter = 1.
 	return p
 }
 
@@ -74,11 +74,11 @@ func registerTrans(proj Transformer, names ...string) {
 
 // TransformFuncs returns forward and inverse transformation functions for
 // this projection.
-func (p *Proj) TransformFuncs() (forward, inverse TransformFunc, err error) {
-	t, ok := projections[strings.ToLower(p.name)]
+func (p *SR) TransformFuncs() (forward, inverse TransformFunc, err error) {
+	t, ok := projections[strings.ToLower(p.Name)]
 	if !ok {
 		err = fmt.Errorf("in proj.Proj.TransformFuncs, could not find "+
-			"transformer for %s", p.name)
+			"transformer for %s", p.Name)
 	}
 	forward, inverse = t(p)
 	return

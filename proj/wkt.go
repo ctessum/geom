@@ -21,25 +21,25 @@ func findWKTSectionEnd(i int, v []interface{}) int {
 	return len(v)
 }
 
-func (p *Proj) sExpr(v []interface{}) error {
+func (p *SR) sExpr(v []interface{}) error {
 	for i, vv := range v {
 		switch vv.(type) {
 		case string:
 			switch vv.(string) {
 			case "PROJCS":
-				p.srsCode = v[i+1].(string)
+				p.SRSCode = v[i+1].(string)
 				// we are only interested in PROJCS
 				j := findWKTSectionEnd(i, v)
 				return p.parseWKTProjCS(v[i+2 : j])
 			case "GEOCS":
 				// This should only happen if there is no PROJCS.
-				p.name = "longlat"
+				p.Name = "longlat"
 				j := findWKTSectionEnd(i, v)
 				if err := p.parseWKTGeoCS(v[i+1 : j]); err != nil {
 					return err
 				}
 			case "LOCAL_CS":
-				p.name = "identity"
+				p.Name = "identity"
 				p.local = true
 			}
 		}
@@ -47,7 +47,7 @@ func (p *Proj) sExpr(v []interface{}) error {
 	return nil
 }
 
-func (p *Proj) parseWKTProjCS(v []interface{}) error {
+func (p *SR) parseWKTProjCS(v []interface{}) error {
 	for _, vv := range v {
 		vvv := vv.([]interface{})
 		switch vvv[0].(type) {
@@ -74,7 +74,7 @@ func (p *Proj) parseWKTProjCS(v []interface{}) error {
 	return nil
 }
 
-func (p *Proj) parseWKTGeoCS(v []interface{}) error {
+func (p *SR) parseWKTGeoCS(v []interface{}) error {
 	for _, vv := range v[1:len(v)] {
 		vvv := vv.([]interface{})
 		switch vvv[0].(type) {
@@ -87,13 +87,13 @@ func (p *Proj) parseWKTGeoCS(v []interface{}) error {
 		}
 	}
 	// didn't find a datum, so the datum name is the GEOCS name.
-	p.datumCode = strings.ToLower(v[0].(string))
+	p.DatumCode = strings.ToLower(v[0].(string))
 	p.datumRename()
 	return nil
 }
 
-func (p *Proj) parseWKTDatum(v []interface{}) error {
-	p.datumCode = strings.ToLower(v[0].(string))
+func (p *SR) parseWKTDatum(v []interface{}) error {
+	p.DatumCode = strings.ToLower(v[0].(string))
 	p.datumRename()
 	for _, vv := range v[1:len(v)] {
 		vvv := vv.([]interface{})
@@ -111,61 +111,61 @@ func (p *Proj) parseWKTDatum(v []interface{}) error {
 	return nil
 }
 
-func (p *Proj) datumRename() {
-	if p.datumCode[0:2] == "d_" {
-		p.datumCode = p.datumCode[2:len(p.datumCode)]
+func (p *SR) datumRename() {
+	if p.DatumCode[0:2] == "d_" {
+		p.DatumCode = p.DatumCode[2:len(p.DatumCode)]
 	}
-	if p.datumCode == "new_zealand_geodetic_datum_1949" ||
-		p.datumCode == "new_zealand_1949" {
-		p.datumCode = "nzgd49"
+	if p.DatumCode == "new_zealand_geodetic_datum_1949" ||
+		p.DatumCode == "new_zealand_1949" {
+		p.DatumCode = "nzgd49"
 	}
-	if p.datumCode == "wgs_1984" {
-		if p.name == "Mercator_Auxiliary_Sphere" {
+	if p.DatumCode == "wgs_1984" {
+		if p.Name == "Mercator_Auxiliary_Sphere" {
 			p.sphere = true
 		}
-		p.datumCode = "wgs84"
+		p.DatumCode = "wgs84"
 	}
-	if strings.HasSuffix(p.datumCode, "_ferro") {
-		p.datumCode = strings.TrimSuffix(p.datumCode, "_ferro")
+	if strings.HasSuffix(p.DatumCode, "_ferro") {
+		p.DatumCode = strings.TrimSuffix(p.DatumCode, "_ferro")
 	}
-	if strings.HasSuffix(p.datumCode, "_jakarta") {
-		p.datumCode = strings.TrimSuffix(p.datumCode, "_jakarta")
+	if strings.HasSuffix(p.DatumCode, "_jakarta") {
+		p.DatumCode = strings.TrimSuffix(p.DatumCode, "_jakarta")
 	}
-	if strings.Contains(p.datumCode, "belge") {
-		p.datumCode = "rnb72"
+	if strings.Contains(p.DatumCode, "belge") {
+		p.DatumCode = "rnb72"
 	}
 }
 
-func (p *Proj) parseWKTSpheroid(v []interface{}) error {
-	p.ellps = strings.Replace(v[0].(string), "_19", "", -1)
-	p.ellps = strings.Replace(p.ellps, "clarke_18", "clrk", -1)
-	p.ellps = strings.Replace(p.ellps, "Clarke_18", "clrk", -1)
-	if strings.ToLower(p.ellps[0:13]) == "international" {
-		p.ellps = "intl"
+func (p *SR) parseWKTSpheroid(v []interface{}) error {
+	p.Ellps = strings.Replace(v[0].(string), "_19", "", -1)
+	p.Ellps = strings.Replace(p.Ellps, "clarke_18", "clrk", -1)
+	p.Ellps = strings.Replace(p.Ellps, "Clarke_18", "clrk", -1)
+	if strings.ToLower(p.Ellps[0:13]) == "international" {
+		p.Ellps = "intl"
 	}
 	a, err := strconv.ParseFloat(v[1].(string), 64)
 	if err != nil {
 		return fmt.Errorf("in proj.parseWKTSpheroid a: %v", err)
 	}
-	p.a = a
-	p.rf, err = strconv.ParseFloat(v[2].(string), 64)
+	p.A = a
+	p.Rf, err = strconv.ParseFloat(v[2].(string), 64)
 	if err != nil {
 		return fmt.Errorf("in proj.parseWKTSpheroid rf: %v", err)
 	}
-	if strings.Contains(p.datumCode, "osgb_1936") {
-		p.datumCode = "osgb36"
+	if strings.Contains(p.DatumCode, "osgb_1936") {
+		p.DatumCode = "osgb36"
 	}
-	if math.IsNaN(p.b) {
-		p.b = p.a
+	if math.IsNaN(p.B) {
+		p.B = p.A
 	}
 	return nil
 }
 
-func (p *Proj) parseWKTProjection(v []interface{}) {
-	p.name = v[0].(string)
+func (p *SR) parseWKTProjection(v []interface{}) {
+	p.Name = v[0].(string)
 }
 
-func (p *Proj) parseWKTParameter(v []interface{}) error {
+func (p *SR) parseWKTParameter(v []interface{}) error {
 	name := v[0].(string)
 	val, err := strconv.ParseFloat(v[1].(string), 64)
 	if err != nil {
@@ -173,41 +173,41 @@ func (p *Proj) parseWKTParameter(v []interface{}) error {
 	}
 	switch name {
 	case "Standard_Parallel_1", "standard_parallel_1":
-		p.lat0 = d2r(val)
-		p.lat1 = d2r(val)
+		p.Lat0 = d2r(val)
+		p.Lat1 = d2r(val)
 	case "Standard_Parallel_2", "standard_parallel_2":
-		p.lat2 = d2r(val)
+		p.Lat2 = d2r(val)
 	case "False_Easting":
-		p.x0 = p.toMeter(val)
+		p.X0 = p.toMeter(val)
 	case "False_Northing":
-		p.y0 = p.toMeter(val)
+		p.Y0 = p.toMeter(val)
 	case "Central_Meridian":
-		p.long0 = d2r(val)
+		p.Long0 = d2r(val)
 	case "Latitude_Of_Origin":
-		p.lat0 = d2r(val)
+		p.Lat0 = d2r(val)
 	case "Central_Parallel":
-		p.lat0 = d2r(val)
+		p.Lat0 = d2r(val)
 	case "Scale_Factor", "scale_factor":
-		p.k0 = val
+		p.K0 = val
 	case "Latitude_of_center", "latitude_of_center":
-		p.lat0 = d2r(val)
+		p.Lat0 = d2r(val)
 	case "longitude_of_center", "Longitude_Of_Center":
-		p.longc = d2r(val)
+		p.LongC = d2r(val)
 	case "false_easting":
-		p.x0 = p.toMeter(val)
+		p.X0 = p.toMeter(val)
 	case "false_northing":
-		p.y0 = p.toMeter(val)
+		p.Y0 = p.toMeter(val)
 	case "central_meridian":
-		p.long0 = d2r(val)
+		p.Long0 = d2r(val)
 	case "latitude_of_origin":
-		p.lat0 = d2r(val)
+		p.Lat0 = d2r(val)
 	case "azimuth":
-		p.alpha = d2r(val)
+		p.Alpha = d2r(val)
 	}
 	return nil
 }
 
-func (p *Proj) parseWKTPrimeM(v []interface{}) error {
+func (p *SR) parseWKTPrimeM(v []interface{}) error {
 	name := strings.ToLower(v[0].(string))
 	if name != "greenwich" {
 		return fmt.Errorf("in proj.parseWTKPrimeM: prime meridian is %s but"+
@@ -216,31 +216,31 @@ func (p *Proj) parseWKTPrimeM(v []interface{}) error {
 	return nil
 }
 
-func (p *Proj) parseWKTUnit(v []interface{}) error {
-	p.units = strings.ToLower(v[0].(string))
-	if p.units == "metre" {
-		p.units = "meter"
+func (p *SR) parseWKTUnit(v []interface{}) error {
+	p.Units = strings.ToLower(v[0].(string))
+	if p.Units == "metre" {
+		p.Units = "meter"
 	}
 	if len(v) > 1 {
 		convert, err := strconv.ParseFloat(v[1].(string), 64)
 		if err != nil {
 			return fmt.Errorf("in proj.parseWKTUnit: %v", err)
 		}
-		if p.name == "longlat" {
-			p.to_meter = convert * p.a
+		if p.Name == "longlat" {
+			p.ToMeter = convert * p.A
 		} else {
-			p.to_meter = convert
+			p.ToMeter = convert
 		}
 	}
 	return nil
 }
 
 func d2r(input float64) float64 {
-	return input * D2R
+	return input * deg2rad
 }
 
-func (p *Proj) toMeter(input float64) float64 {
-	return p.to_meter * input
+func (p *SR) toMeter(input float64) float64 {
+	return p.ToMeter * input
 }
 
 var wktregexp *regexp.Regexp
@@ -249,7 +249,7 @@ func init() {
 	wktregexp = regexp.MustCompile("([A-Z]+)(\\[)")
 }
 
-func wkt(wkt string) (*Proj, error) {
+func wkt(wkt string) (*SR, error) {
 	wkt = wktregexp.ReplaceAllString(wkt, "$2\"$1\",")
 	fmt.Println(wkt)
 
@@ -260,7 +260,7 @@ func wkt(wkt string) (*Proj, error) {
 		panic(err)
 	}
 	fmt.Println(lisp)
-	o := newProj()
+	o := newSR()
 	o.sExpr(lisp.([]interface{}))
 	return o, nil
 }

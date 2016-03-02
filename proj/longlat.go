@@ -1,7 +1,7 @@
 package proj
 
 // LongLat is a longitude-latitude (i.e., no projection) projection.
-func LongLat(this *Proj) (forward, inverse TransformFunc) {
+func LongLat(this *SR) (forward, inverse TransformFunc) {
 	identity := func(x, y float64) (float64, float64, error) {
 		return x, y, nil
 	}

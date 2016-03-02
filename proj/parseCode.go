@@ -19,7 +19,7 @@ func testProj(code string) bool {
 }
 
 // Parse parses a WKT- or PROJ4-formatted projection string into a Proj object.
-func Parse(code string) (*Proj, error) {
+func Parse(code string) (*SR, error) {
 	//check to see if this is a WKT string
 	if p, ok := defs[code]; ok {
 		return p, nil

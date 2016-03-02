@@ -29,7 +29,7 @@ func TestAddDef(t *testing.T) {
 }
 
 func TestUnits(t *testing.T) {
-	if defs["testmerc2"].units != "m" {
+	if defs["testmerc2"].Units != "m" {
 		t.Error("should parse units")
 	}
 }
@@ -109,7 +109,7 @@ func TestWKT(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if defs["EPSG:4269"].to_meter != 6378137*0.01745329251994328 {
+	if defs["EPSG:4269"].ToMeter != 6378137*0.01745329251994328 {
 		t.Errorf("should provide the correct conversion factor for WKT GEOGCS projections")
 	}
 
@@ -117,7 +117,7 @@ func TestWKT(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if defs["EPSG:4279"].to_meter != 6377563.396*0.01745329251994328 {
+	if defs["EPSG:4279"].ToMeter != 6377563.396*0.01745329251994328 {
 		t.Errorf("should provide the correct conversion factor for WKT GEOGCS projections")
 	}
 }
