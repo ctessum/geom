@@ -14,8 +14,9 @@ func testWKT(code string) bool {
 	}
 	return false
 }
+
 func testProj(code string) bool {
-	return code[0] == '+'
+	return len(code) >= 1 && code[0] == '+'
 }
 
 // Parse parses a WKT- or PROJ4-formatted projection string into a Proj object.
@@ -38,6 +39,6 @@ func Parse(code string) (*SR, error) {
 		p.deriveConstants()
 		return p, nil
 	}
-	return nil, fmt.Errorf("unsupported projection definition %s; only proj4 and "+
+	return nil, fmt.Errorf("unsupported projection definition '%s'; only proj4 and "+
 		"WKT are supported", code)
 }

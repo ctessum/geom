@@ -18,7 +18,6 @@ func projString(defData string) (*SR, error) {
 		a = strings.TrimSpace(a)
 		split := strings.Split(a, "=")
 		split = append(split, "true")
-		fmt.Println(split)
 		paramName := strings.ToLower(split[0])
 		paramVal := split[1]
 

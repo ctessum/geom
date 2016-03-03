@@ -64,10 +64,10 @@ func TestProj2Proj(t *testing.T) {
 
 func TestProj4(t *testing.T) {
 	type testPoint struct {
-		code   string
-		xy, ll []float64
-		acc    struct {
-			xy, ll float64
+		Code   string
+		XY, LL []float64
+		Acc    struct {
+			XY, LL float64
 		}
 	}
 	var testPoints []testPoint
@@ -80,45 +80,52 @@ func TestProj4(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	fmt.Println(testPoints)
 	for _, testPoint := range testPoints {
-		wgs84, err := Parse("+longlat")
+		wgs84, err := Parse("+proj=longlat")
 		if err != nil {
 			t.Fatal(err)
 		}
+		fmt.Println(testPoint)
 		xyAcc := 2.
 		llAcc := 6.
-		if testPoint.acc.xy != 0 {
-			xyAcc = testPoint.acc.xy
+		if testPoint.Acc.XY != 0 {
+			xyAcc = testPoint.Acc.XY
 		}
-		if testPoint.acc.ll != 0 {
-			llAcc = testPoint.acc.ll
+		if testPoint.Acc.LL != 0 {
+			llAcc = testPoint.Acc.LL
 		}
 		xyEPSLN := math.Pow(10, -1*xyAcc)
 		llEPSLN := math.Pow(10, -1*llAcc)
-		proj, err := Parse(testPoint.code)
+		proj, err := Parse(testPoint.Code)
 		if err != nil {
-			t.Errorf("%s: %s", testPoint.code, err)
+			t.Errorf("%s: %s", testPoint.Code, err)
+			continue
 		}
 		trans, err := wgs84.NewTransformFunc(proj)
 		if err != nil {
-			t.Errorf("%s: %s", testPoint.code, err)
+			t.Errorf("%s: %s", testPoint.Code, err)
+			continue
 		}
-		x, y, err := trans(testPoint.ll[0], testPoint.ll[1])
+		x, y, err := trans(testPoint.LL[0], testPoint.LL[1])
 		if err != nil {
-			t.Errorf("%s: %s", testPoint.code, err)
+			t.Errorf("%s: %s", testPoint.Code, err)
+			continue
 		}
-		closeTo(t, x, testPoint.xy[0], xyEPSLN, fmt.Sprintf("%s fwd x", testPoint.code))
-		closeTo(t, y, testPoint.xy[1], xyEPSLN, fmt.Sprintf("%s fwd y", testPoint.code))
+		closeTo(t, x, testPoint.XY[0], xyEPSLN, fmt.Sprintf("%s fwd x", testPoint.Code))
+		closeTo(t, y, testPoint.XY[1], xyEPSLN, fmt.Sprintf("%s fwd y", testPoint.Code))
 		trans, err = proj.NewTransformFunc(wgs84)
 		if err != nil {
-			t.Errorf("%s: %s", testPoint.code, err)
+			t.Errorf("%s: %s", testPoint.Code, err)
+			continue
 		}
-		lon, lat, err := trans(testPoint.xy[0], testPoint.xy[1])
+		lon, lat, err := trans(testPoint.XY[0], testPoint.XY[1])
 		if err != nil {
-			t.Errorf("%s: %s", testPoint.code, err)
+			t.Errorf("%s: %s", testPoint.Code, err)
+			continue
 		}
-		closeTo(t, lon, testPoint.ll[0], llEPSLN, fmt.Sprintf("%s inv x", testPoint.code))
-		closeTo(t, lat, testPoint.ll[1], llEPSLN, fmt.Sprintf("%s inv y", testPoint.code))
+		closeTo(t, lon, testPoint.LL[0], llEPSLN, fmt.Sprintf("%s inv x", testPoint.Code))
+		closeTo(t, lat, testPoint.LL[1], llEPSLN, fmt.Sprintf("%s inv y", testPoint.Code))
 	}
 }
 

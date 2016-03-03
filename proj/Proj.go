@@ -80,6 +80,7 @@ func (sr *SR) TransformFuncs() (forward, inverse TransformFunc, err error) {
 	if !ok {
 		err = fmt.Errorf("in proj.Proj.TransformFuncs, could not find "+
 			"transformer for %s", sr.Name)
+		return
 	}
 	forward, inverse = t(sr)
 	return

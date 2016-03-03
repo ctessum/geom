@@ -1,6 +1,9 @@
 package proj
 
-import "math"
+import (
+	"fmt"
+	"math"
+)
 
 func checkNotWGS(source, dest *SR) bool {
 	return ((source.datum.datum_type == pjd3Param || source.datum.datum_type == pjd7Param) && dest.DatumCode != "WGS84")
@@ -9,6 +12,9 @@ func checkNotWGS(source, dest *SR) bool {
 // NewTransformFunc creates a function that transforms a point from sr
 // to the destination spatial reference.
 func (source *SR) NewTransformFunc(dest *SR) (TransformFunc, error) {
+	if dest == nil {
+		return nil, fmt.Errorf("proj: destination is nil")
+	}
 	return func(x, y float64) (float64, float64, error) {
 		point := []float64{x, y}
 		var wgs84 *SR
