@@ -43,7 +43,7 @@ func adjust_axis(crs *SR, denorm bool, point []float64) ([]float64, error) {
 			}
 			break
 		default:
-			err := fmt.Errorf("in plot.adjust_axis: unknown axis (%s). check "+
+			err := fmt.Errorf("in plot.adjust_axis: unknown axis (%v). check "+
 				"definition of %s", crs.Axis[i], crs.Name)
 			return nil, err
 		}
