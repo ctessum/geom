@@ -37,6 +37,8 @@ func (sr *SR) parseWKTProjCS(secName []string, secData string) error {
 		if err := sr.parseWKTUnit(secName, secData); err != nil {
 			return err
 		}
+	case "AUTHORITY": // This holds for example the ESPG number.
+	case "AXIS":
 	default:
 		return fmt.Errorf("proj.parseWKTProjCS: unknown WKT section %v", secName)
 	}
@@ -134,7 +136,7 @@ func (sr *SR) parseWKTSpheroid(secName []string, secData string) error {
 }
 
 func (sr *SR) parseWKTProjection(secName []string, secData string) {
-	sr.Name = secData
+	sr.Name = strings.Trim(secData, "\"")
 }
 
 func (sr *SR) parseWKTParameter(secName []string, secData string) error {
@@ -168,7 +170,7 @@ func (sr *SR) parseWKTParameter(secName []string, secData string) error {
 		sr.Long0 = d2r(val)
 	case "azimuth":
 		sr.Alpha = d2r(val)
-	case "auxiliary_sphere_type":
+	case "auxiliary_sphere_type", "rectified_grid_angle":
 		// TODO: Figure out if this is important.
 	default:
 		return fmt.Errorf("proj.parseWKTParameter: unknown name %v", name)
@@ -197,7 +199,7 @@ func (sr *SR) parseWKTUnit(secName []string, secData string) error {
 		if err != nil {
 			return fmt.Errorf("in proj.parseWKTUnit: %v", err)
 		}
-		if sr.Name == "longlat" {
+		if sr.Name == longlat {
 			sr.ToMeter = convert * sr.A
 		} else {
 			sr.ToMeter = convert
@@ -242,7 +244,7 @@ func (sr *SR) parseWKTSection(secName []string, secData string) error {
 			err = sr.parseWKTProjCS(secNameO, secDataO)
 		case "GEOCS":
 			// This should only happen if there is no PROJCS.
-			sr.Name = "longlat"
+			sr.Name = longlat
 			if err := sr.parseWKTGeoCS(secNameO, secDataO); err != nil {
 				return err
 			}

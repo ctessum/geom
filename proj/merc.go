@@ -12,6 +12,9 @@ const (
 
 // Merc is a mercator projection.
 func Merc(this *SR) (forward, inverse TransformFunc) {
+	if math.IsNaN(this.Long0) {
+		this.Long0 = 0
+	}
 	var con = this.B / this.A
 	this.Es = 1 - con*con
 	if math.IsNaN(this.X0) {
@@ -40,7 +43,7 @@ func Merc(this *SR) (forward, inverse TransformFunc) {
 	// Mercator forward equations--mapping lat,long to x,y
 	forward = func(lon, lat float64) (x, y float64, err error) {
 		// convert to radians
-		if lat*r2d > 90 || lat*r2d < -90 || lon*r2d > 180 || lon*r2d < -180 {
+		if math.IsNaN(lat) || math.IsNaN(lon) || lat*r2d > 90 || lat*r2d < -90 || lon*r2d > 180 || lon*r2d < -180 {
 			err = fmt.Errorf("in proj.Merc forward: invalid longitude (%g) or latitude (%g)", lon, lat)
 			return
 		}

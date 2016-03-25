@@ -69,7 +69,7 @@ func registerTrans(proj Transformer, names ...string) {
 		projections = make(map[string]Transformer)
 	}
 	for _, n := range names {
-		projections[strings.ToLower(n)] = Merc
+		projections[strings.ToLower(n)] = proj
 	}
 }
 

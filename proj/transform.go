@@ -9,6 +9,9 @@ func checkNotWGS(source, dest *SR) bool {
 	return ((source.datum.datum_type == pjd3Param || source.datum.datum_type == pjd7Param) && dest.DatumCode != "WGS84")
 }
 
+const enu = "enu"
+const longlat = "longlat"
+
 // NewTransformFunc creates a function that transforms a point from sr
 // to the destination spatial reference.
 func (source *SR) NewTransformFunc(dest *SR) (TransformFunc, error) {
@@ -17,11 +20,9 @@ func (source *SR) NewTransformFunc(dest *SR) (TransformFunc, error) {
 	}
 	return func(x, y float64) (float64, float64, error) {
 		point := []float64{x, y}
-		var wgs84 *SR
-		var err error
 		// Workaround for datum shifts towgs84, if either source or destination projection is not wgs84
 		if checkNotWGS(source, dest) || checkNotWGS(dest, source) {
-			wgs84, err = Parse("WGS84")
+			wgs84, err := Parse("WGS84")
 			if err != nil {
 				return math.NaN(), math.NaN(), err
 			}
@@ -35,22 +36,21 @@ func (source *SR) NewTransformFunc(dest *SR) (TransformFunc, error) {
 			}
 			source = wgs84
 		}
-		var sourceInverse, destForward TransformFunc
-		_, sourceInverse, err = source.TransformFuncs()
+		_, sourceInverse, err := source.TransformFuncs()
 		if err != nil {
 			return math.NaN(), math.NaN(), err
 		}
-		destForward, _, err = source.TransformFuncs()
+		destForward, _, err := dest.TransformFuncs()
 		if err != nil {
 			return math.NaN(), math.NaN(), err
 		}
 
 		// DGR, 2010/11/12
-		if source.Axis != "enu" {
+		if source.Axis != enu {
 			adjust_axis(source, false, point)
 		}
 		// Transform source points to long/lat, if they aren't already.
-		if source.Name == "longlat" {
+		if source.Name == longlat {
 			point[0] *= deg2rad // convert degrees to radians
 			point[1] *= deg2rad
 		} else {
@@ -62,7 +62,9 @@ func (source *SR) NewTransformFunc(dest *SR) (TransformFunc, error) {
 			}
 		}
 		// Adjust for the prime meridian if necessary
-		point[0] += source.FromGreenwich
+		if !math.IsNaN(source.FromGreenwich) {
+			point[0] += source.FromGreenwich
+		}
 
 		// Convert datums if needed, and if possible.
 		z := 0.
@@ -79,12 +81,14 @@ func (source *SR) NewTransformFunc(dest *SR) (TransformFunc, error) {
 		}
 
 		// Adjust for the prime meridian if necessary
-		point[0] -= dest.FromGreenwich
+		if !math.IsNaN(dest.FromGreenwich) {
+			point[0] -= dest.FromGreenwich
+		}
 
-		if dest.Name == "longlat" {
+		if dest.Name == longlat {
 			// convert radians to decimal degrees
 			point[0] *= r2d
-			point[0] *= r2d
+			point[1] *= r2d
 		} else { // else project
 			point[0], point[1], err = destForward(point[0], point[1])
 			if err != nil {
@@ -95,12 +99,13 @@ func (source *SR) NewTransformFunc(dest *SR) (TransformFunc, error) {
 		}
 
 		// DGR, 2010/11/12
-		if dest.Axis != "enu" {
+		if dest.Axis != enu {
 			point, err = adjust_axis(dest, true, point)
 			if err != nil {
 				return math.NaN(), math.NaN(), err
 			}
 		}
+
 		return point[0], point[1], nil
 	}, nil
 }

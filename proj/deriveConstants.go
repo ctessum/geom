@@ -57,7 +57,7 @@ func (json *SR) deriveConstants() {
 	}
 	//DGR 2010-11-12: axis
 	if json.Axis == "" {
-		json.Axis = "enu"
+		json.Axis = enu
 	}
 
 	if json.datum == nil {

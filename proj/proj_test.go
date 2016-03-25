@@ -34,10 +34,12 @@ func TestUnits(t *testing.T) {
 	}
 }
 
-func closeTo(t *testing.T, a, b, tol float64, prefix string) {
-	if 2*math.Abs(a-b)/math.Abs(a+b) > tol {
+func closeTo(t *testing.T, a, b, tol float64, prefix string) bool {
+	if a == math.NaN() || b == math.NaN() || 2*math.Abs(a-b)/math.Abs(a+b) > tol {
 		t.Errorf("%s: value should be %f but is %f", prefix, b, a)
+		return false
 	}
+	return true
 }
 
 func TestProj2Proj(t *testing.T) {
@@ -80,13 +82,14 @@ func TestProj4(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println(testPoints)
 	for _, testPoint := range testPoints {
-		wgs84, err := Parse("+proj=longlat")
+		if !strings.Contains(strings.ToLower(testPoint.Code), "merc") {
+			continue
+		}
+		wgs84, err := Parse("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
 		if err != nil {
 			t.Fatal(err)
 		}
-		fmt.Println(testPoint)
 		xyAcc := 2.
 		llAcc := 6.
 		if testPoint.Acc.XY != 0 {
@@ -112,8 +115,12 @@ func TestProj4(t *testing.T) {
 			t.Errorf("%s: %s", testPoint.Code, err)
 			continue
 		}
-		closeTo(t, x, testPoint.XY[0], xyEPSLN, fmt.Sprintf("%s fwd x", testPoint.Code))
-		closeTo(t, y, testPoint.XY[1], xyEPSLN, fmt.Sprintf("%s fwd y", testPoint.Code))
+		if !closeTo(t, x, testPoint.XY[0], xyEPSLN, fmt.Sprintf("%s fwd x", testPoint.Code)) {
+			continue
+		}
+		if !closeTo(t, y, testPoint.XY[1], xyEPSLN, fmt.Sprintf("%s fwd y", testPoint.Code)) {
+			continue
+		}
 		trans, err = proj.NewTransformFunc(wgs84)
 		if err != nil {
 			t.Errorf("%s: %s", testPoint.Code, err)
@@ -124,8 +131,12 @@ func TestProj4(t *testing.T) {
 			t.Errorf("%s: %s", testPoint.Code, err)
 			continue
 		}
-		closeTo(t, lon, testPoint.LL[0], llEPSLN, fmt.Sprintf("%s inv x", testPoint.Code))
-		closeTo(t, lat, testPoint.LL[1], llEPSLN, fmt.Sprintf("%s inv y", testPoint.Code))
+		if !closeTo(t, lon, testPoint.LL[0], llEPSLN, fmt.Sprintf("%s inv x", testPoint.Code)) {
+			continue
+		}
+		if !closeTo(t, lat, testPoint.LL[1], llEPSLN, fmt.Sprintf("%s inv y", testPoint.Code)) {
+			continue
+		}
 	}
 }
 
