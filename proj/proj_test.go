@@ -83,7 +83,9 @@ func TestProj4(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, testPoint := range testPoints {
-		if !strings.Contains(strings.ToLower(testPoint.Code), "merc") {
+		if !(strings.Contains(strings.ToLower(testPoint.Code), "merc") ||
+			strings.Contains(strings.ToLower(testPoint.Code), "lambert") ||
+			strings.Contains(strings.ToLower(testPoint.Code), "lcc")) {
 			continue
 		}
 		wgs84, err := Parse("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
