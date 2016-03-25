@@ -11,7 +11,7 @@ import (
 type TransformFunc func(float64, float64) (float64, float64, error)
 
 // A Transformer creates forward and inverse TransformFuncs from a projection.
-type Transformer func(*SR) (forward, inverse TransformFunc)
+type Transformer func(*SR) (forward, inverse TransformFunc, err error)
 
 var projections map[string]Transformer
 
@@ -46,6 +46,9 @@ type SR struct {
 	DatumName                  string
 	NoDefs                     bool
 	datum                      *datum
+	NS                         float64
+	F0                         float64
+	RH                         float64
 }
 
 // newProj initializes a SR object and sets fields to default values.
@@ -82,6 +85,6 @@ func (sr *SR) TransformFuncs() (forward, inverse TransformFunc, err error) {
 			"transformer for %s", sr.Name)
 		return
 	}
-	forward, inverse = t(sr)
+	forward, inverse, err = t(sr)
 	return
 }
