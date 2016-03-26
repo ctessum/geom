@@ -22,7 +22,7 @@ func (sr *SR) parseWKTProjCS(secName []string, secData string) error {
 	}
 	switch secName[1] {
 	case "GEOGCS":
-		sr.parseWKTGeoCS(secName, secData)
+		sr.parseWKTGeogCS(secName, secData)
 	case "PRIMEM":
 		if err := sr.parseWKTPrimeM(secName, secData); err != nil {
 			return err
@@ -54,7 +54,7 @@ func stringInArray(s string, a []string) bool {
 	return false
 }
 
-func (sr *SR) parseWKTGeoCS(secName []string, secData string) error {
+func (sr *SR) parseWKTGeogCS(secName []string, secData string) error {
 	if secName[len(secName)-1] == "GEOGCS" {
 		name, data := splitWKTName(secData)
 		// Set the datum name to the GEOCS name in case we don't find a datum.
@@ -63,8 +63,14 @@ func (sr *SR) parseWKTGeoCS(secName []string, secData string) error {
 		return sr.parseWKTSection(secName, data)
 	} else if stringInArray("DATUM", secName) {
 		return sr.parseWKTDatum(secName, secData)
+	} else if secName[len(secName)-1] == "PRIMEM" {
+		return sr.parseWKTPrimeM(secName, secData)
+	} else if secName[len(secName)-1] == "UNIT" {
+		return sr.parseWKTUnit(secName, secData)
+	} else if secName[len(secName)-1] == "AUTHORITY" {
+		return nil // Don't do anything with authority for now.
 	}
-	return fmt.Errorf("proj.parseWKTGeoCS: unknown WKT section %v", secName)
+	return fmt.Errorf("proj.parseWKTGeogCS: unknown WKT section %v", secName)
 }
 
 func (sr *SR) parseWKTDatum(secName []string, secData string) error {
@@ -78,6 +84,7 @@ func (sr *SR) parseWKTDatum(secName []string, secData string) error {
 		if err := sr.parseWKTSpheroid(secName, secData); err != nil {
 			return err
 		}
+	case "AUTHORITY": // Don't do anything with this for now.
 	default:
 		return fmt.Errorf("proj.parseWKTDatum: unknown WKT section %v", secName)
 	}
@@ -180,7 +187,7 @@ func (sr *SR) parseWKTParameter(secName []string, secData string) error {
 
 func (sr *SR) parseWKTPrimeM(secName []string, secData string) error {
 	v := strings.Split(secData, ",")
-	name := strings.ToLower(v[0])
+	name := strings.ToLower(strings.Trim(v[0], "\""))
 	if name != "greenwich" {
 		return fmt.Errorf("in proj.parseWTKPrimeM: prime meridian is %s but"+
 			"only greenwich is supported", name)
@@ -242,17 +249,15 @@ func (sr *SR) parseWKTSection(secName []string, secData string) error {
 		switch secNameO[0] {
 		case "PROJCS":
 			err = sr.parseWKTProjCS(secNameO, secDataO)
-		case "GEOCS":
+		case "GEOGCS":
 			// This should only happen if there is no PROJCS.
 			sr.Name = longlat
-			if err := sr.parseWKTGeoCS(secNameO, secDataO); err != nil {
-				return err
-			}
+			err = sr.parseWKTGeogCS(secNameO, secDataO)
 		case "LOCAL_CS":
 			sr.Name = "identity"
 			sr.local = true
 		default:
-			err = fmt.Errorf("proj: unknown WKT section name '%s'", secName)
+			err = fmt.Errorf("proj: unknown WKT section name '%s'", secNameO)
 		}
 		if err != nil {
 			return err
