@@ -139,6 +139,7 @@ func TestProj4(t *testing.T) {
 		if !closeTo(t, lat, testPoint.LL[1], llEPSLN, fmt.Sprintf("%s inv y", testPoint.Code)) {
 			continue
 		}
+		t.Logf("passed %s", testPoint.Code)
 	}
 }
 
@@ -162,7 +163,7 @@ func TestWKT(t *testing.T) {
 
 func TestErrors(t *testing.T) {
 	_, err := Parse("fake one")
-	if err != nil || !strings.Contains(err.Error(), "unsupported") {
+	if err == nil || !strings.Contains(err.Error(), "unsupported") {
 		t.Errorf("should throw an error for an unknown ref")
 	}
 }
