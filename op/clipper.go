@@ -25,8 +25,10 @@ package op
 
 import (
 	"fmt"
-	"github.com/ctessum/geom"
 	"math"
+	"time"
+
+	"github.com/ctessum/geom"
 )
 
 //func _DBG(f func()) { f() }
@@ -57,20 +59,20 @@ type clipper struct {
 	eventQueue
 }
 
-func (c *clipper) compute(operation Op) geom.T {
+func (c *clipper) compute(operation Op) (geom.T, error) {
 
 	// Test 1 for trivial result case
 	if len(c.subject)*len(c.clipping) == 0 {
 		switch operation {
 		case DIFFERENCE:
-			return Clone(c.subject)
+			return Clone(c.subject), nil
 		case UNION:
 			if len(c.subject) == 0 {
-				return Clone(c.clipping)
+				return Clone(c.clipping), nil
 			}
-			return Clone(c.subject)
+			return Clone(c.subject), nil
 		}
-		return nil
+		return nil, nil
 	}
 
 	// Test 2 for trivial result case
@@ -79,16 +81,16 @@ func (c *clipper) compute(operation Op) geom.T {
 	if !subjectbb.Overlaps(clippingbb) {
 		switch operation {
 		case DIFFERENCE:
-			return Clone(c.subject)
+			return Clone(c.subject), nil
 		case UNION, XOR:
 			result := Clone(c.subject)
 			for _, rcont := range c.clipping {
 				cont := contour(rcont)
 				result = append(result, cont.Clone())
 			}
-			return result
+			return result, nil
 		}
-		return nil
+		return nil, nil
 	}
 
 	// Add each segment to the eventQueue, sorted from left to right.
@@ -123,7 +125,16 @@ func (c *clipper) compute(operation Op) geom.T {
 		}
 	})
 
+	timeout := time.After(60 * time.Second)
+
 	for !c.eventQueue.IsEmpty() {
+
+		select {
+		case <-timeout:
+			return nil, fmt.Errorf("op.compute: timeout (probably infinite loop)")
+		default:
+		}
+
 		var prev, next *endpoint
 		e := c.eventQueue.dequeue()
 		_DBG(func() { fmt.Printf("\nProcess event: (of %d)\n%v\n", len(c.eventQueue.elements)+1, *e) })
@@ -133,7 +144,7 @@ func (c *clipper) compute(operation Op) geom.T {
 		case operation == INTERSECTION && e.p.X > MINMAX_X:
 			fallthrough
 		case operation == DIFFERENCE && e.p.X > subjectbb.Max.X:
-			return connector.toShape()
+			return connector.toShape(), nil
 			//case operation == UNION && e.p.X > MINMAX_X:
 			//	_DBG(func() { fmt.Print("\nUNION optimization, fast quit\n") })
 			//	// add all the non-processed line segments to the result
@@ -281,7 +292,7 @@ func (c *clipper) compute(operation Op) geom.T {
 			}
 		})
 	}
-	return connector.toShape()
+	return connector.toShape(), nil
 }
 
 func findIntersection(seg0, seg1 segment) (int, geom.Point, geom.Point) {
