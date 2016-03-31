@@ -27,7 +27,7 @@ type SR struct {
 	X0, Y0, K0                                                 float64
 	A, A2, B, B2                                               float64
 	Ra                                                         bool
-	Zone                                                       int64
+	Zone                                                       float64
 	UTMSouth                                                   bool
 	DatumParams                                                []float64
 	ToMeter                                                    float64

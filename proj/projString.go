@@ -72,7 +72,7 @@ func projString(defData string) (*SR, error) {
 		case "r_a":
 			self.Ra = true
 		case "zone":
-			self.Zone, err = strconv.ParseInt(paramVal, 10, 64)
+			self.Zone, err = strconv.ParseFloat(paramVal, 64)
 		case "south":
 			self.UTMSouth = true
 		case "no_defs":

@@ -54,3 +54,34 @@ func phi2z(eccent, ts float64) (float64, error) {
 	}
 	return math.NaN(), fmt.Errorf("phi2z has no convergence")
 }
+
+func e0fn(x float64) float64 {
+	return (1 - 0.25*x*(1+x/16*(3+1.25*x)))
+}
+
+func e1fn(x float64) float64 {
+	return (0.375 * x * (1 + 0.25*x*(1+0.46875*x)))
+}
+
+func e2fn(x float64) float64 {
+	return (0.05859375 * x * x * (1 + 0.75*x))
+}
+
+func e3fn(x float64) float64 {
+	return (x * x * x * (35 / 3072))
+}
+
+func mlfn(e0, e1, e2, e3, phi float64) float64 {
+	return (e0*phi - e1*math.Sin(2*phi) + e2*math.Sin(4*phi) - e3*math.Sin(6*phi))
+}
+
+func asinz(x float64) float64 {
+	if math.Abs(x) > 1 {
+		if x > 1 {
+			x = 1
+		} else {
+			x = -1
+		}
+	}
+	return math.Asin(x)
+}
