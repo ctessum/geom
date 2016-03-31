@@ -1,18 +1,30 @@
-var D2R = 0.01745329251994329577;
-var tmerc = require('./tmerc');
-exports.dependsOn = 'tmerc';
-exports.init = function() {
-  if (!this.zone) {
-    return;
-  }
-  this.lat0 = 0;
-  this.long0 = ((6 * Math.abs(this.zone)) - 183) * D2R;
-  this.x0 = 500000;
-  this.y0 = this.utmSouth ? 10000000 : 0;
-  this.k0 = 0.9996;
+package proj
 
-  tmerc.init.apply(this);
-  this.forward = tmerc.forward;
-  this.inverse = tmerc.inverse;
-};
-exports.names = ["Universal Transverse Mercator System", "utm"];
+import (
+	"fmt"
+	"math"
+)
+
+// UTM is a universal transverse Mercator projection.
+func UTM(this *SR) (forward, inverse TransformFunc, err error) {
+
+	if math.IsNaN(this.Zone) {
+		err = fmt.Errorf("in proj.UTM: zone is not specified")
+		return
+	}
+	this.Lat0 = 0
+	this.Long0 = ((6 * math.Abs(this.Zone)) - 183) * deg2rad
+	this.X0 = 500000
+	if this.UTMSouth {
+		this.Y0 = 10000000
+	} else {
+		this.Y0 = 0
+	}
+	this.K0 = 0.9996
+
+	return TMerc(this)
+}
+
+func init() {
+	registerTrans(UTM, "Universal Transverse Mercator System", "utm")
+}
