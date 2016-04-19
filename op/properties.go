@@ -52,6 +52,9 @@ func Length(g geom.T) float64 {
 
 // see http://www.mathopenref.com/coordpolygonarea2.html
 func area(polygon []geom.Point) float64 {
+	if len(polygon) == 0 {
+		return 0
+	}
 	highI := len(polygon) - 1
 	A := (polygon[highI].X +
 		polygon[0].X) * (polygon[0].Y - polygon[highI].Y)
