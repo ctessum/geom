@@ -5,7 +5,7 @@ import (
 	"reflect"
 )
 
-func Encode(g geom.T) ([]byte, error) {
+func Encode(g geom.Geom) ([]byte, error) {
 	switch g.(type) {
 	case geom.Point:
 		point := g.(geom.Point)

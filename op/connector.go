@@ -108,7 +108,7 @@ func (c *connector) add(s segment) {
 	c.openPolys = append(c.openPolys, *newChain(s))
 }
 
-func (c *connector) toShape() geom.T {
+func (c *connector) toShape() geom.Geom {
 	// Check for empty result
 	if (len(c.closedPolys) == 0 ||
 		(len(c.closedPolys) == 1 && len(c.closedPolys[0].points) == 0)) &&
@@ -131,7 +131,7 @@ func (c *connector) toShape() geom.T {
 		}
 		// fix winding directions
 		FixOrientation(poly)
-		return geom.T(poly)
+		return geom.Geom(poly)
 
 	case outputLines:
 		// Because we're dealing with linestrings and not polygons,
@@ -144,7 +144,7 @@ func (c *connector) toShape() geom.T {
 				outline[i][j] = p
 			}
 		}
-		return geom.T(outline)
+		return geom.Geom(outline)
 
 	case outputPoints:
 		// only keep points coincident with both subject and clip

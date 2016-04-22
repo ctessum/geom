@@ -109,9 +109,9 @@ func TestContourContains(t *T) {
 }
 
 func ExamplePolygon_Construct() {
-	subject := geom.T(geom.Polygon{
+	subject := geom.Geom(geom.Polygon{
 		{{1, 1}, {1, 2}, {2, 2}, {2, 1}}}) // small square
-	clipping := geom.T(geom.Polygon{
+	clipping := geom.Geom(geom.Polygon{
 		{{0, 0}, {0, 3}, {3, 0}}}) // overlapping triangle
 
 	// Calculate the intersection

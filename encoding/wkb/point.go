@@ -6,7 +6,7 @@ import (
 	"io"
 )
 
-func pointReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
+func pointReader(r io.Reader, byteOrder binary.ByteOrder) (geom.Geom, error) {
 	point := geom.Point{}
 	if err := binary.Read(r, byteOrder, &point); err != nil {
 		return nil, err

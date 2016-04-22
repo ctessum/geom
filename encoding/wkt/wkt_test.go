@@ -8,7 +8,7 @@ import (
 
 func TestWKT(t *testing.T) {
 	var testCases = []struct {
-		g   geom.T
+		g   geom.Geom
 		wkt []byte
 	}{
 		{

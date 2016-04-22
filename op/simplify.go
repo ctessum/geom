@@ -15,16 +15,16 @@ import (
 // It is based on the algorithm:
 // J. L. G. Pallero, Robust line simplification on the plane.
 // Comput. Geosci. 61, 152–159 (2013).
-func Simplify(g geom.T, tolerance float64) (geom.T, error) {
+func Simplify(g geom.Geom, tolerance float64) (geom.Geom, error) {
 	if g == nil {
 		return nil, nil
 	}
 
 	var err error
-	resultChan := make(chan geom.T)
+	resultChan := make(chan geom.Geom)
 	go func() {
 		// Run the simplifier, while checking for an infinite loop.
-		var gg geom.T
+		var gg geom.Geom
 		gg, err = simplify(g, tolerance)
 		resultChan <- gg
 	}()
@@ -38,7 +38,7 @@ func Simplify(g geom.T, tolerance float64) (geom.T, error) {
 	}
 }
 
-func simplify(g geom.T, tolerance float64) (geom.T, error) {
+func simplify(g geom.Geom, tolerance float64) (geom.Geom, error) {
 	switch g.(type) {
 	case geom.Point, geom.MultiPoint:
 		return g, nil
@@ -154,10 +154,10 @@ func segMakesNotSimple(segStart, segEnd geom.Point, paths [][]geom.Point) bool {
 // SimplifyInfiniteLoopError indicates that the Simplify function has fallen
 // into an infinite loop.
 type SimplifyInfiniteLoopError struct {
-	g geom.T
+	g geom.Geom
 }
 
-func newSimplifyInfiniteLoopError(g geom.T) SimplifyInfiniteLoopError {
+func newSimplifyInfiniteLoopError(g geom.Geom) SimplifyInfiniteLoopError {
 	return SimplifyInfiniteLoopError{g: g}
 }
 

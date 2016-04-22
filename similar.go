@@ -35,7 +35,7 @@ func pointssSimilar(p1ss, p2ss [][]Point, e float64) bool {
 }
 
 // Similar determines whether two geometries are similar within tolerance.
-func (p Point) Similar(g T, tolerance float64) bool {
+func (p Point) Similar(g Geom, tolerance float64) bool {
 	switch g.(type) {
 	case Point:
 		return pointSimilar(p, g.(Point), tolerance)
@@ -45,7 +45,7 @@ func (p Point) Similar(g T, tolerance float64) bool {
 }
 
 // Similar determines whether two geometries are similar within tolerance.
-func (mp MultiPoint) Similar(g T, tolerance float64) bool {
+func (mp MultiPoint) Similar(g Geom, tolerance float64) bool {
 	switch g.(type) {
 	case MultiPoint:
 		return pointsSimilar(mp, g.(MultiPoint), tolerance)
@@ -57,7 +57,7 @@ func (mp MultiPoint) Similar(g T, tolerance float64) bool {
 // Similar determines whether two geometries are similar within tolerance.
 // If two lines contain the same points but in different directions it will
 // return false.
-func (l LineString) Similar(g T, tolerance float64) bool {
+func (l LineString) Similar(g Geom, tolerance float64) bool {
 	switch g.(type) {
 	case LineString:
 		return pointsSimilar(l, g.(LineString), tolerance)
@@ -69,7 +69,7 @@ func (l LineString) Similar(g T, tolerance float64) bool {
 // Similar determines whether two geometries are similar within tolerance.
 // If ml and g have the similar linestrings but in a different order, it
 // will return true.
-func (ml MultiLineString) Similar(g T, tolerance float64) bool {
+func (ml MultiLineString) Similar(g Geom, tolerance float64) bool {
 	switch g.(type) {
 	case MultiLineString:
 		ml2 := g.(MultiLineString)
@@ -104,7 +104,7 @@ func (ml MultiLineString) Similar(g T, tolerance float64) bool {
 // Similar determines whether two geometries are similar within tolerance.
 // If ml and g have the similar polygons but in a different order, it
 // will return true.
-func (mp MultiPolygon) Similar(g T, tolerance float64) bool {
+func (mp MultiPolygon) Similar(g Geom, tolerance float64) bool {
 	switch g.(type) {
 	case MultiPolygon:
 		mp2 := g.(MultiPolygon)
@@ -141,7 +141,7 @@ func (mp MultiPolygon) Similar(g T, tolerance float64) bool {
 // different starting point, it will return true. If they have the same
 // rings but in a different order, it will return true. If the rings have the same
 // points but different winding directions, it will return false.
-func (p Polygon) Similar(g T, tolerance float64) bool {
+func (p Polygon) Similar(g Geom, tolerance float64) bool {
 	switch g.(type) {
 	case Polygon:
 		p2 := g.(Polygon)
@@ -153,6 +153,52 @@ func (p Polygon) Similar(g T, tolerance float64) bool {
 			matched := false
 			for ii, i := range indices {
 				if ringSimilar(r1, p2[i], tolerance) { // we found a match
+					matched = true
+					// remove index i from futher consideration.
+					if ii == len(indices)-1 {
+						indices = indices[0:ii]
+					} else {
+						indices = append(indices[0:ii], indices[ii+1:len(indices)]...)
+					}
+					break
+				}
+			}
+			if !matched {
+				return false
+			}
+		}
+		return true
+	default:
+		return false
+	}
+}
+
+// Similar determines whether two bounds are similar within tolerance.
+func (b *Bounds) Similar(g Geom, tolerance float64) bool {
+	switch g.(type) {
+	case *Bounds:
+		b2 := g.(*Bounds)
+		return pointSimilar(b.Min, b2.Min, tolerance) && pointSimilar(b.Max, b2.Max, tolerance)
+	default:
+		return false
+	}
+}
+
+// Similar determines whether two geometries collections are similar within tolerance.
+// If gc and g have the same geometries
+// but in a different order, it will return true.
+func (gc GeometryCollection) Similar(g Geom, tolerance float64) bool {
+	switch g.(type) {
+	case GeometryCollection:
+		gc2 := g.(GeometryCollection)
+		indices := make([]int, len(gc2))
+		for i := range gc2 {
+			indices[i] = i
+		}
+		for _, gc1 := range gc {
+			matched := false
+			for ii, i := range indices {
+				if gc1.Similar(gc2[i], tolerance) { // we found a match
 					matched = true
 					// remove index i from futher consideration.
 					if ii == len(indices)-1 {

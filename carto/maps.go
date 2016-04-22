@@ -1,4 +1,4 @@
-// Go language map drawing library
+// Package carto is a Go language map drawing library
 package carto
 
 import (
@@ -75,14 +75,16 @@ type Canvas struct {
 func NewCanvas(N, S, E, W float64, c draw.Canvas) *Canvas {
 	m := &Canvas{
 		Canvas: c,
-		Bounds: geom.NewBoundsPoint(geom.Point{W, S}).
-			ExtendPoint(geom.Point{E, N}),
+		Bounds: &geom.Bounds{
+			Min: geom.Point{X: W, Y: S},
+			Max: geom.Point{X: E, Y: N},
+		},
 		Polygon: geom.Polygon{{
-			geom.Point{W, S},
-			geom.Point{E, S},
-			geom.Point{E, N},
-			geom.Point{W, N},
-			geom.Point{W, S},
+			geom.Point{X: W, Y: S},
+			geom.Point{X: E, Y: S},
+			geom.Point{X: E, Y: N},
+			geom.Point{X: W, Y: N},
+			geom.Point{X: W, Y: S},
 		}},
 		scale: min(float64(c.Max.X-c.Min.X)/(E-W),
 			float64(c.Max.Y-c.Min.Y)/(N-S)),
@@ -104,8 +106,10 @@ func NewRasterMap(N, S, E, W float64, width int) *RasterMap {
 			//Canvas: draw.New(vgimg.NewImage(I, vgimg.DPI(int(float64(width)/mapWidth)))),
 			Canvas: draw.New(vgimg.NewWith(vgimg.UseImage(I))),
 			//Canvas: draw.New(vgimg.New(vgimg.UseImage(I), vgimg.DPI(300))),
-			Bounds: geom.NewBoundsPoint(geom.Point{W, S}).
-				ExtendPoint(geom.Point{E, N}),
+			Bounds: &geom.Bounds{
+				Min: geom.Point{X: W, Y: S},
+				Max: geom.Point{X: E, Y: N},
+			},
 		},
 		I: I,
 	}
@@ -122,13 +126,13 @@ func (r *RasterMap) WriteTo(f io.Writer) error {
 // stroke and fill colors, the width of the bounding line,
 // and the markerGlyph, which specifies the shape of the marker
 // (only used for point shapes).
-func (m *Canvas) DrawVector(g geom.T, fillColor color.NRGBA,
+func (m *Canvas) DrawVector(g geom.Geom, fillColor color.NRGBA,
 	lineStyle draw.LineStyle, markerGlyph draw.GlyphStyle) error {
 	// check bounding box
 	if g == nil {
 		return nil
 	}
-	gbounds := g.Bounds(nil)
+	gbounds := g.Bounds()
 	if !gbounds.Overlaps(m.Bounds) {
 		return nil
 	}
@@ -267,7 +271,7 @@ func NewCanvasFromRaster(S, W, dy, dx float64, ny, nx int,
 
 type MapData struct {
 	Cmap      *ColorMap
-	Shapes    []geom.T
+	Shapes    []geom.Geom
 	Data      []float64
 	DrawEdges bool
 	draw.LineStyle
@@ -276,7 +280,7 @@ type MapData struct {
 func NewMapData(numShapes int, Type ColorMapType) *MapData {
 	m := new(MapData)
 	m.Cmap = NewColorMap(Type)
-	m.Shapes = make([]geom.T, numShapes)
+	m.Shapes = make([]geom.Geom, numShapes)
 	m.Data = make([]float64, numShapes)
 	m.LineStyle = draw.LineStyle{Width: 1. * vg.Millimeter}
 	return m
@@ -347,11 +351,11 @@ func (e UnsupportedGeometryError) Error() string {
 
 // Convenience function for making a simple map.
 func DrawShapes(f io.Writer, strokeColor, fillColor []color.NRGBA,
-	linewidth, markersize vg.Length, shapes ...geom.T) error {
+	linewidth, markersize vg.Length, shapes ...geom.Geom) error {
 	bounds := geom.NewBounds()
 	for _, s := range shapes {
 		if s != nil {
-			bounds = s.Bounds(bounds)
+			bounds.Extend(s.Bounds())
 		}
 	}
 	m := NewRasterMap(bounds.Max.Y, bounds.Min.Y,

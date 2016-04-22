@@ -42,8 +42,8 @@ func printEntry(e entry, level int) {
 	fmt.Println()
 }
 
-func items(n *node) chan geom.T {
-	ch := make(chan geom.T)
+func items(n *node) chan geom.Geom {
+	ch := make(chan geom.Geom)
 	go func() {
 		for _, e := range n.entries {
 			if n.leaf {
@@ -74,7 +74,7 @@ func verify(t *testing.T, n *node) {
 	}
 }
 
-func indexOf(objs []geom.T, obj geom.T) int {
+func indexOf(objs []geom.Geom, obj geom.Geom) int {
 	ind := -1
 	for i, r := range objs {
 		if r == obj {
@@ -97,14 +97,6 @@ var chooseLeafNodeTests = []struct {
 		mustRect(geom.Point{3, 4}, geom.Point{2, 0.9}),
 		1,
 		"clear winner",
-		1,
-	},
-	{
-		mustRect(geom.Point{-1, -1.5}, geom.Point{0.5, 2.5025}),
-		mustRect(geom.Point{0.5, 1}, geom.Point{0.5, 0.815}),
-		mustRect(geom.Point{3, 4}, geom.Point{2, 0.9}),
-		1,
-		"leaves tie",
 		1,
 	},
 	{
@@ -561,7 +553,7 @@ func TestCondenseTreeEliminate(t *testing.T) {
 	parent.entries = append(parent.entries[:2], parent.entries[3:]...)
 	rt.condenseTree(parent)
 
-	retrieved := []geom.T{}
+	retrieved := []geom.Geom{}
 	for obj := range items(rt.root) {
 		retrieved = append(retrieved, obj)
 	}

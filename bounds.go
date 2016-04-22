@@ -62,3 +62,13 @@ func (b *Bounds) extendPointss(pointss [][]Point) {
 func (b *Bounds) Overlaps(b2 *Bounds) bool {
 	return b.Min.X <= b2.Max.X && b.Min.Y <= b2.Max.Y && b.Max.X >= b2.Min.X && b.Max.Y >= b2.Min.Y
 }
+
+// Bounds returns b
+func (b *Bounds) Bounds() *Bounds {
+	return b
+}
+
+// Within calculates whether b is within poly or touching its edge.
+func (b *Bounds) Within(poly Polygonal) bool {
+	return pointInPolygonal(b.Min, poly) && pointInPolygonal(b.Max, poly)
+}

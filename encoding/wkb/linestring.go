@@ -6,7 +6,7 @@ import (
 	"io"
 )
 
-func lineStringReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
+func lineStringReader(r io.Reader, byteOrder binary.ByteOrder) (geom.Geom, error) {
 	points, err := readPoints(r, byteOrder)
 	if err != nil {
 		return nil, err

@@ -26,7 +26,7 @@ func pointssCoordinates(pointss [][]geom.Point) [][][]float64 {
 	return coordinates
 }
 
-func ToGeoJSON(g geom.T) (*Geometry, error) {
+func ToGeoJSON(g geom.Geom) (*Geometry, error) {
 	switch g.(type) {
 	case geom.Point:
 		return &Geometry{
@@ -48,7 +48,7 @@ func ToGeoJSON(g geom.T) (*Geometry, error) {
 	}
 }
 
-func Encode(g geom.T) ([]byte, error) {
+func Encode(g geom.Geom) ([]byte, error) {
 	if object, err := ToGeoJSON(g); err == nil {
 		return json.Marshal(object)
 	} else {

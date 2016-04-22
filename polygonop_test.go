@@ -119,19 +119,19 @@ func TestPolygonOp(t *testing.T) {
 	for i, test := range tests {
 		intersection := test.subject.Intersection(test.clipping)
 		if !intersection.Similar(test.intersection, 1.e-9) {
-			t.Errorf("%d: intersection expected %g, got %g", i, test.intersection, intersection)
+			t.Errorf("%d: intersection expected %v, got %v", i, test.intersection, intersection)
 		}
 		union := test.subject.Union(test.clipping)
 		if !union.Similar(test.union, 1.e-9) {
-			t.Errorf("%d: union expected %g, got %g", i, test.union, union)
+			t.Errorf("%d: union expected %v, got %v", i, test.union, union)
 		}
 		difference := test.subject.Difference(test.clipping)
 		if !difference.Similar(test.difference, 1.e-9) {
-			t.Errorf("%d: difference expected %g, got %g", i, test.difference, difference)
+			t.Errorf("%d: difference expected %v, got %v", i, test.difference, difference)
 		}
 		xor := test.subject.XOr(test.clipping)
 		if !xor.Similar(test.xor, 1.e-9) {
-			t.Errorf("%d: xor expected %g, got %g", i, test.xor, xor)
+			t.Errorf("%d: xor expected %v, got %v", i, test.xor, xor)
 		}
 	}
 }

@@ -4,16 +4,16 @@ They can be encoded and decoded by other packages in this repository.
 */
 package geom
 
-// T is an interface for generic geometry types.
-type T interface {
+// Geom is an interface for generic geometry types.
+type Geom interface {
 	Bounds() *Bounds
 	Within(Polygonal) bool
-	Similar(T, float64) bool
+	Similar(Geom, float64) bool
 }
 
 // Linear is an interface for types that are linear in nature.
 type Linear interface {
-	T
+	Geom
 	Length() float64
 	//Clip(Polygonal) Linear
 	//Intersection(Linear) MultiPoint
@@ -22,7 +22,7 @@ type Linear interface {
 
 // Polygonal is an interface for types that are polygonal in nature.
 type Polygonal interface {
-	T
+	Geom
 	Polygons() []Polygon
 	Intersection(Polygonal) Polygon
 	Union(Polygonal) Polygon
@@ -36,7 +36,7 @@ type Polygonal interface {
 
 // PointLike is an interface for types that are pointlike in nature.
 type PointLike interface {
-	T
+	Geom
 	Points() []Point
 	On(l Linear, tolerance float64) bool
 }

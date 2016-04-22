@@ -33,7 +33,7 @@ var (
 )
 
 type UnexpectedGeometryError struct {
-	Geom geom.T
+	Geom geom.Geom
 }
 
 func (e UnexpectedGeometryError) Error() string {
@@ -48,7 +48,7 @@ func (e UnsupportedGeometryError) Error() string {
 	return "wkb: unsupported type: " + e.Type.String()
 }
 
-type wkbReader func(io.Reader, binary.ByteOrder) (geom.T, error)
+type wkbReader func(io.Reader, binary.ByteOrder) (geom.Geom, error)
 
 var wkbReaders map[uint32]wkbReader
 
@@ -63,7 +63,7 @@ func init() {
 	wkbReaders[wkbGeometryCollection] = geometryCollectionReader
 }
 
-func Read(r io.Reader) (geom.T, error) {
+func Read(r io.Reader) (geom.Geom, error) {
 
 	var wkbByteOrder uint8
 	if err := binary.Read(r, binary.LittleEndian, &wkbByteOrder); err != nil {
@@ -92,7 +92,7 @@ func Read(r io.Reader) (geom.T, error) {
 
 }
 
-func Decode(buf []byte) (geom.T, error) {
+func Decode(buf []byte) (geom.Geom, error) {
 	return Read(bytes.NewBuffer(buf))
 }
 
@@ -105,7 +105,7 @@ func writeMany(w io.Writer, byteOrder binary.ByteOrder, data ...interface{}) err
 	return nil
 }
 
-func Write(w io.Writer, byteOrder binary.ByteOrder, g geom.T) error {
+func Write(w io.Writer, byteOrder binary.ByteOrder, g geom.Geom) error {
 	var wkbByteOrder uint8
 	switch byteOrder {
 	case XDR:
@@ -160,7 +160,7 @@ func Write(w io.Writer, byteOrder binary.ByteOrder, g geom.T) error {
 	}
 }
 
-func Encode(g geom.T, byteOrder binary.ByteOrder) ([]byte, error) {
+func Encode(g geom.Geom, byteOrder binary.ByteOrder) ([]byte, error) {
 	w := bytes.NewBuffer(nil)
 	if err := Write(w, byteOrder, g); err != nil {
 		return nil, err

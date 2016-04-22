@@ -73,7 +73,7 @@ func (r *Decoder) getFieldIndices() {
 // value rec must be a pointer to a struct. The function will
 // attempt to match the struct fields to shapefile data.
 // It will read the shape data into any struct fields that
-// implement the geom.T interface. It will read attribute
+// implement the geom.Geom interface. It will read attribute
 // data into any struct fields whose `shp` tag or field names
 // that match an attribute name in the shapefile (case insensitive).
 // Only exported fields will be matched, and all matched fields
@@ -91,7 +91,7 @@ func (r *Decoder) DecodeRow(rec interface{}) bool {
 	v, t := getRecInfo(rec)
 	_, shape := r.Shape()
 
-	gI := reflect.TypeOf((*geom.T)(nil)).Elem()
+	gI := reflect.TypeOf((*geom.Geom)(nil)).Elem()
 	for i := 0; i < v.NumField(); i++ {
 		fType := t.Field(i)
 		fValue := v.Field(i)
@@ -125,7 +125,7 @@ func (r *Decoder) DecodeRow(rec interface{}) bool {
 // and whether there are still more records to be read from the
 // shapefile (more).
 func (r *Decoder) DecodeRowFields(fieldNames ...string) (
-	g geom.T, fields map[string]string, more bool) {
+	g geom.Geom, fields map[string]string, more bool) {
 
 	fields = make(map[string]string)
 	var err error
@@ -375,7 +375,7 @@ func (e *Encoder) Encode(d interface{}) error {
 		e.Writer.WriteAttribute(e.row, i, v.Field(j).Interface())
 	}
 
-	shape, err := geom2Shp(v.Field(e.geomIndex).Interface().(geom.T))
+	shape, err := geom2Shp(v.Field(e.geomIndex).Interface().(geom.Geom))
 	if err != nil {
 		return err
 	}
@@ -387,7 +387,7 @@ func (e *Encoder) Encode(d interface{}) error {
 // EncodeFields encodes the geometry 'g' and 'vals' values as a
 // shapefile record. The number of values should be the same as
 // the number of fields the shapefile was created with.
-func (e *Encoder) EncodeFields(g geom.T, vals ...interface{}) error {
+func (e *Encoder) EncodeFields(g geom.Geom, vals ...interface{}) error {
 	shape, err := geom2Shp(g)
 	if err != nil {
 		return err

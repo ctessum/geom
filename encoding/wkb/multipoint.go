@@ -6,7 +6,7 @@ import (
 	"io"
 )
 
-func multiPointReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
+func multiPointReader(r io.Reader, byteOrder binary.ByteOrder) (geom.Geom, error) {
 	var numPoints uint32
 	if err := binary.Read(r, byteOrder, &numPoints); err != nil {
 		return nil, err

@@ -6,7 +6,7 @@ import (
 	"io"
 )
 
-func multiPolygonReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
+func multiPolygonReader(r io.Reader, byteOrder binary.ByteOrder) (geom.Geom, error) {
 	var numPolygons uint32
 	if err := binary.Read(r, byteOrder, &numPolygons); err != nil {
 		return nil, err
