@@ -40,7 +40,7 @@ func (sr *SR) parseWKTProjCS(secName []string, secData string) error {
 	case "AUTHORITY": // This holds for example the ESPG number.
 	case "AXIS":
 	default:
-		return fmt.Errorf("proj.parseWKTProjCS: unknown WKT section %v", secName)
+		return fmt.Errorf("proj.parseWKTProjCS: unknown WKT section %#v", secName)
 	}
 	return nil
 }
@@ -65,7 +65,7 @@ func (sr *SR) parseWKTGeogCS(secName []string, secData string) error {
 		return sr.parseWKTDatum(secName, secData)
 	} else if secName[len(secName)-1] == "PRIMEM" {
 		return sr.parseWKTPrimeM(secName, secData)
-	} else if secName[len(secName)-1] == "UNIT" {
+	} else if secName[len(secName)-1] == "UNIT" && sr.Name == longlat {
 		return sr.parseWKTUnit(secName, secData)
 	} else if secName[len(secName)-1] == "AUTHORITY" {
 		return nil // Don't do anything with authority for now.
@@ -77,7 +77,7 @@ func (sr *SR) parseWKTDatum(secName []string, secData string) error {
 	switch secName[len(secName)-1] {
 	case "DATUM":
 		name, data := splitWKTName(secData)
-		sr.DatumCode = strings.ToLower(name)
+		sr.DatumCode = strings.ToLower(strings.Trim(name, "\" "))
 		sr.datumRename()
 		return sr.parseWKTSection(secName, data)
 	case "SPHEROID":
@@ -136,47 +136,52 @@ func (sr *SR) parseWKTSpheroid(secName []string, secData string) error {
 	if strings.Contains(sr.DatumCode, "osgb_1936") {
 		sr.DatumCode = "osgb36"
 	}
-	if math.IsNaN(sr.B) {
+	if math.IsInf(sr.B, 0) {
 		sr.B = sr.A
 	}
 	return nil
 }
 
 func (sr *SR) parseWKTProjection(secName []string, secData string) {
-	sr.Name = strings.Trim(secData, "\"")
+	if strings.Contains(secData, ",") {
+		// Sometimes the projection has an authority after it, which we aren't
+		// currently interested in.
+		sr.Name = strings.Trim(strings.Split(secData, ",")[0], "\" ")
+	} else {
+		sr.Name = strings.Trim(secData, "\"")
+	}
 }
 
 func (sr *SR) parseWKTParameter(secName []string, secData string) error {
 	v := strings.Split(secData, ",")
 	name := strings.Trim(strings.ToLower(v[0]), "\"")
-	val, err := strconv.ParseFloat(v[1], 64)
+	val, err := strconv.ParseFloat(strings.TrimSpace(v[1]), 64)
 	if err != nil {
 		return fmt.Errorf("in proj.parseWKTParameter: %v", err)
 	}
 	switch name {
 	case "standard_parallel_1":
-		sr.Lat0 = d2r(val)
-		sr.Lat1 = d2r(val)
+		sr.Lat1 = val * deg2rad
 	case "standard_parallel_2":
-		sr.Lat2 = d2r(val)
+		sr.Lat2 = val * deg2rad
 	case "false_easting":
-		sr.X0 = sr.toMeter(val)
+		sr.X0 = val
 	case "false_northing":
-		sr.Y0 = sr.toMeter(val)
+		sr.Y0 = val
 	case "latitude_of_origin":
-		sr.Lat0 = d2r(val)
+		sr.Lat0 = val * deg2rad
 	case "central_parallel":
-		sr.Lat0 = d2r(val)
+		sr.Lat0 = val * deg2rad
 	case "scale_factor":
 		sr.K0 = val
 	case "latitude_of_center":
-		sr.Lat0 = d2r(val)
+		sr.Lat0 = val * deg2rad
 	case "longitude_of_center":
-		sr.LongC = d2r(val)
+		sr.LongC = val * deg2rad
 	case "central_meridian":
-		sr.Long0 = d2r(val)
+		sr.Long0 = val * deg2rad
 	case "azimuth":
-		sr.Alpha = d2r(val)
+		sr.Alpha = val * deg2rad
 	case "auxiliary_sphere_type", "rectified_grid_angle":
 		// TODO: Figure out if this is important.
 	default:
@@ -202,7 +207,8 @@ func (sr *SR) parseWKTUnit(secName []string, secData string) error {
 		sr.Units = "meter"
 	}
 	if len(v) > 1 {
-		convert, err := strconv.ParseFloat(v[1], 64)
+		sr.Units = strings.TrimSpace(v[0])
+		convert, err := strconv.ParseFloat(strings.TrimSpace(v[1]), 64)
 		if err != nil {
 			return fmt.Errorf("in proj.parseWKTUnit: %v", err)
 		}
@@ -215,18 +221,18 @@ func (sr *SR) parseWKTUnit(secName []string, secData string) error {
 	return nil
 }
 
-func d2r(input float64) float64 {
-	return input * deg2rad
-}
-
-func (sr *SR) toMeter(input float64) float64 {
-	return sr.ToMeter * input
-}
-
 // wkt parses a WKT specification.
 func wkt(wkt string) (*SR, error) {
 	sr := newSR()
 	err := sr.parseWKTSection([]string{}, wkt)
+
+	// Convert units to meters.
+	sr.X0 *= sr.ToMeter
+	sr.Y0 *= sr.ToMeter
+	if math.IsNaN(sr.Lat0) {
+		sr.Lat0 = sr.Lat1
+	}
+
 	return sr, err
 }
 
@@ -241,7 +247,7 @@ func (sr *SR) parseWKTSection(secName []string, secData string) error {
 		name := strings.Trim(secData[0:o], ", ")
 		if strings.Contains(name, ",") {
 			comma := strings.LastIndex(name, ",")
-			name = name[comma+1 : len(name)]
+			name = strings.TrimSpace(name[comma+1 : len(name)])
 		}
 		secNameO := append(secName, name)
 		secDataO := secData[o+1 : c]
