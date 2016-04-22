@@ -6,7 +6,7 @@ import (
 	"io"
 )
 
-func multiLineStringReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
+func multiLineStringReader(r io.Reader, byteOrder binary.ByteOrder) (geom.Geom, error) {
 	var numLineStrings uint32
 	if err := binary.Read(r, byteOrder, &numLineStrings); err != nil {
 		return nil, err

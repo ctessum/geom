@@ -12,7 +12,7 @@ const tolerance = 1.e-9
 // Function Area returns the area of a polygon, or the combined area of a
 // MultiPolygon, assuming that none of the polygons in the MultiPolygon
 // overlap and that nested polygons have alternating winding directions.
-func Area(g geom.T) float64 {
+func Area(g geom.Geom) float64 {
 	a := 0.
 	switch g.(type) {
 	case geom.Polygon:
@@ -33,7 +33,7 @@ func Area(g geom.T) float64 {
 
 // Function Length returns the length of a LineString, or the combined
 // length of a MultiLineString.
-func Length(g geom.T) float64 {
+func Length(g geom.Geom) float64 {
 	l := 0.
 	switch g.(type) {
 	case geom.LineString:
@@ -79,7 +79,7 @@ func length(line []geom.Point) float64 {
 // self-intersecting.
 // The algorithm will not check to make sure the holes are
 // actually inside the outer rings.
-func Centroid(g geom.T) (geom.Point, error) {
+func Centroid(g geom.Geom) (geom.Point, error) {
 	var out geom.Point
 	var A, xA, yA float64
 	switch g.(type) {
@@ -110,7 +110,7 @@ func Centroid(g geom.T) (geom.Point, error) {
 // guaranteed to lie on the surface of the shape.
 // It will usually be the centroid, except for
 // when the centroid is not with the shape.
-func PointOnSurface(g geom.T) (geom.Point, error) {
+func PointOnSurface(g geom.Geom) (geom.Point, error) {
 	c, err := Centroid(g)
 	if err != nil {
 		return geom.Point{}, err
@@ -187,7 +187,7 @@ func isLeft(P0, P1, P2 geom.Point) float64 {
 // Change the winding direction of the outer and inner
 // rings so the outer ring is counter-clockwise and
 // nesting rings alternate directions.
-func FixOrientation(g geom.T) error {
+func FixOrientation(g geom.Geom) error {
 	if g == nil {
 		return fmt.Errorf("Nil geometry")
 	}
@@ -241,7 +241,7 @@ func polyInPoly(outer, inner contour) bool {
 }
 
 // Within checks whether inner is within outer.
-func Within(inner, outer geom.T) (bool, error) {
+func Within(inner, outer geom.Geom) (bool, error) {
 	switch outer.(type) {
 	case geom.Polygon:
 		op := outer.(geom.Polygon)
@@ -273,7 +273,7 @@ func Within(inner, outer geom.T) (bool, error) {
 // Function pointInPolygon determines whether "point" is
 // within "polygon". Also returns true if "point" is on the
 // edge of "polygon".
-func pointInPolygon(point geom.Point, polygon geom.T) (bool, error) {
+func pointInPolygon(point geom.Point, polygon geom.Geom) (bool, error) {
 	inCount := 0
 	switch polygon.(type) {
 	case geom.Polygon:
@@ -290,7 +290,7 @@ func pointInPolygon(point geom.Point, polygon geom.T) (bool, error) {
 		return inCount > 0, nil
 	case geom.MultiPolygon:
 		for _, pp := range polygon.(geom.MultiPolygon) {
-			in, err := pointInPolygon(point, geom.T(pp))
+			in, err := pointInPolygon(point, geom.Geom(pp))
 			if err != nil {
 				return false, err
 			}
@@ -395,7 +395,7 @@ func pointOnSegment(p, segStart, segEnd geom.Point) bool {
 
 // Distance returns the distance between the closest parts of two geometries.
 // Currently, only points are supported.
-func Distance(a, b geom.T) float64 {
+func Distance(a, b geom.Geom) float64 {
 	switch a.(type) {
 	case geom.Point:
 		switch b.(type) {

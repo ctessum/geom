@@ -8,7 +8,7 @@ import (
 func TestBounds(t *testing.T) {
 
 	var testCases = []struct {
-		g      T
+		g      Geom
 		bounds *Bounds
 	}{
 		{

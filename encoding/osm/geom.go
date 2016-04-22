@@ -10,7 +10,7 @@ import (
 
 // GeomTags holds a geometry object and the tags that apply to it.
 type GeomTags struct {
-	geom.T
+	geom.Geom
 	Tags map[string]string
 }
 
@@ -25,7 +25,7 @@ func (o *Data) Geom() ([]*GeomTags, error) {
 				return nil, err
 			}
 			items = append(items, &GeomTags{
-				T:    g,
+				Geom: g,
 				Tags: r.Tags,
 			})
 		}
@@ -33,7 +33,7 @@ func (o *Data) Geom() ([]*GeomTags, error) {
 	for _, w := range o.Ways {
 		if _, ok := o.dependentWays[w.ID]; !ok {
 			items = append(items, &GeomTags{
-				T:    wayToGeom(w, o.Nodes),
+				Geom: wayToGeom(w, o.Nodes),
 				Tags: w.Tags,
 			})
 		}
@@ -41,7 +41,7 @@ func (o *Data) Geom() ([]*GeomTags, error) {
 	for _, n := range o.Nodes {
 		if _, ok := o.dependentNodes[n.ID]; !ok {
 			items = append(items, &GeomTags{
-				T:    nodeToPoint(n),
+				Geom: nodeToPoint(n),
 				Tags: n.Tags,
 			})
 		}
@@ -53,7 +53,7 @@ func nodeToPoint(n *osmpbf.Node) geom.Point {
 	return geom.Point{X: n.Lon, Y: n.Lat}
 }
 
-func wayToGeom(way *osmpbf.Way, nodes map[int64]*osmpbf.Node) geom.T {
+func wayToGeom(way *osmpbf.Way, nodes map[int64]*osmpbf.Node) geom.Geom {
 	if wayIsClosed(way) {
 		return wayToPolygon(way, nodes)
 	}
@@ -86,7 +86,7 @@ func wayToLineString(way *osmpbf.Way, nodes map[int64]*osmpbf.Node) geom.LineStr
 // relationToGeom converts a relation to a geometry object.
 func relationToGeom(relation *osmpbf.Relation,
 	relations map[int64]*osmpbf.Relation, ways map[int64]*osmpbf.Way,
-	nodes map[int64]*osmpbf.Node) (geom.T, error) {
+	nodes map[int64]*osmpbf.Node) (geom.Geom, error) {
 
 	var nNodes, nLines, nPolygons int
 	for _, m := range relation.Members {
@@ -165,7 +165,7 @@ func relationToMultiLineString(relation *osmpbf.Relation, ways map[int64]*osmpbf
 
 func relationToGeometryCollection(relation *osmpbf.Relation,
 	relations map[int64]*osmpbf.Relation, ways map[int64]*osmpbf.Way,
-	nodes map[int64]*osmpbf.Node) (geom.T, error) {
+	nodes map[int64]*osmpbf.Node) (geom.Geom, error) {
 
 	p := make(geom.GeometryCollection, len(relation.Members))
 	for i, m := range relation.Members {

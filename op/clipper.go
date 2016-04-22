@@ -25,8 +25,9 @@ package op
 
 import (
 	"fmt"
-	"github.com/ctessum/geom"
 	"math"
+
+	"github.com/ctessum/geom"
 )
 
 //func _DBG(f func()) { f() }
@@ -57,7 +58,7 @@ type clipper struct {
 	eventQueue
 }
 
-func (c *clipper) compute(operation Op) geom.T {
+func (c *clipper) compute(operation Op) geom.Geom {
 
 	// Test 1 for trivial result case
 	if len(c.subject)*len(c.clipping) == 0 {
@@ -74,8 +75,8 @@ func (c *clipper) compute(operation Op) geom.T {
 	}
 
 	// Test 2 for trivial result case
-	subjectbb := c.subject.Bounds(nil)
-	clippingbb := c.clipping.Bounds(nil)
+	subjectbb := c.subject.Bounds()
+	clippingbb := c.clipping.Bounds()
 	if !subjectbb.Overlaps(clippingbb) {
 		switch operation {
 		case DIFFERENCE:

@@ -91,7 +91,7 @@ def main(argv):
     print ')'
     print
     print 'var cases = []struct {'
-    print '\tg   geom.T'
+    print '\tg   geom.Geom'
     print '\thex string'
     print '\twkb []byte'
     print '\twkt string'

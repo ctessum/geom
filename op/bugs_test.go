@@ -67,16 +67,16 @@ func dump(poly geom.Polygon) string {
 }
 
 func TestBug3(t *T) {
-	cases := []struct{ subject, clipping, result geom.T }{
+	cases := []struct{ subject, clipping, result geom.Geom }{
 		// original reported github issue #3
 		{
-			subject: geom.T(geom.Polygon{
+			subject: geom.Geom(geom.Polygon{
 				{{1, 1}, {1, 2}, {2, 2}, {2, 1}}}),
-			clipping: geom.T(geom.Polygon{
+			clipping: geom.Geom(geom.Polygon{
 				{{2, 1}, {2, 2}, {3, 2}, {3, 1}},
 				{{1, 2}, {1, 3}, {2, 3}, {2, 2}},
 				{{2, 2}, {2, 3}, {3, 3}, {3, 2}}}),
-			result: geom.T(geom.Polygon{
+			result: geom.Geom(geom.Polygon{
 				{{1, 1}, {2, 1}, {3, 1},
 					{3, 2}, {3, 3},
 					{2, 3}, {1, 3},
@@ -84,49 +84,49 @@ func TestBug3(t *T) {
 		},
 		// simplified variant of issue #3, for easier debugging
 		{
-			subject: geom.T(geom.Polygon{
+			subject: geom.Geom(geom.Polygon{
 				{{1, 2}, {2, 2}, {2, 1}}}),
-			clipping: geom.T(geom.Polygon{
+			clipping: geom.Geom(geom.Polygon{
 				{{2, 1}, {2, 2}, {3, 2}},
 				{{1, 2}, {2, 3}, {2, 2}},
 				{{2, 2}, {2, 3}, {3, 2}}}),
-			result: geom.T(geom.Polygon{
+			result: geom.Geom(geom.Polygon{
 				{{1, 2}, {2, 3}, {3, 2}, {2, 1}}}),
 		},
 		{
-			subject: geom.T(geom.Polygon{
+			subject: geom.Geom(geom.Polygon{
 				{{1, 2}, {2, 2}, {2, 1}}}),
-			clipping: geom.T(geom.Polygon{
+			clipping: geom.Geom(geom.Polygon{
 				{{1, 2}, {2, 3}, {2, 2}},
 				{{2, 2}, {2, 3}, {3, 2}}}),
-			result: geom.T(geom.Polygon{
+			result: geom.Geom(geom.Polygon{
 				{{1, 2}, {2, 3}, {3, 2}, {2, 2}, {2, 1}}}),
 		},
 		// another variation, now with single degenerated curve
 		{
-			subject: geom.T(geom.Polygon{
+			subject: geom.Geom(geom.Polygon{
 				{{1, 2}, {2, 2}, {2, 1}}}),
-			clipping: geom.T(geom.Polygon{
+			clipping: geom.Geom(geom.Polygon{
 				{{1, 2}, {2, 3}, {2, 2}, {2, 3}, {3, 2}}}),
-			result: geom.T(geom.Polygon{
+			result: geom.Geom(geom.Polygon{
 				{{1, 2}, {2, 3}, {3, 2}, {2, 2}, {2, 1}}}),
 		},
 		{
-			subject: geom.T(geom.Polygon{
+			subject: geom.Geom(geom.Polygon{
 				{{1, 2}, {2, 2}, {2, 1}}}),
-			clipping: geom.T(geom.Polygon{
+			clipping: geom.Geom(geom.Polygon{
 				{{2, 1}, {2, 2}, {2, 3}, {3, 2}},
 				{{1, 2}, {2, 3}, {2, 2}}}),
-			result: geom.T(geom.Polygon{
+			result: geom.Geom(geom.Polygon{
 				{{1, 2}, {2, 3}, {3, 2}, {2, 1}}}),
 		},
 		// "union" with effectively empty polygon (wholly self-intersecting)
 		{
-			subject: geom.T(geom.Polygon{
+			subject: geom.Geom(geom.Polygon{
 				{{1, 2}, {2, 2}, {2, 1}}}),
-			clipping: geom.T(geom.Polygon{
+			clipping: geom.Geom(geom.Polygon{
 				{{1, 2}, {2, 2}, {2, 3}, {1, 2}, {2, 2}, {2, 3}}}),
-			result: geom.T(geom.Polygon{
+			result: geom.Geom(geom.Polygon{
 				{{1, 2}, {2, 2}, {2, 1}}}),
 		},
 	}

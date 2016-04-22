@@ -17,7 +17,7 @@ var FixOrientation = false
 // Shp2Geom converts a shapefile shape to a geometry
 // object that can be used with other packages.
 // This function can be used to wrap the go-shp "Shape()" method.
-func shp2Geom(n int, s shp.Shape) (int, geom.T, error) {
+func shp2Geom(n int, s shp.Shape) (int, geom.Geom, error) {
 	switch t := reflect.TypeOf(s); {
 	case t == reflect.TypeOf(&shp.Point{}):
 		return n, point2geom(*s.(*shp.Point)), nil
@@ -53,13 +53,13 @@ func shp2Geom(n int, s shp.Shape) (int, geom.T, error) {
 
 // Functions for converting shp to geom
 
-func point2geom(s shp.Point) geom.T {
+func point2geom(s shp.Point) geom.Geom {
 	return geom.Point(s)
 }
-func pointM2geom(s shp.PointM) geom.T {
+func pointM2geom(s shp.PointM) geom.Geom {
 	return geom.Point{s.X, s.Y}
 }
-func pointZ2geom(s shp.PointZ) geom.T {
+func pointZ2geom(s shp.PointZ) geom.Geom {
 	return geom.Point{s.X, s.Y}
 }
 func getStartEnd(parts []int32, points []shp.Point, i int) (start, end int) {
@@ -71,7 +71,7 @@ func getStartEnd(parts []int32, points []shp.Point, i int) (start, end int) {
 	}
 	return
 }
-func polygon2geom(s shp.Polygon) geom.T {
+func polygon2geom(s shp.Polygon) geom.Geom {
 	var pg geom.Polygon = make([][]geom.Point, len(s.Parts))
 	for i := 0; i < len(s.Parts); i++ {
 		start, end := getStartEnd(s.Parts, s.Points, i)
@@ -87,7 +87,7 @@ func polygon2geom(s shp.Polygon) geom.T {
 	}
 	return pg
 }
-func polygonM2geom(s shp.PolygonM) geom.T {
+func polygonM2geom(s shp.PolygonM) geom.Geom {
 	var pg geom.Polygon = make([][]geom.Point, len(s.Parts))
 	jj := 0
 	for i := 0; i < len(s.Parts); i++ {
@@ -106,7 +106,7 @@ func polygonM2geom(s shp.PolygonM) geom.T {
 	return pg
 }
 
-func polygonZ2geom(s shp.PolygonZ) geom.T {
+func polygonZ2geom(s shp.PolygonZ) geom.Geom {
 	var pg geom.Polygon = make([][]geom.Point, len(s.Parts))
 	jj := -1
 	for i := 0; i < len(s.Parts); i++ {
@@ -124,7 +124,7 @@ func polygonZ2geom(s shp.PolygonZ) geom.T {
 	op.FixOrientation(pg)
 	return pg
 }
-func polyLine2geom(s shp.PolyLine) geom.T {
+func polyLine2geom(s shp.PolyLine) geom.Geom {
 	var pl geom.MultiLineString = make([]geom.LineString, len(s.Parts))
 	for i := 0; i < len(s.Parts); i++ {
 		start, end := getStartEnd(s.Parts, s.Points, i)
@@ -135,7 +135,7 @@ func polyLine2geom(s shp.PolyLine) geom.T {
 	}
 	return pl
 }
-func polyLineM2geom(s shp.PolyLineM) geom.T {
+func polyLineM2geom(s shp.PolyLineM) geom.Geom {
 	var pl geom.MultiLineString = make([]geom.LineString, len(s.Parts))
 	jj := 0
 	for i := 0; i < len(s.Parts); i++ {
@@ -150,7 +150,7 @@ func polyLineM2geom(s shp.PolyLineM) geom.T {
 	}
 	return pl
 }
-func polyLineZ2geom(s shp.PolyLineZ) geom.T {
+func polyLineZ2geom(s shp.PolyLineZ) geom.Geom {
 	var pl geom.MultiLineString = make([]geom.LineString, len(s.Parts))
 	jj := 0
 	for i := 0; i < len(s.Parts); i++ {
@@ -165,21 +165,21 @@ func polyLineZ2geom(s shp.PolyLineZ) geom.T {
 	}
 	return pl
 }
-func multiPoint2geom(s shp.MultiPoint) geom.T {
+func multiPoint2geom(s shp.MultiPoint) geom.Geom {
 	var mp geom.MultiPoint = make([]geom.Point, len(s.Points))
 	for i, p := range s.Points {
 		mp[i] = geom.Point(p)
 	}
 	return mp
 }
-func multiPointM2geom(s shp.MultiPointM) geom.T {
+func multiPointM2geom(s shp.MultiPointM) geom.Geom {
 	var mp geom.MultiPoint = make([]geom.Point, len(s.Points))
 	for i, p := range s.Points {
 		mp[i] = geom.Point{p.X, p.Y} //, s.MArray[i]}
 	}
 	return mp
 }
-func multiPointZ2geom(s shp.MultiPointZ) geom.T {
+func multiPointZ2geom(s shp.MultiPointZ) geom.Geom {
 	var mp geom.MultiPoint = make([]geom.Point, len(s.Points))
 	for i, p := range s.Points {
 		mp[i] = geom.Point{p.X, p.Y} //, s.ZArray[i], s.MArray[i]}
@@ -188,7 +188,7 @@ func multiPointZ2geom(s shp.MultiPointZ) geom.T {
 }
 
 // Geom2Shp converts a geometry object to a shapefile shape.
-func geom2Shp(g geom.T) (shp.Shape, error) {
+func geom2Shp(g geom.Geom) (shp.Shape, error) {
 	if g == nil {
 		return &shp.Null{}, nil
 	}
@@ -257,7 +257,7 @@ func geom2multiPoint(g geom.MultiPoint) shp.Shape {
 	}
 	return mp
 }
-func bounds2box(g geom.T) shp.Box {
-	b := g.Bounds(nil)
+func bounds2box(g geom.Geom) shp.Box {
+	b := g.Bounds()
 	return shp.Box{b.Min.X, b.Min.Y, b.Max.X, b.Max.Y}
 }

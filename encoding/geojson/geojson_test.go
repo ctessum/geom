@@ -8,7 +8,7 @@ import (
 
 func TestGeoJSON(t *testing.T) {
 	testCases := []struct {
-		g       geom.T
+		g       geom.Geom
 		geoJSON []byte
 	}{
 		{

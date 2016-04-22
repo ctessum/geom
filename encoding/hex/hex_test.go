@@ -8,7 +8,7 @@ import (
 
 func Test(t *testing.T) {
 	var cases = []struct {
-		g   geom.T
+		g   geom.Geom
 		ndr string
 	}{
 		{

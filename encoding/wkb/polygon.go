@@ -6,7 +6,7 @@ import (
 	"io"
 )
 
-func polygonReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
+func polygonReader(r io.Reader, byteOrder binary.ByteOrder) (geom.Geom, error) {
 	var numRings uint32
 	if err := binary.Read(r, byteOrder, &numRings); err != nil {
 		return nil, err

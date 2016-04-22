@@ -6,16 +6,16 @@ import (
 	"io"
 )
 
-func geometryCollectionReader(r io.Reader, byteOrder binary.ByteOrder) (geom.T, error) {
+func geometryCollectionReader(r io.Reader, byteOrder binary.ByteOrder) (geom.Geom, error) {
 	var numGeometries uint32
 	if err := binary.Read(r, byteOrder, &numGeometries); err != nil {
 		return nil, err
 	}
-	geoms := make([]geom.T, numGeometries)
+	geoms := make([]geom.Geom, numGeometries)
 	for i := uint32(0); i < numGeometries; i++ {
 		if g, err := Read(r); err == nil {
 			var ok bool
-			geoms[i], ok = g.(geom.T)
+			geoms[i], ok = g.(geom.Geom)
 			if !ok {
 				return nil, &UnexpectedGeometryError{g}
 			}

@@ -64,7 +64,7 @@ func (n *node) String() string {
 type entry struct {
 	bb    *geom.Bounds // bounding-box of all children of this entry
 	child *node
-	obj   geom.T
+	obj   geom.Geom
 }
 
 func (e entry) String() string {
@@ -81,8 +81,8 @@ func (e entry) String() string {
 //
 // Implemented per Section 3.2 of "R-trees: A Dynamic Index Structure for
 // Spatial Searching" by A. Guttman, Proceedings of ACM SIGMOD, p. 47-57, 1984.
-func (tree *Rtree) Insert(obj geom.T) {
-	e := entry{obj.Bounds(nil), nil, obj}
+func (tree *Rtree) Insert(obj geom.Geom) {
+	e := entry{obj.Bounds(), nil, obj}
 	tree.insert(e, 1)
 	tree.size++
 }
@@ -328,7 +328,7 @@ func pickNext(left, right *node, entries []entry) (next int) {
 //
 // Implemented per Section 3.3 of "R-trees: A Dynamic Index Structure for
 // Spatial Searching" by A. Guttman, Proceedings of ACM SIGMOD, p. 47-57, 1984.
-func (tree *Rtree) Delete(obj geom.T) bool {
+func (tree *Rtree) Delete(obj geom.Geom) bool {
 	n := tree.findLeaf(tree.root, obj)
 	if n == nil {
 		return false
@@ -357,13 +357,13 @@ func (tree *Rtree) Delete(obj geom.T) bool {
 }
 
 // findLeaf finds the leaf node containing obj.
-func (tree *Rtree) findLeaf(n *node, obj geom.T) *node {
+func (tree *Rtree) findLeaf(n *node, obj geom.Geom) *node {
 	if n.leaf {
 		return n
 	}
 	// if not leaf, search all candidate subtrees
 	for _, e := range n.entries {
-		if containsRect(e.bb, obj.Bounds(nil)) {
+		if containsRect(e.bb, obj.Bounds()) {
 			leaf := tree.findLeaf(e.child, obj)
 			if leaf == nil {
 				continue
@@ -421,12 +421,12 @@ func (tree *Rtree) condenseTree(n *node) {
 //
 // Implemented per Section 3.1 of "R-trees: A Dynamic Index Structure for
 // Spatial Searching" by A. Guttman, Proceedings of ACM SIGMOD, p. 47-57, 1984.
-func (tree *Rtree) SearchIntersect(bb *geom.Bounds) []geom.T {
+func (tree *Rtree) SearchIntersect(bb *geom.Bounds) []geom.Geom {
 	return tree.searchIntersect(tree.root, bb)
 }
 
-func (tree *Rtree) searchIntersect(n *node, bb *geom.Bounds) []geom.T {
-	results := []geom.T{}
+func (tree *Rtree) searchIntersect(n *node, bb *geom.Bounds) []geom.Geom {
+	results := []geom.Geom{}
 	for _, e := range n.entries {
 		if intersect(e.bb, bb) {
 			if n.leaf {
@@ -441,7 +441,7 @@ func (tree *Rtree) searchIntersect(n *node, bb *geom.Bounds) []geom.T {
 
 // NearestNeighbor returns the closest object to the specified point.
 // Implemented per "Nearest Neighbor Queries" by Roussopoulos et al
-func (tree *Rtree) NearestNeighbor(p geom.Point) geom.T {
+func (tree *Rtree) NearestNeighbor(p geom.Point) geom.Geom {
 	obj, _ := tree.nearestNeighbor(p, tree.root, math.MaxFloat64, nil)
 	return obj
 }
@@ -495,7 +495,7 @@ func pruneEntries(p geom.Point, entries []entry, minDists []float64) []entry {
 }
 
 func (tree *Rtree) nearestNeighbor(p geom.Point, n *node, d float64,
-	nearest geom.T) (geom.T, float64) {
+	nearest geom.Geom) (geom.Geom, float64) {
 	if n.leaf {
 		for _, e := range n.entries {
 			dist := math.Sqrt(minDist(p, e.bb))
@@ -519,9 +519,9 @@ func (tree *Rtree) nearestNeighbor(p geom.Point, n *node, d float64,
 	return nearest, d
 }
 
-func (tree *Rtree) NearestNeighbors(k int, p geom.Point) []geom.T {
+func (tree *Rtree) NearestNeighbors(k int, p geom.Point) []geom.Geom {
 	dists := make([]float64, k)
-	objs := make([]geom.T, k)
+	objs := make([]geom.Geom, k)
 	for i := 0; i < k; i++ {
 		dists[i] = math.MaxFloat64
 		objs[i] = nil
@@ -531,8 +531,8 @@ func (tree *Rtree) NearestNeighbors(k int, p geom.Point) []geom.T {
 }
 
 // insert obj into nearest and return the first k elements in increasing order.
-func insertNearest(k int, dists []float64, nearest []geom.T, dist float64,
-	obj geom.T) ([]float64, []geom.T) {
+func insertNearest(k int, dists []float64, nearest []geom.Geom, dist float64,
+	obj geom.Geom) ([]float64, []geom.Geom) {
 	i := 0
 	for i < k && dist >= dists[i] {
 		i++
@@ -548,7 +548,7 @@ func insertNearest(k int, dists []float64, nearest []geom.T, dist float64,
 	copy(updatedDists[i+1:], right)
 
 	leftObjs, rightObjs := nearest[:i], nearest[i:k-1]
-	updatedNearest := make([]geom.T, k)
+	updatedNearest := make([]geom.Geom, k)
 	copy(updatedNearest, leftObjs)
 	updatedNearest[i] = obj
 	copy(updatedNearest[i+1:], rightObjs)
@@ -557,7 +557,7 @@ func insertNearest(k int, dists []float64, nearest []geom.T, dist float64,
 }
 
 func (tree *Rtree) nearestNeighbors(k int, p geom.Point, n *node,
-	dists []float64, nearest []geom.T) ([]geom.T, []float64) {
+	dists []float64, nearest []geom.Geom) ([]geom.Geom, []float64) {
 	if n.leaf {
 		for _, e := range n.entries {
 			dist := math.Sqrt(minDist(p, e.bb))

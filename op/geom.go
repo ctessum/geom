@@ -121,7 +121,7 @@ const (
 // k is number of intersections of all polygon edges.
 // "subject" and "clipping" can both be of type geom.Polygon,
 // geom.MultiPolygon, geom.LineString, or geom.MultiLineString.
-func Construct(subject, clipping geom.T, operation Op) (geom.T, error) {
+func Construct(subject, clipping geom.Geom, operation Op) (geom.Geom, error) {
 	if subject == nil && clipping == nil {
 		return nil, nil
 	} else if subject == nil {
@@ -168,7 +168,7 @@ func Construct(subject, clipping geom.T, operation Op) (geom.T, error) {
 	default:
 		return nil, newUnsupportedGeometryError(clipping)
 	}
-	resultChan := make(chan geom.T)
+	resultChan := make(chan geom.Geom)
 	go func() {
 		// Run the clipper, while checking for an infinite loop.
 		resultChan <- c.compute(operation)
@@ -185,7 +185,7 @@ func Construct(subject, clipping geom.T, operation Op) (geom.T, error) {
 }
 
 // convert input shapes to polygon to make internal processing easier
-func convertToPolygon(g geom.T) geom.Polygon {
+func convertToPolygon(g geom.Geom) geom.Polygon {
 	var out geom.Polygon
 	switch g.(type) {
 	case geom.Polygon:
@@ -236,10 +236,10 @@ func convertToPolygon(g geom.T) geom.Polygon {
 }
 
 type UnsupportedGeometryError struct {
-	G geom.T
+	G geom.Geom
 }
 
-func newUnsupportedGeometryError(g geom.T) UnsupportedGeometryError {
+func newUnsupportedGeometryError(g geom.Geom) UnsupportedGeometryError {
 	return UnsupportedGeometryError{g}
 }
 
@@ -252,10 +252,10 @@ func (e UnsupportedGeometryError) Error() string {
 }
 
 type InfiniteLoopError struct {
-	s, c geom.T
+	s, c geom.Geom
 }
 
-func newInfiniteLoopError(subject, clipping geom.T) InfiniteLoopError {
+func newInfiniteLoopError(subject, clipping geom.Geom) InfiniteLoopError {
 	return InfiniteLoopError{s: subject, c: clipping}
 }
 

@@ -9,7 +9,7 @@ import (
 func TestWKB(t *testing.T) {
 
 	var testCases = []struct {
-		g   geom.T
+		g   geom.Geom
 		xdr []byte
 		ndr []byte
 	}{

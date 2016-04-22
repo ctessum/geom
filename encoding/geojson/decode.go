@@ -65,7 +65,7 @@ func makeLinearRings(coordinates [][][]float64) [][]geom.Point {
 	return pointss
 }
 
-func doFromGeoJSON(g *Geometry) geom.T {
+func doFromGeoJSON(g *Geometry) geom.Geom {
 	switch g.Type {
 	case "Point":
 		coordinates := decodeCoordinates(g.Coordinates)
@@ -102,7 +102,7 @@ func doFromGeoJSON(g *Geometry) geom.T {
 	}
 }
 
-func FromGeoJSON(geom *Geometry) (g geom.T, err error) {
+func FromGeoJSON(geom *Geometry) (g geom.Geom, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			g = nil
@@ -112,7 +112,7 @@ func FromGeoJSON(geom *Geometry) (g geom.T, err error) {
 	return doFromGeoJSON(geom), nil
 }
 
-func Decode(data []byte) (geom.T, error) {
+func Decode(data []byte) (geom.Geom, error) {
 	var geom Geometry
 	if err := json.Unmarshal(data, &geom); err == nil {
 		return FromGeoJSON(&geom)

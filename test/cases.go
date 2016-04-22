@@ -5,7 +5,7 @@ import (
 )
 
 var cases = []struct {
-	g   geom.T
+	g   geom.Geom
 	hex string
 	wkb []byte
 	wkt string

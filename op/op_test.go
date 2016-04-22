@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-var shape1, shape2 geom.T
+var shape1, shape2 geom.Geom
 
 func init() {
 	shape1 = geom.Polygon{{geom.Point{0, 0}, geom.Point{1, 0},
@@ -86,7 +86,7 @@ func TestXor(t *testing.T) {
 }
 
 func TestDifficultShapes1(t *testing.T) {
-	difficultShapeA := geom.T(geom.Polygon{{
+	difficultShapeA := geom.Geom(geom.Polygon{{
 		{-949.9671190511435, -776530.876383242}, {-971.3149450758938, -776530.876383242},
 		{-987.3186852218928, -776530.876383242}, {-971.3143310546875, -776530.9375},
 		{-949.9663696289062, -776530.9375}, {-932.567192575676, -776530.876383242}},
@@ -100,7 +100,7 @@ func TestDifficultShapes1(t *testing.T) {
 		{{2237.068105247765, -776547.7454548368}, {2225.847412109375, -776547.625},
 			{2225.844897193834, -776547.6249235813}}})
 
-	difficultShapeB := geom.T(geom.Polygon{{
+	difficultShapeB := geom.Geom(geom.Polygon{{
 		{-4000, -780000}, {-4000, -776000}, {0, -776000}, {0, -780000}, {-4000, -780000}}})
 	FixOrientation(difficultShapeA)
 	FixOrientation(difficultShapeB)
@@ -112,7 +112,7 @@ func TestDifficultShapes1(t *testing.T) {
 }
 
 func TestDifficultShapes2(t *testing.T) {
-	shape := geom.T(geom.Polygon{
+	shape := geom.Geom(geom.Polygon{
 		{{1.825033375e+06, -277681.0625}, {1.824031125e+06, -277704.15625},
 			{1.823029e+06, -277727.21875}, {1.82202675e+06, -277750.28125},
 			{1.822009375e+06, -276760.3125}, {1.8230115e+06, -276737.25},
@@ -197,8 +197,8 @@ func TestDifficultShapes2(t *testing.T) {
 			{1.83002675e+06, -276575.625}, {1.831029e+06, -276552.5},
 			{1.832031125e+06, -276529.375}}})
 
-	b := shape.Bounds(nil)
-	bounds := geom.T(geom.Polygon{{
+	b := shape.Bounds()
+	bounds := geom.Geom(geom.Polygon{{
 		{b.Min.X, b.Min.Y}, {b.Max.X, b.Min.Y}, {b.Max.X, b.Max.Y},
 		{b.Min.X, b.Max.Y}, {b.Min.X, b.Min.Y}}})
 	FixOrientation(shape)
@@ -213,9 +213,9 @@ func TestDifficultShapes2(t *testing.T) {
 }
 
 func TestDifficultShapes4(t *testing.T) {
-	a := geom.T(geom.Polygon{
+	a := geom.Geom(geom.Polygon{
 		{{-1.05479925e+06, 357453.593}, {-1.05279975e+06, 357459.593}, {-1.05280525e+06, 358450.906}, {-1.0518055e+06, 358453.906}, {-1.051811e+06, 359445.25}, {-1.0518165e+06, 360436.593}, {-1.051822e+06, 361427.968}, {-1.052821875e+06, 361424.937}, {-1.05281625e+06, 360433.562}, {-1.05281075e+06, 359442.218}, {-1.053810625e+06, 359439.218}, {-1.054810375e+06, 359436.218}, {-1.054815875e+06, 360427.562}, {-1.055815625e+06, 360424.562}, {-1.0568155e+06, 360421.562}, {-1.05681e+06, 359430.218}, {-1.055810125e+06, 359433.218}, {-1.055804625e+06, 358441.906}, {-1.054804875e+06, 358444.906}, {-1.05479925e+06, 357453.593}}})
-	b := geom.T(geom.Polygon{
+	b := geom.Geom(geom.Polygon{
 		{{-1.08e+06, 324000}, {-1.08e+06, 360000}, {-1.044e+06, 360000}, {-1.044e+06, 324000}, {-1.08e+06, 324000}}})
 
 	FixOrientation(a)
@@ -237,9 +237,9 @@ func TestDifficultShapes4(t *testing.T) {
 // end up working correctly (The result is empty but it should
 // contain the entire shape a).
 func TestDifficultShapes5(t *testing.T) {
-	a := geom.T(geom.Polygon{
+	a := geom.Geom(geom.Polygon{
 		{{0, 0}, {1, 0}, {0.5, 0.5}, {1, 1}, {0, 1}, {0, 0}}})
-	b := geom.T(geom.Polygon{
+	b := geom.Geom(geom.Polygon{
 		{{1, 0}, {1, 1}, {0.5, 0.5 * (1 + 1e-10)}, {1, 0}}})
 
 	FixOrientation(a)
@@ -253,7 +253,7 @@ func TestDifficultShapes5(t *testing.T) {
 	drawShapes(b, a, diff, "DifficultShapes5diff.png")
 }
 
-var spiral = geom.T(geom.LineString{
+var spiral = geom.Geom(geom.LineString{
 	{158.69048, 156.42586}, {144.01645, 156.42586}, {139.1901, 161.57183},
 	{139.1901, 169.9358}, {139.1901, 180.95427}, {150.53931, 194.58874},
 	{169.42641, 194.58874}, {194.23167, 192.66117}, {210.35714, 175.22916},
@@ -274,7 +274,7 @@ var spiral = geom.T(geom.LineString{
 	{97.739911, 26.744043}})
 
 func TestLine(t *testing.T) {
-	shape := geom.T(geom.Polygon{
+	shape := geom.Geom(geom.Polygon{
 		{{0, 0}, {0, 200}, {200, 200}, {200, 0}, {0, 0}}})
 	FixOrientation(shape)
 
@@ -284,7 +284,7 @@ func TestLine(t *testing.T) {
 }
 
 func TestLines(t *testing.T) {
-	line := geom.T(geom.LineString{
+	line := geom.Geom(geom.LineString{
 		{0, 0}, {200, 200}, {100, 200}, {300, 330}, {100, 50}})
 
 	intersection, err := Construct(spiral, line, INTERSECTION)
@@ -296,10 +296,10 @@ func TestLines(t *testing.T) {
 // To get around this problem, if there are only 2 points, we add a third
 // one a small distance from the second point.
 func TestDifficultLine1(t *testing.T) {
-	line := geom.T(geom.MultiLineString{{
+	line := geom.Geom(geom.MultiLineString{{
 		{0, 1}, {2, 1.1}}})
 
-	shape := geom.T(geom.Polygon{
+	shape := geom.Geom(geom.Polygon{
 		{{1, 0}, {2, 0}, {2, 2}, {1, 2}, {1, 0}}})
 
 	intersection, err := Construct(line, shape, INTERSECTION)
@@ -308,12 +308,12 @@ func TestDifficultLine1(t *testing.T) {
 }
 
 func TestDifficultLine2(t *testing.T) {
-	line := geom.T(geom.MultiLineString{
+	line := geom.Geom(geom.MultiLineString{
 		{{1990.0286865234375, 479215.03125},
 			{1943.354248046875, 479215.03125},
 			{888.0219116210938, 479254.625}}})
 
-	shape := geom.T(geom.Polygon{
+	shape := geom.Geom(geom.Polygon{
 		{{0, 468000}, {36000, 468000}, {36000, 504000}, {0, 504000},
 			{0, 468000}}})
 
@@ -324,10 +324,10 @@ func TestDifficultLine2(t *testing.T) {
 }
 
 func TestDifficultLine4(t *testing.T) {
-	line := geom.T(geom.MultiLineString{
+	line := geom.Geom(geom.MultiLineString{
 		{{1.996889625e+06, 443289.9375}, {1.99685025e+06, 443318.53125}, {1.99685025e+06, 443318.53125}, {1.996842875e+06, 443323.9375}, {1.99685025e+06, 443318.53125}, {1.996842875e+06, 443323.9375}, {1.996842875e+06, 443323.9375}, {1.9968197232187183e+06, 443337.1989592995}, {1.9967845e+06, 443357.375}, {1.9967391211110454e+06, 443391.6950416795}, {1.99669025e+06, 443428.65625}, {1.996620125e+06, 443478.5625}, {1.99650475e+06, 443550.15625}, {1.996620125e+06, 443478.5625}, {1.99669025e+06, 443428.65625}, {1.9967391211110454e+06, 443391.6950416795}, {1.9967845e+06, 443357.375}, {1.9968197232187183e+06, 443337.1989592995}, {1.996842875e+06, 443323.9375}, {1.996842875e+06, 443323.9375}, {1.99685025e+06, 443318.53125}, {1.996842875e+06, 443323.9375}, {1.99685025e+06, 443318.53125}, {1.996842875e+06, 443323.9375}, {1.99685025e+06, 443318.53125}, {1.996842875e+06, 443323.9375}, {1.996842875e+06, 443323.9375}, {1.9968197232187183e+06, 443337.1989592995}, {1.9967845e+06, 443357.375}, {1.9967391211110454e+06, 443391.6950416795}, {1.99669025e+06, 443428.65625}, {1.996620125e+06, 443478.5625}, {1.99650475e+06, 443550.15625}, {1.996620125e+06, 443478.5625}, {1.99669025e+06, 443428.65625}, {1.9967391211110454e+06, 443391.6950416795}, {1.9967845e+06, 443357.375}, {1.9968197232187183e+06, 443337.1989592995}, {1.996842875e+06, 443323.9375}, {1.996842875e+06, 443323.9375}, {1.99685025e+06, 443318.53125}, {1.996842875e+06, 443323.9375}, {1.99685025e+06, 443318.53125}, {1.996842875e+06, 443323.9375}, {1.99685025e+06, 443318.53125}, {1.996842875e+06, 443323.9375}, {1.996842875e+06, 443323.9375}, {1.9968197232187183e+06, 443337.1989592995}, {1.9967845e+06, 443357.375}, {1.9967391211110454e+06, 443391.6950416795}, {1.99669025e+06, 443428.65625}, {1.996620125e+06, 443478.5625}, {1.99650475e+06, 443550.15625}, {1.996620125e+06, 443478.5625}, {1.99669025e+06, 443428.65625}, {1.9967391211110454e+06, 443391.6950416795}, {1.9967845e+06, 443357.375}, {1.9968197232187183e+06, 443337.1989592995}, {1.996842875e+06, 443323.9375}, {1.996842875e+06, 443323.9375}, {1.99685025e+06, 443318.53125}, {1.996842875e+06, 443323.9375}, {1.99685025e+06, 443318.53125}, {1.996842875e+06, 443323.9375}, {1.99685025e+06, 443318.53125}, {1.996842875e+06, 443323.9375}, {1.996842875e+06, 443323.9375}, {1.9968197232187183e+06, 443337.1989592995}, {1.9967845e+06, 443357.375}, {1.9967391211110454e+06, 443391.6950416795}, {1.99669025e+06, 443428.65625}, {1.996620125e+06, 443478.5625}, {1.99650475e+06, 443550.15625}}})
 
-	shape := geom.T(geom.Polygon{
+	shape := geom.Geom(geom.Polygon{
 		{{1.992e+06, 432000}, {2.004e+06, 432000}, {2.004e+06, 444000}, {1.992e+06, 444000}, {1.992e+06, 432000}}})
 
 	//drawLine(line, shape, nil, "difficultLine4.png")
@@ -338,7 +338,7 @@ func TestDifficultLine4(t *testing.T) {
 }
 
 func TestPointOnSurface(t *testing.T) {
-	blockGroup := geom.T(geom.Polygon{
+	blockGroup := geom.Geom(geom.Polygon{
 		{{1.4666686659213295e+06, 456356.6099318844},
 			{1.466640272395703e+06, 456308.3459849271},
 			{1.466631568797793e+06, 456297.6509224567},
@@ -614,7 +614,7 @@ func TestPointOnSurface(t *testing.T) {
 			{1.4666547522076156e+06, 455805.74063399347},
 			{1.4667199179854032e+06, 455818.7092827637},
 			{1.466911849343087e+06, 455860.0625510622}}})
-	county := geom.T(geom.Polygon{
+	county := geom.Geom(geom.Polygon{
 		{{1.4902934142170995e+06, 494389.19971794426},
 			{1.4900452472900571e+06, 494269.9492884994},
 			{1.4903031722511984e+06, 494142.16165892704},
@@ -1193,7 +1193,7 @@ func TestWithin(t *testing.T) {
 }
 
 func TestCentroid(t *testing.T) {
-	shape := geom.T(geom.Polygon{
+	shape := geom.Geom(geom.Polygon{
 		{{0, 0}, {1, 0}, {2, 1}, {2, 2}, {1, 3}, {0, 3}, {-1, 2}, {-1, 1}, {0, 0}},
 		{{0, 0.1}, {0.9, 2.7}, {1.9, 1.5}, {0.75, 0.1}, {0, 0.1}}})
 	point, err := Centroid(shape)
@@ -1203,11 +1203,11 @@ func TestCentroid(t *testing.T) {
 }
 
 func TestInfiniteLoopBug2(t *testing.T) {
-	subject := geom.T(geom.LineString{
+	subject := geom.Geom(geom.LineString{
 		{1.427255375e+06, -2.3283064365386963e-10},
 		{1.4271285e+06, 134.7111358642578}, {1.427109e+06, 178.30108642578125}})
 
-	clipping := geom.T(geom.Polygon{
+	clipping := geom.Geom(geom.Polygon{
 		{{1.416e+06, -12000}, {1.428e+06, -12000}, {1.428e+06, 0},
 			{1.416e+06, 0}, {1.416e+06, -12000}}})
 
@@ -1216,12 +1216,12 @@ func TestInfiniteLoopBug2(t *testing.T) {
 	drawShapes(subject, clipping, isect, "infiniteLoopBug2.png")
 }
 func TestInfiniteLoopBug3(t *testing.T) {
-	subject := geom.T(geom.Polygon{
+	subject := geom.Geom(geom.Polygon{
 		{geom.Point{X: 1.7714672107465276e+06, Y: -102506.68254093888},
 			geom.Point{X: 1.7713768917571804e+06, Y: -102000.75485953009},
 			geom.Point{X: 1.7717109214841307e+06, Y: -101912.19625031832}}})
 
-	clipping := geom.T(geom.Polygon{
+	clipping := geom.Geom(geom.Polygon{
 		{geom.Point{X: 1.7714593229229522e+06, Y: -102470.35230830211},
 			//geom.Point{X: 1.7714672107465276e+06, Y: -102506.68254093888},
 			geom.Point{X: 1.7714672107465276e+06, Y: -102506.68254093867},
@@ -1304,7 +1304,7 @@ func TestInfiniteLoopBug6(t *testing.T) {
 	drawShapes(subject, clipping, isect, "infiniteLoopBug6.png")
 }
 
-func drawShapes(a, b, c geom.T, filename string) {
+func drawShapes(a, b, c geom.Geom, filename string) {
 	f, err := os.Create(filename)
 	if err != nil {
 		panic(err)
@@ -1317,7 +1317,7 @@ func drawShapes(a, b, c geom.T, filename string) {
 	f.Close()
 }
 
-func drawLine(a, b, c geom.T, filename string) {
+func drawLine(a, b, c geom.Geom, filename string) {
 	f, err := os.Create(filename)
 	if err != nil {
 		panic(err)
@@ -1330,7 +1330,7 @@ func drawLine(a, b, c geom.T, filename string) {
 	f.Close()
 }
 
-func drawLines(a, b, c geom.T, filename string) {
+func drawLines(a, b, c geom.Geom, filename string) {
 	f, err := os.Create(filename)
 	if err != nil {
 		panic(err)
@@ -1347,7 +1347,7 @@ func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
 }
 
-func RandomPoly(maxWidth, maxHeight float64, vertCnt int) geom.T {
+func RandomPoly(maxWidth, maxHeight float64, vertCnt int) geom.Geom {
 	var result geom.Polygon
 	result = make([][]geom.Point, 1)
 	result[0] = make([]geom.Point, vertCnt)
@@ -1356,7 +1356,7 @@ func RandomPoly(maxWidth, maxHeight float64, vertCnt int) geom.T {
 			rand.Float64() * maxHeight}
 	}
 	result[0][vertCnt-1] = result[0][0]
-	return geom.T(result)
+	return geom.Geom(result)
 }
 
 // Test operations on random (likely self-intersecting) polygons.
@@ -1380,7 +1380,7 @@ func TestRandom(t *testing.T) {
 		clipTypes := map[string]Op{"intersection": INTERSECTION,
 			"union": UNION, "xor": XOR}
 		areas := make(map[string]float64)
-		solutions := make(map[string]geom.T)
+		solutions := make(map[string]geom.Geom)
 
 		for clipType, ct := range clipTypes {
 			s, err := Construct(subj, clip, ct)

@@ -52,9 +52,9 @@ func (g *GeoJSON) GetProperty(propertyName string) []float64 {
 	return out
 }
 
-func (g *GeoJSON) GetGeometry() ([]geom.T, error) {
+func (g *GeoJSON) GetGeometry() ([]geom.Geom, error) {
 	var err error
-	out := make([]geom.T, len(g.Features))
+	out := make([]geom.Geom, len(g.Features))
 	for i, f := range g.Features {
 		out[i], err = geojson.FromGeoJSON(f.Geometry)
 		if err != nil {
