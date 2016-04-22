@@ -4,11 +4,14 @@ They can be encoded and decoded by other packages in this repository.
 */
 package geom
 
+import "github.com/ctessum/geom/proj"
+
 // Geom is an interface for generic geometry types.
 type Geom interface {
 	Bounds() *Bounds
 	Within(Polygonal) bool
 	Similar(Geom, float64) bool
+	Transform(proj.Transformer) (Geom, error)
 }
 
 // Linear is an interface for types that are linear in nature.

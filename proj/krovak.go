@@ -6,7 +6,7 @@ import (
 )
 
 // Krovak is a Krovak projection.
-func Krovak(this *SR) (forward, inverse TransformFunc, err error) {
+func Krovak(this *SR) (forward, inverse Transformer, err error) {
 	this.A = 6377397.155
 	this.Es = 0.006674372230614
 	this.E = math.Sqrt(this.Es)

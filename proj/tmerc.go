@@ -6,7 +6,7 @@ import (
 )
 
 // TMerc is a transverse Mercator projection.
-func TMerc(this *SR) (forward, inverse TransformFunc, err error) {
+func TMerc(this *SR) (forward, inverse Transformer, err error) {
 
 	e0 := e0fn(this.Es)
 	e1 := e1fn(this.Es)

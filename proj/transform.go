@@ -12,9 +12,9 @@ func checkNotWGS(source, dest *SR) bool {
 const enu = "enu"
 const longlat = "longlat"
 
-// NewTransformFunc creates a function that transforms a point from sr
+// NewTransform creates a function that transforms a point from sr
 // to the destination spatial reference.
-func (source *SR) NewTransformFunc(dest *SR) (TransformFunc, error) {
+func (source *SR) NewTransform(dest *SR) (Transformer, error) {
 	if dest == nil {
 		return nil, fmt.Errorf("proj: destination is nil")
 	}
@@ -26,7 +26,7 @@ func (source *SR) NewTransformFunc(dest *SR) (TransformFunc, error) {
 			if err != nil {
 				return math.NaN(), math.NaN(), err
 			}
-			t, err := source.NewTransformFunc(wgs84)
+			t, err := source.NewTransform(wgs84)
 			if err != nil {
 				return math.NaN(), math.NaN(), err
 			}
@@ -36,11 +36,11 @@ func (source *SR) NewTransformFunc(dest *SR) (TransformFunc, error) {
 			}
 			source = wgs84
 		}
-		_, sourceInverse, err := source.TransformFuncs()
+		_, sourceInverse, err := source.Transformers()
 		if err != nil {
 			return math.NaN(), math.NaN(), err
 		}
-		destForward, _, err := dest.TransformFuncs()
+		destForward, _, err := dest.Transformers()
 		if err != nil {
 			return math.NaN(), math.NaN(), err
 		}

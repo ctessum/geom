@@ -52,7 +52,7 @@ func TestProj2Proj(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	trans, err := sweref99tm.NewTransformFunc(rt90)
+	trans, err := sweref99tm.NewTransform(rt90)
 	if err != nil {
 		t.Error(err)
 	}
@@ -113,7 +113,7 @@ func TestProj4(t *testing.T) {
 			t.Errorf("%s: %s", testPoint.Code, err)
 			continue
 		}
-		trans, err := wgs84.NewTransformFunc(proj)
+		trans, err := wgs84.NewTransform(proj)
 		if err != nil {
 			t.Errorf("%s: %s", testPoint.Code, err)
 			continue
@@ -129,7 +129,7 @@ func TestProj4(t *testing.T) {
 		if !closeTo(t, y, testPoint.XY[1], xyEPSLN, fmt.Sprintf("%s fwd y", testPoint.Code)) {
 			continue
 		}
-		trans, err = proj.NewTransformFunc(wgs84)
+		trans, err = proj.NewTransform(wgs84)
 		if err != nil {
 			t.Errorf("%s: %s", testPoint.Code, err)
 			continue
@@ -187,7 +187,7 @@ func TestDatum(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	trans, err := wgs84.NewTransformFunc(to)
+	trans, err := wgs84.NewTransform(to)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -197,7 +197,7 @@ func TestDatum(t *testing.T) {
 	}
 	closeTo(t, x, -868208.6070936776, 1.e-8, "Longitude of point from WGS84")
 	closeTo(t, y, -1095793.6411470256, 1.e-9, "Latitude of point from WGS84")
-	trans2, err := wgs84.NewTransformFunc(to)
+	trans2, err := wgs84.NewTransform(to)
 	if err != nil {
 		t.Fatal(err)
 	}

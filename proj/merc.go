@@ -11,7 +11,7 @@ const (
 )
 
 // Merc is a mercator projection.
-func Merc(this *SR) (forward, inverse TransformFunc, err error) {
+func Merc(this *SR) (forward, inverse Transformer, err error) {
 	if math.IsNaN(this.Long0) {
 		this.Long0 = 0
 	}

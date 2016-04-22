@@ -7,13 +7,13 @@ import (
 	"strings"
 )
 
-// TransformFunc takes input coordinates and returns output coordinates and an error.
-type TransformFunc func(float64, float64) (float64, float64, error)
+// A Transformer takes input coordinates and returns output coordinates and an error.
+type Transformer func(X, Y float64) (x, y float64, err error)
 
-// A Transformer creates forward and inverse TransformFuncs from a projection.
-type Transformer func(*SR) (forward, inverse TransformFunc, err error)
+// A TransformerFunc creates forward and inverse Transformers from a projection.
+type TransformerFunc func(*SR) (forward, inverse Transformer, err error)
 
-var projections map[string]Transformer
+var projections map[string]TransformerFunc
 
 // SR holds information about a spatial reference (projection).
 type SR struct {
@@ -69,18 +69,18 @@ func newSR() *SR {
 	return p
 }
 
-func registerTrans(proj Transformer, names ...string) {
+func registerTrans(proj TransformerFunc, names ...string) {
 	if projections == nil {
-		projections = make(map[string]Transformer)
+		projections = make(map[string]TransformerFunc)
 	}
 	for _, n := range names {
 		projections[strings.ToLower(n)] = proj
 	}
 }
 
-// TransformFuncs returns forward and inverse transformation functions for
+// Transformers returns forward and inverse transformation functions for
 // this projection.
-func (sr *SR) TransformFuncs() (forward, inverse TransformFunc, err error) {
+func (sr *SR) Transformers() (forward, inverse Transformer, err error) {
 	t, ok := projections[strings.ToLower(sr.Name)]
 	if !ok {
 		err = fmt.Errorf("in proj.Proj.TransformFuncs, could not find "+
