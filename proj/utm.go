@@ -6,7 +6,7 @@ import (
 )
 
 // UTM is a universal transverse Mercator projection.
-func UTM(this *SR) (forward, inverse TransformFunc, err error) {
+func UTM(this *SR) (forward, inverse Transformer, err error) {
 
 	if math.IsNaN(this.Zone) {
 		err = fmt.Errorf("in proj.UTM: zone is not specified")
