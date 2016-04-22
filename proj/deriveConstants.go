@@ -17,7 +17,10 @@ func (json *SR) deriveConstants() {
 	if json.DatumCode != "" && json.DatumCode != "none" {
 		datumDef, ok := datumDefs[json.DatumCode]
 		if ok {
-			json.DatumParams = datumDef.towgs84
+			json.DatumParams = make([]float64, len(datumDef.towgs84))
+			for i, p := range datumDef.towgs84 {
+				json.DatumParams[i] = p
+			}
 			json.Ellps = datumDef.ellipse
 			if datumDef.datumName != "" {
 				json.DatumName = datumDef.datumName
@@ -31,7 +34,15 @@ func (json *SR) deriveConstants() {
 		if !ok {
 			ellipse = ellipsoidDefs["WGS84"]
 		}
-		json.A, json.B, json.Rf = ellipse.a, ellipse.b, ellipse.rf
+		if ellipse.a != 0 {
+			json.A = ellipse.a
+		}
+		if ellipse.b != 0 {
+			json.B = ellipse.b
+		}
+		if ellipse.rf != 0 {
+			json.Rf = ellipse.rf
+		}
 		json.EllipseName = ellipse.ellipseName
 	}
 	if !math.IsNaN(json.Rf) && math.IsNaN(json.B) {

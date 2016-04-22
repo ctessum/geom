@@ -83,9 +83,8 @@ func (this *datum) compare_datums(dest *datum) bool {
 		//return false
 		//DGR 2012-07-29 lazy ...
 		return this.nadGrids == dest.nadGrids
-	} else {
-		return true // datums are equal
 	}
+	return true // datums are equal
 }
 
 /*

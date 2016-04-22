@@ -72,7 +72,6 @@ func LCC(this *SR) (forward, inverse TransformFunc, err error) {
 		if math.Abs(2*math.Abs(lat)-math.Pi) <= epsln {
 			lat = sign(lat) * (halfPi - 2*epsln)
 		}
-
 		con := math.Abs(math.Abs(lat) - halfPi)
 		var ts, rh1 float64
 		if con > epsln {

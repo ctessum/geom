@@ -47,7 +47,10 @@ func (source *SR) NewTransformFunc(dest *SR) (TransformFunc, error) {
 
 		// DGR, 2010/11/12
 		if source.Axis != enu {
-			adjust_axis(source, false, point)
+			point, err = adjust_axis(source, false, point)
+			if err != nil {
+				return math.NaN(), math.NaN(), err
+			}
 		}
 		// Transform source points to long/lat, if they aren't already.
 		if source.Name == longlat {
@@ -71,13 +74,13 @@ func (source *SR) NewTransformFunc(dest *SR) (TransformFunc, error) {
 		if len(point) == 3 {
 			z = point[2]
 		}
-		point[0], point[1], z, err = datumTransform(source.datum, dest.datum, point[0],
-			point[1], z)
+		point[0], point[1], z, err = datumTransform(source.datum, dest.datum,
+			point[0], point[1], z)
 		if err != nil {
 			return math.NaN(), math.NaN(), err
 		}
 		if len(point) == 3 {
-			point[2] = 2
+			point[2] = z
 		}
 
 		// Adjust for the prime meridian if necessary
