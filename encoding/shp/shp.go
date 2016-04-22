@@ -6,11 +6,13 @@ package shp
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"reflect"
 	"strconv"
 	"strings"
 
 	"github.com/ctessum/geom"
+	"github.com/ctessum/geom/proj"
 	"github.com/jonas-p/go-shp"
 )
 
@@ -39,18 +41,29 @@ type Decoder struct {
 	row          int
 	fieldIndices map[string]int
 	err          error
+	filename     string
 }
 
 // NewDecoder creates a new Decoder.
 func NewDecoder(filename string) (*Decoder, error) {
 	fname := strings.TrimSuffix(filename, ".shp")
 	r := new(Decoder)
+	r.filename = fname
 	rr, err := shp.Open(fname + ".shp")
 	if err != nil {
 		return nil, err
 	}
 	r.Reader = *rr
 	return r, err
+}
+
+// SR reads the shapefile spatial reference from the corresponding .prj file.
+func (r *Decoder) SR() (*proj.SR, error) {
+	b, err := ioutil.ReadFile(r.filename + ".prj")
+	if err != nil {
+		return nil, err
+	}
+	return proj.Parse(string(b))
 }
 
 // Close closes the underlying Reader.

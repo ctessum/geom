@@ -85,3 +85,13 @@ func asinz(x float64) float64 {
 	}
 	return math.Asin(x)
 }
+
+func qsfnz(eccent, sinphi float64) float64 {
+	var con float64
+	if eccent > 1.0e-7 {
+		con = eccent * sinphi
+		return ((1 - eccent*eccent) * (sinphi/(1-con*con) - (0.5/eccent)*math.Log((1-con)/(1+con))))
+	} else {
+		return (2 * sinphi)
+	}
+}

@@ -87,6 +87,8 @@ func TestProj4(t *testing.T) {
 		//	continue
 		//}
 		if !(strings.Contains(strings.ToLower(testPoint.Code), "merc") ||
+			strings.Contains(strings.ToLower(testPoint.Code), "albers") ||
+			strings.Contains(strings.ToLower(testPoint.Code), "aea") ||
 			strings.Contains(strings.ToLower(testPoint.Code), "lambert") ||
 			strings.Contains(strings.ToLower(testPoint.Code), "lcc")) ||
 			strings.Contains(strings.ToLower(testPoint.Code), "oblique") ||

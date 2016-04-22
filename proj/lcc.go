@@ -31,7 +31,7 @@ func LCC(this *SR) (forward, inverse Transformer, err error) {
 	}
 	// Standard Parallels cannot be equal and on opposite sides of the equator
 	if math.Abs(this.Lat1+this.Lat2) < epsln {
-		err = fmt.Errorf("Standard Parallels cannot be equal and on opposite sides of the equator")
+		err = fmt.Errorf("proj.LCC: standard Parallels cannot be equal and on opposite sides of the equator")
 		return
 	}
 
@@ -50,16 +50,17 @@ func LCC(this *SR) (forward, inverse Transformer, err error) {
 
 	var ts0 = tsfnz(this.E, this.Lat0, math.Sin(this.Lat0))
 
+	var NS float64
 	if math.Abs(this.Lat1-this.Lat2) > epsln {
-		this.NS = math.Log(ms1/ms2) / math.Log(ts1/ts2)
+		NS = math.Log(ms1/ms2) / math.Log(ts1/ts2)
 	} else {
-		this.NS = sin1
+		NS = sin1
 	}
-	if math.IsNaN(this.NS) {
-		this.NS = sin1
+	if math.IsNaN(NS) {
+		NS = sin1
 	}
-	this.F0 = ms1 / (this.NS * math.Pow(ts1, this.NS))
-	this.RH = this.A * this.F0 * math.Pow(ts0, this.NS)
+	F0 := ms1 / (NS * math.Pow(ts1, NS))
+	RH := this.A * F0 * math.Pow(ts0, NS)
 	if this.Title == "" {
 		this.Title = "Lambert Conformal Conic"
 	}
@@ -76,18 +77,18 @@ func LCC(this *SR) (forward, inverse Transformer, err error) {
 		var ts, rh1 float64
 		if con > epsln {
 			ts = tsfnz(this.E, lat, math.Sin(lat))
-			rh1 = this.A * this.F0 * math.Pow(ts, this.NS)
+			rh1 = this.A * F0 * math.Pow(ts, NS)
 		} else {
-			con = lat * this.NS
+			con = lat * NS
 			if con <= 0 {
 				err = fmt.Errorf("proj.LCC: con <= 0")
 				return
 			}
 			rh1 = 0
 		}
-		var theta = this.NS * adjust_lon(lon-this.Long0)
+		var theta = NS * adjust_lon(lon-this.Long0)
 		x = this.K0*(rh1*math.Sin(theta)) + this.X0
-		y = this.K0*(this.RH-rh1*math.Cos(theta)) + this.Y0
+		y = this.K0*(RH-rh1*math.Cos(theta)) + this.Y0
 
 		return
 	}
@@ -98,8 +99,8 @@ func LCC(this *SR) (forward, inverse Transformer, err error) {
 
 		var rh1, con, ts float64
 		x = (x - this.X0) / this.K0
-		y = (this.RH - (y-this.Y0)/this.K0)
-		if this.NS > 0 {
+		y = (RH - (y-this.Y0)/this.K0)
+		if NS > 0 {
 			rh1 = math.Sqrt(x*x + y*y)
 			con = 1
 		} else {
@@ -110,9 +111,9 @@ func LCC(this *SR) (forward, inverse Transformer, err error) {
 		if rh1 != 0 {
 			theta = math.Atan2((con * x), (con * y))
 		}
-		if (rh1 != 0) || (this.NS > 0) {
-			con = 1 / this.NS
-			ts = math.Pow((rh1 / (this.A * this.F0)), con)
+		if (rh1 != 0) || (NS > 0) {
+			con = 1 / NS
+			ts = math.Pow((rh1 / (this.A * F0)), con)
 			lat, err = phi2z(this.E, ts)
 			if err != nil {
 				return
@@ -120,7 +121,7 @@ func LCC(this *SR) (forward, inverse Transformer, err error) {
 		} else {
 			lat = -halfPi
 		}
-		lon = adjust_lon(theta/this.NS + this.Long0)
+		lon = adjust_lon(theta/NS + this.Long0)
 
 		return
 	}

@@ -20,22 +20,22 @@ func Krovak(this *SR) (forward, inverse Transformer, err error) {
 	if math.IsNaN(this.K0) {
 		this.K0 = 0.9999
 	}
-	this.S45 = 0.785398163397448 /* 45 */
-	this.S90 = 2 * this.S45
-	this.Fi0 = this.Lat0
-	this.E2 = this.Es
-	this.E = math.Sqrt(this.E2)
-	this.Alfa = math.Sqrt(1 + (this.E2*math.Pow(math.Cos(this.Fi0), 4))/(1-this.E2))
-	this.Uq = 1.04216856380474
-	this.U0 = math.Asin(math.Sin(this.Fi0) / this.Alfa)
-	this.G = math.Pow((1+this.E*math.Sin(this.Fi0))/(1-this.E*math.Sin(this.Fi0)), this.Alfa*this.E/2)
-	this.K = math.Tan(this.U0/2+this.S45) / math.Pow(math.Tan(this.Fi0/2+this.S45), this.Alfa) * this.G
-	this.K1 = this.K0
-	this.N0 = this.A * math.Sqrt(1-this.E2) / (1 - this.E2*math.Pow(math.Sin(this.Fi0), 2))
-	this.S0 = 1.37008346281555
-	this.N = math.Sin(this.S0)
-	this.Ro0 = this.K1 * this.N0 / math.Tan(this.S0)
-	this.Ad = this.S90 - this.Uq
+	const S45 = 0.785398163397448 /* 45 */
+	const S90 = 2 * S45
+	Fi0 := this.Lat0
+	E2 := this.Es
+	this.E = math.Sqrt(E2)
+	Alfa := math.Sqrt(1 + (E2*math.Pow(math.Cos(Fi0), 4))/(1-E2))
+	const Uq = 1.04216856380474
+	U0 := math.Asin(math.Sin(Fi0) / Alfa)
+	G := math.Pow((1+this.E*math.Sin(Fi0))/(1-this.E*math.Sin(Fi0)), Alfa*this.E/2)
+	K := math.Tan(U0/2+S45) / math.Pow(math.Tan(Fi0/2+S45), Alfa) * G
+	K1 := this.K0
+	N0 := this.A * math.Sqrt(1-E2) / (1 - E2*math.Pow(math.Sin(Fi0), 2))
+	const S0 = 1.37008346281555
+	N := math.Sin(S0)
+	Ro0 := K1 * N0 / math.Tan(S0)
+	Ad := S90 - Uq
 
 	/* ellipsoid */
 	/* calculate xy from lat/lon */
@@ -44,13 +44,13 @@ func Krovak(this *SR) (forward, inverse Transformer, err error) {
 		var gfi, u, deltav, s, d, eps, ro float64
 		delta_lon := adjust_lon(lon - this.Long0)
 		/* Transformation */
-		gfi = math.Pow(((1 + this.E*math.Sin(lat)) / (1 - this.E*math.Sin(lat))), (this.Alfa * this.E / 2))
-		u = 2 * (math.Atan(this.K*math.Pow(math.Tan(lat/2+this.S45), this.Alfa)/gfi) - this.S45)
-		deltav = -delta_lon * this.Alfa
-		s = math.Asin(math.Cos(this.Ad)*math.Sin(u) + math.Sin(this.Ad)*math.Cos(u)*math.Cos(deltav))
+		gfi = math.Pow(((1 + this.E*math.Sin(lat)) / (1 - this.E*math.Sin(lat))), (Alfa * this.E / 2))
+		u = 2 * (math.Atan(K*math.Pow(math.Tan(lat/2+S45), Alfa)/gfi) - S45)
+		deltav = -delta_lon * Alfa
+		s = math.Asin(math.Cos(Ad)*math.Sin(u) + math.Sin(Ad)*math.Cos(u)*math.Cos(deltav))
 		d = math.Asin(math.Cos(u) * math.Sin(deltav) / math.Cos(s))
-		eps = this.N * d
-		ro = this.Ro0 * math.Pow(math.Tan(this.S0/2+this.S45), this.N) / math.Pow(math.Tan(s/2+this.S45), this.N)
+		eps = N * d
+		ro = Ro0 * math.Pow(math.Tan(S0/2+S45), N) / math.Pow(math.Tan(s/2+S45), N)
 		y = ro * math.Cos(eps) / 1
 		x = ro * math.Sin(eps) / 1
 
@@ -75,11 +75,11 @@ func Krovak(this *SR) (forward, inverse Transformer, err error) {
 		}
 		ro = math.Sqrt(x*x + y*y)
 		eps = math.Atan2(y, x)
-		d = eps / math.Sin(this.S0)
-		s = 2 * (math.Atan(math.Pow(this.Ro0/ro, 1/this.N)*math.Tan(this.S0/2+this.S45)) - this.S45)
-		u = math.Asin(math.Cos(this.Ad)*math.Sin(s) - math.Sin(this.Ad)*math.Cos(s)*math.Cos(d))
+		d = eps / math.Sin(S0)
+		s = 2 * (math.Atan(math.Pow(Ro0/ro, 1/N)*math.Tan(S0/2+S45)) - S45)
+		u = math.Asin(math.Cos(Ad)*math.Sin(s) - math.Sin(Ad)*math.Cos(s)*math.Cos(d))
 		deltav = math.Asin(math.Cos(s) * math.Sin(d) / math.Cos(u))
-		x = this.Long0 - deltav/this.Alfa
+		x = this.Long0 - deltav/Alfa
 		fi1 = u
 		ok = 0
 		var iter = 0
@@ -87,7 +87,7 @@ func Krovak(this *SR) (forward, inverse Transformer, err error) {
 			if !(ok == 0 && iter < 15) {
 				break
 			}
-			y = 2 * (math.Atan(math.Pow(this.K, -1/this.Alfa)*math.Pow(math.Tan(u/2+this.S45), 1/this.Alfa)*math.Pow((1+this.E*math.Sin(fi1))/(1-this.E*math.Sin(fi1)), this.E/2)) - this.S45)
+			y = 2 * (math.Atan(math.Pow(K, -1/Alfa)*math.Pow(math.Tan(u/2+S45), 1/Alfa)*math.Pow((1+this.E*math.Sin(fi1))/(1-this.E*math.Sin(fi1)), this.E/2)) - S45)
 			if math.Abs(fi1-y) < 0.0000000001 {
 				ok = 1
 			}
