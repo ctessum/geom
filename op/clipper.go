@@ -59,7 +59,7 @@ type clipper struct {
 	eventQueue
 }
 
-func (c *clipper) compute(operation Op) geom.Geom {
+func (c *clipper) compute(operation Op) (geom.Geom, error) {
 
 	// Test 1 for trivial result case
 	if len(c.subject)*len(c.clipping) == 0 {

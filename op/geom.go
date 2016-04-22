@@ -167,20 +167,7 @@ func Construct(subject, clipping geom.Geom, operation Op) (geom.Geom, error) {
 	default:
 		return nil, newUnsupportedGeometryError(clipping)
 	}
-	resultChan := make(chan geom.Geom)
-	go func() {
-		// Run the clipper, while checking for an infinite loop.
-		resultChan <- c.compute(operation)
-	}()
-	timer := time.NewTimer(1 * time.Minute)
-	select {
-	case result := <-resultChan:
-		timer.Stop()
-		return result, nil
-	case <-timer.C:
-		return nil, newInfiniteLoopError(subject, clipping)
-	}
-	//return c.compute(operation), nil
+	return c.compute(operation)
 }
 
 // convert input shapes to polygon to make internal processing easier
