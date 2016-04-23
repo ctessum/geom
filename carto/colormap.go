@@ -456,10 +456,10 @@ func (c *ColorMap) Legend(canvas *draw.Canvas, label string) (err error) {
 	//	draw.Point{0., 0.}, draw.Point{c.Max.X - c.Min.X, 0},
 	//	draw.Point{c.Max.X - c.Min.X, c.Max.Y - c.Min.Y},
 	//	draw.Point{0., c.Max.Y - c.Min.Y}, draw.Point{0, 0}})
-	c.Canvas.FillPolygon(c.BackgroundColor, []draw.Point{
-		draw.Point{c.Min.X, c.Min.Y}, draw.Point{c.Max.X, c.Min.Y},
-		draw.Point{c.Max.X, c.Max.Y},
-		draw.Point{c.Min.X, c.Max.Y}, draw.Point{c.Min.X, c.Min.Y}})
+	c.Canvas.FillPolygon(c.BackgroundColor, []vg.Point{
+		vg.Point{X: c.Min.X, Y: c.Min.Y}, vg.Point{X: c.Max.X, Y: c.Min.Y},
+		vg.Point{X: c.Max.X, Y: c.Max.Y},
+		vg.Point{X: c.Min.X, Y: c.Max.Y}, vg.Point{X: c.Min.X, Y: c.Min.Y}})
 
 	// Create gradient using a bunch of thin lines
 	gradLoc := barLeft
@@ -476,12 +476,12 @@ func (c *ColorMap) Legend(canvas *draw.Canvas, label string) (err error) {
 
 	// Stroke edge of color bar
 	ls := draw.LineStyle{Color: c.EdgeColor, Width: c.LineWidth}
-	c.Canvas.StrokeLines(ls, []draw.Point{
-		draw.Point{barLeft, barBottom},
-		draw.Point{barRight, barBottom},
-		draw.Point{barRight, barTop},
-		draw.Point{barLeft, barTop},
-		draw.Point{barLeft, barBottom}})
+	c.Canvas.StrokeLines(ls, []vg.Point{
+		vg.Point{barLeft, barBottom},
+		vg.Point{barRight, barBottom},
+		vg.Point{barRight, barTop},
+		vg.Point{barLeft, barTop},
+		vg.Point{barLeft, barBottom}})
 
 	for i, tickloc := range c.ticklocs {
 		val := c.colorstops[i]
@@ -495,14 +495,14 @@ func (c *ColorMap) Legend(canvas *draw.Canvas, label string) (err error) {
 		tickx := barLeft + vg.Length(tickloc)*(barRight-barLeft)
 		if c.negativeOutlier && i == 0 ||
 			c.positiveOutlier && i == len(c.ticklocs)-1 {
-			c.Canvas.FillText(textStyle, tickx, unitsYover, -0.5, 0, valStr)
+			c.Canvas.FillText(textStyle, vg.Point{tickx, unitsYover}, -0.5, 0, valStr)
 		} else if !(c.Type == Linear && (i == 0 || i == len(c.ticklocs)-1)) {
-			c.Canvas.FillText(textStyle, tickx, unitsYunder, -0.5, -1, valStr)
+			c.Canvas.FillText(textStyle, vg.Point{tickx, unitsYunder}, -0.5, -1, valStr)
 		}
 		c.Canvas.StrokeLine2(ls, tickx, barBottom, tickx,
 			barBottom+tickLength)
 	}
-	c.Canvas.FillText(textStyle, labelX, labelY, -0.5, -1., label)
+	c.Canvas.FillText(textStyle, vg.Point{labelX, labelY}, -0.5, -1., label)
 	return
 }
 

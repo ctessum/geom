@@ -159,9 +159,9 @@ func (m *Canvas) DrawVector(g geom.Geom, fillColor color.NRGBA,
 		for i, pTemp := range l {
 			p := m.Coordinates(pTemp)
 			if i == 0 {
-				path.Move(p.X, p.Y)
+				path.Move(p)
 			} else {
-				path.Line(p.X, p.Y)
+				path.Line(p)
 			}
 		}
 		m.Stroke(path)
@@ -183,9 +183,9 @@ func (m *Canvas) DrawVector(g geom.Geom, fillColor color.NRGBA,
 			for i, pTemp := range ring {
 				p := m.Coordinates(pTemp)
 				if i == 0 {
-					path.Move(p.X, p.Y)
+					path.Move(p)
 				} else {
-					path.Line(p.X, p.Y)
+					path.Line(p)
 				}
 			}
 		}
@@ -220,8 +220,8 @@ func (m *Canvas) DrawVector(g geom.Geom, fillColor color.NRGBA,
 
 // Coordinates transforms geographic coordinates to coordinates
 // on the canvas.
-func (m *Canvas) Coordinates(p geom.Point) draw.Point {
-	var pOut draw.Point
+func (m *Canvas) Coordinates(p geom.Point) vg.Point {
+	var pOut vg.Point
 	pOut.X = m.Min.X + vg.Length(m.scale*(p.X-m.Bounds.Min.X))
 	pOut.Y = m.Min.Y + vg.Length(m.scale*(p.Y-m.Bounds.Min.Y))
 	return pOut
