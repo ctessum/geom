@@ -1,5 +1,10 @@
 package geom
 
+// Simplifier is an interface for types that can be simplified.
+type Simplifier interface {
+	Simplify(tolerance float64) Geom
+}
+
 // Simplify simplifies p
 // by removing points according to the tolerance parameter,
 // while ensuring that the resulting shape is not self intersecting
@@ -9,7 +14,7 @@ package geom
 // It is based on the algorithm:
 // J. L. G. Pallero, Robust line simplification on the plane.
 // Comput. Geosci. 61, 152–159 (2013).
-func (p Polygon) Simplify(tolerance float64) Polygonal {
+func (p Polygon) Simplify(tolerance float64) Geom {
 	var out Polygon = make([][]Point, len(p))
 	for i, r := range p {
 		out[i] = simplifyCurve(r, p, tolerance)
@@ -26,7 +31,7 @@ func (p Polygon) Simplify(tolerance float64) Polygonal {
 // It is based on the algorithm:
 // J. L. G. Pallero, Robust line simplification on the plane.
 // Comput. Geosci. 61, 152–159 (2013).
-func (mp MultiPolygon) Simplify(tolerance float64) Polygonal {
+func (mp MultiPolygon) Simplify(tolerance float64) Geom {
 	out := make(MultiPolygon, len(mp))
 	for i, p := range mp {
 		out[i] = p.Simplify(tolerance).(Polygon)
@@ -42,7 +47,7 @@ func (mp MultiPolygon) Simplify(tolerance float64) Polygonal {
 // It is based on the algorithm:
 // J. L. G. Pallero, Robust line simplification on the plane.
 // Comput. Geosci. 61, 152–159 (2013).
-func (l LineString) Simplify(tolerance float64) Linear {
+func (l LineString) Simplify(tolerance float64) Geom {
 	return LineString(simplifyCurve(l, [][]Point{}, tolerance))
 }
 
@@ -54,7 +59,7 @@ func (l LineString) Simplify(tolerance float64) Linear {
 // It is based on the algorithm:
 // J. L. G. Pallero, Robust line simplification on the plane.
 // Comput. Geosci. 61, 152–159 (2013).
-func (ml MultiLineString) Simplify(tolerance float64) Linear {
+func (ml MultiLineString) Simplify(tolerance float64) Geom {
 	out := make(MultiLineString, len(ml))
 	for i, l := range ml {
 		out[i] = l.Simplify(tolerance).(LineString)

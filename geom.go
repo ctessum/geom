@@ -20,7 +20,7 @@ type Linear interface {
 	Length() float64
 	//Clip(Polygonal) Linear
 	//Intersection(Linear) MultiPoint
-	Simplify(tolerance float64) Linear
+	Simplify(tolerance float64) Geom
 }
 
 // Polygonal is an interface for types that are polygonal in nature.
@@ -32,7 +32,7 @@ type Polygonal interface {
 	XOr(Polygonal) Polygon
 	Difference(Polygonal) Polygon
 	Area() float64
-	Simplify(tolerance float64) Polygonal
+	Simplify(tolerance float64) Geom
 	FixOrientation()
 	Centroid() Point
 }
