@@ -223,7 +223,7 @@ func (sr *SR) parseWKTUnit(secName []string, secData string) error {
 
 // wkt parses a WKT specification.
 func wkt(wkt string) (*SR, error) {
-	sr := newSR()
+	sr := NewSR()
 	err := sr.parseWKTSection([]string{}, wkt)
 
 	// Convert units to meters.

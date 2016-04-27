@@ -48,8 +48,8 @@ type SR struct {
 	Czech                      bool
 }
 
-// newProj initializes a SR object and sets fields to default values.
-func newSR() *SR {
+// NewSR initializes a SR object and sets fields to default values.
+func NewSR() *SR {
 	p := new(SR)
 	// Initialize floats to NaN.
 	v := reflect.ValueOf(p).Elem()

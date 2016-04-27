@@ -29,14 +29,14 @@ func Parse(code string) (*SR, error) {
 		if err != nil {
 			return nil, err
 		}
-		p.deriveConstants()
+		p.DeriveConstants()
 		return p, nil
 	} else if testProj(code) {
 		p, err := projString(code)
 		if err != nil {
 			return nil, err
 		}
-		p.deriveConstants()
+		p.DeriveConstants()
 		return p, nil
 	}
 	return nil, fmt.Errorf("unsupported projection definition '%s'; only proj4 and "+

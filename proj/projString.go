@@ -9,7 +9,7 @@ import (
 const deg2rad = 0.01745329251994329577
 
 func projString(defData string) (*SR, error) {
-	self := newSR()
+	self := NewSR()
 	var err error
 	for i, a := range strings.Split(defData, "+") {
 		if i == 0 {
