@@ -210,3 +210,68 @@ func TestDatum(t *testing.T) {
 	closeTo(t, x2, -868208.6070936776, 1.e-8, "Longitude 2nd of point from WGS84")
 	closeTo(t, y2, -1095793.6411470256, 1.e-9, "Latitude of 2nd point from WGS84")
 }
+
+func TestWKTParse(t *testing.T) {
+	wkt := `GEOGCS["NAD83",DATUM["North_American_Datum_1983",SPHEROID["GRS 1980",6378137,298.257222101,AUTHORITY["EPSG","7019"]],TOWGS84[0,0,0,0,0,0,0],AUTHORITY["EPSG","6269"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4269"]]`
+
+	sr, err := Parse(wkt)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := &SR{
+		Name:          "longlat",
+		Title:         "",
+		SRSCode:       "",
+		DatumCode:     "north_american_datum_1983",
+		Rf:            298.257222101,
+		Lat0:          math.NaN(),
+		Lat1:          math.NaN(),
+		Lat2:          math.NaN(),
+		LatTS:         math.NaN(),
+		Long0:         math.NaN(),
+		Long1:         math.NaN(),
+		Long2:         math.NaN(),
+		LongC:         math.NaN(),
+		Alpha:         math.NaN(),
+		X0:            math.NaN(),
+		Y0:            math.NaN(),
+		K0:            1,
+		K:             math.NaN(),
+		A:             6.378137e+06,
+		A2:            4.0680631590769e+13,
+		B:             6.356752314140356e+06,
+		B2:            4.040829998332877e+13,
+		Ra:            false,
+		Zone:          math.NaN(),
+		UTMSouth:      false,
+		DatumParams:   []float64{0, 0, 0, 0, 0, 0, 0},
+		ToMeter:       111319.4907932736,
+		Units:         "degree",
+		FromGreenwich: math.NaN(),
+		NADGrids:      "",
+		Axis:          "enu",
+		local:         false,
+		sphere:        false,
+		Ellps:         "GRS 1980",
+		EllipseName:   "",
+		Es:            0.006694380022900686,
+		E:             0.08181919104281517,
+		Ep2:           0.006739496775478856,
+		DatumName:     "",
+		NoDefs:        false,
+		datum: &datum{
+			datum_type:   4,
+			datum_params: []float64{0, 0, 0, 0, 0, 0, 0},
+			a:            6.378137e+06,
+			b:            6.356752314140356e+06,
+			es:           0.006694380022900686,
+			ep2:          0.006739496775478856,
+			nadGrids:     ""},
+		Czech: false,
+	}
+
+	if !sr.Equal(want, 0) {
+		t.Errorf("have\n\t%#v\nwant\n\t%#v", sr, want)
+	}
+}

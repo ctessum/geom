@@ -5,6 +5,8 @@ import (
 	"math"
 	"reflect"
 	"strings"
+
+	"github.com/gonum/floats"
 )
 
 // A Transformer takes input coordinates and returns output coordinates and an error.
@@ -84,4 +86,57 @@ func (sr *SR) Transformers() (forward, inverse Transformer, err error) {
 	}
 	forward, inverse, err = t(sr)
 	return
+}
+
+// Equal determines whether spatial references sr and sr2 are equal to within ulp
+// floating point units in the last place.
+func (sr *SR) Equal(sr2 *SR, ulp uint) bool {
+	v1 := reflect.ValueOf(sr).Elem()
+	v2 := reflect.ValueOf(sr2).Elem()
+	return equal(v1, v2, ulp)
+}
+
+// equal determines whether two values are equal to each other within ulp
+func equal(v1, v2 reflect.Value, ulp uint) bool {
+	for i := 0; i < v1.NumField(); i++ {
+		f1 := v1.Field(i)
+		f2 := v2.Field(i)
+		ft := f1.Type().Kind()
+		switch ft {
+		case reflect.Float64:
+			fv1 := f1.Float()
+			fv2 := f2.Float()
+			if math.IsNaN(fv1) != math.IsNaN(fv2) {
+				return false
+			}
+			if !math.IsNaN(fv1) && !floats.EqualWithinULP(fv1, fv2, ulp) {
+				return false
+			}
+		case reflect.Int:
+			if f1.Int() != f2.Int() {
+				return false
+			}
+		case reflect.Bool:
+			if f1.Bool() != f2.Bool() {
+				return false
+			}
+		case reflect.Ptr:
+			if !equal(reflect.Indirect(f1), reflect.Indirect(f2), ulp) {
+				return false
+			}
+		case reflect.String:
+			if f1.String() != f2.String() {
+				return false
+			}
+		case reflect.Slice:
+			for i := 0; i < f1.Len(); i++ {
+				if !floats.EqualWithinULP(f1.Index(i).Float(), f2.Index(i).Float(), ulp) {
+					return false
+				}
+			}
+		default:
+			panic(fmt.Errorf("unsupported type %s", ft))
+		}
+	}
+	return true
 }

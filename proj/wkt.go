@@ -84,6 +84,16 @@ func (sr *SR) parseWKTDatum(secName []string, secData string) error {
 		if err := sr.parseWKTSpheroid(secName, secData); err != nil {
 			return err
 		}
+	case "TOWGS84":
+		s := strings.Split(secData, ",")
+		sr.DatumParams = make([]float64, len(s))
+		for i, ss := range s {
+			var err error
+			sr.DatumParams[i], err = strconv.ParseFloat(strings.TrimSpace(ss), 64)
+			if err != nil {
+				return err
+			}
+		}
 	case "AUTHORITY": // Don't do anything with this for now.
 	default:
 		return fmt.Errorf("proj.parseWKTDatum: unknown WKT section %v", secName)
@@ -118,7 +128,7 @@ func (sr *SR) datumRename() {
 
 func (sr *SR) parseWKTSpheroid(secName []string, secData string) error {
 	d := strings.Split(secData, ",")
-	sr.Ellps = strings.Replace(d[0], "_19", "", -1)
+	sr.Ellps = strings.Replace(strings.Trim(d[0], "\""), "_19", "", -1)
 	sr.Ellps = strings.Replace(sr.Ellps, "clarke_18", "clrk", -1)
 	sr.Ellps = strings.Replace(sr.Ellps, "Clarke_18", "clrk", -1)
 	if len(sr.Ellps) >= 13 && strings.ToLower(sr.Ellps[0:13]) == "international" {
@@ -202,12 +212,11 @@ func (sr *SR) parseWKTPrimeM(secName []string, secData string) error {
 
 func (sr *SR) parseWKTUnit(secName []string, secData string) error {
 	v := strings.Split(secData, ",")
-	sr.Units = strings.ToLower(v[0])
+	sr.Units = strings.Trim(strings.ToLower(v[0]), "\"")
 	if sr.Units == "metre" {
 		sr.Units = "meter"
 	}
 	if len(v) > 1 {
-		sr.Units = strings.TrimSpace(v[0])
 		convert, err := strconv.ParseFloat(strings.TrimSpace(v[1]), 64)
 		if err != nil {
 			return fmt.Errorf("in proj.parseWKTUnit: %v", err)
