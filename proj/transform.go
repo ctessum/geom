@@ -18,6 +18,15 @@ func (source *SR) NewTransform(dest *SR) (Transformer, error) {
 	if dest == nil {
 		return nil, fmt.Errorf("proj: destination is nil")
 	}
+
+	// If source and dest are the same, we don't need to do any transforming
+	const ulpTolerance = 3 // Our tolerance is 3 units in the last place
+	if source.Equal(dest, 3) {
+		return func(x, y float64) (float64, float64, error) {
+			return x, y, nil
+		}, nil
+	}
+
 	return func(x, y float64) (float64, float64, error) {
 		point := []float64{x, y}
 		// Workaround for datum shifts towgs84, if either source or destination projection is not wgs84
