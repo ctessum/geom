@@ -117,3 +117,24 @@ func TestSimplifyInfiniteLoop(t *testing.T) {
 		t.Errorf("Simplify %+v timed out.", geometry)
 	}
 }
+
+// This test creates a degenerate polygon. It's not ideal but
+// in this case it's what the algorithm is designed to do.
+func TestSimplifyDegenerate(t *testing.T) {
+	geometry := Polygon{[]Point{
+		Point{X: 1, Y: 1},
+		Point{X: 1, Y: 3},
+		Point{X: 1.25, Y: 2},
+		Point{X: 1, Y: 1},
+	}}
+	got := geometry.Simplify(100.)
+
+	want := Polygon{[]Point{
+		Point{X: 1, Y: 1},
+		Point{X: 1, Y: 1},
+	}}
+
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("want %#v, got %#v", want, got)
+	}
+}

@@ -82,7 +82,7 @@ func simplifyCurve(curve []Point,
 				if d > tol {
 					// we have found a candidate point to keep
 					for {
-						// Make sure this simplifcation doesn't cause any self
+						// Make sure this simplification doesn't cause any self
 						// intersections.
 						if j > i+2 &&
 							(segMakesNotSimple(curve[i], curve[j-1], [][]Point{out[0:i]}) ||
@@ -102,6 +102,7 @@ func simplifyCurve(curve []Point,
 				}
 			}
 			if j == len(curve)-1 {
+				// Add last point regardless of distance.
 				out = append(out, curve[j])
 				breakTime = true
 			}
