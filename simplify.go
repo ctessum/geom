@@ -71,6 +71,10 @@ func simplifyCurve(curve []Point,
 	otherCurves [][]Point, tol float64) []Point {
 	out := make([]Point, 0, len(curve))
 
+	if len(curve) == 0 {
+		return nil
+	}
+
 	i := 0
 	for {
 		out = append(out, curve[i])
