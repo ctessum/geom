@@ -66,21 +66,6 @@ func (mp MultiPolygon) Polygons() []Polygon {
 	return mp
 }
 
-// Within calculates whether mp is completely within p. Edges that touch are
-// considered to be within. It may not work correctly if mp has holes.
-func (mp MultiPolygon) Within(p Polygonal) bool {
-	for _, poly := range mp {
-		for _, r := range poly {
-			for _, pp := range r {
-				if !pointInPolygonal(pp, p) {
-					return false
-				}
-			}
-		}
-	}
-	return true
-}
-
 // Centroid calculates the centroid of mp, from
 // wikipedia: http://en.wikipedia.org/wiki/Centroid#Centroid_of_polygon.
 // The polygon can have holes, but each ring must be closed (i.e.,

@@ -23,8 +23,7 @@ func (l LineString) Length() float64 {
 	return length
 }
 
-// Within calculates whether l is completely within p. Points that touch
-// the edge of p are considered within.
+// Within calculates whether l is completely within p.
 func (l LineString) Within(p Polygonal) bool {
 	for _, pp := range l {
 		if !pointInPolygonal(pp, p) {

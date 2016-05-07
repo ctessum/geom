@@ -126,16 +126,3 @@ func (p Polygon) Centroid() Point {
 	}
 	return Point{X: xA / A, Y: yA / A}
 }
-
-// Within calculates whether p is completely within p2. Edges that touch are
-// considered to be within. It may not work correctly if p has holes.
-func (p Polygon) Within(p2 Polygonal) bool {
-	for _, r := range p {
-		for _, pp := range r {
-			if !pointInPolygonal(pp, p2) {
-				return false
-			}
-		}
-	}
-	return true
-}

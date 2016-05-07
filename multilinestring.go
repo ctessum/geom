@@ -21,8 +21,7 @@ func (ml MultiLineString) Length() float64 {
 	return length
 }
 
-// Within calculates whether ml is completely within p. Points that touch
-// the edge of p are considered within.
+// Within calculates whether ml is completely within p.
 func (ml MultiLineString) Within(p Polygonal) bool {
 	for _, l := range ml {
 		if !l.Within(p) {

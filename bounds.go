@@ -68,7 +68,7 @@ func (b *Bounds) Bounds() *Bounds {
 	return b
 }
 
-// Within calculates whether b is within poly or touching its edge.
+// Within calculates whether b is within poly.
 func (b *Bounds) Within(poly Polygonal) bool {
 	return pointInPolygonal(b.Min, poly) && pointInPolygonal(b.Max, poly)
 }

@@ -9,7 +9,6 @@ import "github.com/ctessum/geom/proj"
 // Geom is an interface for generic geometry types.
 type Geom interface {
 	Bounds() *Bounds
-	Within(Polygonal) bool
 	Similar(Geom, float64) bool
 	Transform(proj.Transformer) (Geom, error)
 }
@@ -33,7 +32,6 @@ type Polygonal interface {
 	Difference(Polygonal) Polygon
 	Area() float64
 	Simplify(tolerance float64) Geom
-	FixOrientation()
 	Centroid() Point
 }
 
@@ -42,4 +40,5 @@ type PointLike interface {
 	Geom
 	Points() []Point
 	On(l Linear, tolerance float64) bool
+	Within(Polygonal) bool
 }

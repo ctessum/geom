@@ -1,5 +1,7 @@
 package geom
 
+import "math"
+
 // Simplifier is an interface for types that can be simplified.
 type Simplifier interface {
 	Simplify(tolerance float64) Geom
@@ -136,3 +138,39 @@ func segMakesNotSimple(segStart, segEnd Point, paths [][]Point) bool {
 	}
 	return false
 }
+
+// dist_Point_to_Segment(): get the distance of a point to a segment
+//     Input:  a Point P and a Segment S (in any dimension)
+//     Return: the shortest distance from P to S
+// from http://geomalgorithms.com/a02-_lines.html
+func distPointToSegment(p, segStart, segEnd Point) float64 {
+	v := pointSubtract(segEnd, segStart)
+	w := pointSubtract(p, segStart)
+
+	c1 := dot(w, v)
+	if c1 <= 0. {
+		return d(p, segStart)
+	}
+
+	c2 := dot(v, v)
+	if c2 <= c1 {
+		return d(p, segEnd)
+	}
+
+	b := c1 / c2
+	pb := Point{segStart.X + b*v.X, segStart.Y + b*v.Y}
+	return d(p, pb)
+}
+
+func pointSubtract(p1, p2 Point) Point {
+	return Point{X: p1.X - p2.X, Y: p1.Y - p2.Y}
+}
+
+// dot product
+func dot(u, v Point) float64 { return u.X*v.X + u.Y*v.Y }
+
+// norm = length of  vector
+func norm(v Point) float64 { return math.Sqrt(dot(v, v)) }
+
+// distance = norm of difference
+func d(u, v Point) float64 { return norm(pointSubtract(u, v)) }

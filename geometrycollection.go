@@ -12,14 +12,3 @@ func (gc GeometryCollection) Bounds() *Bounds {
 	}
 	return b
 }
-
-// Within calculates whether gc is completely within p. Points that touch
-// the edge of p are considered within.
-func (gc GeometryCollection) Within(p Polygonal) bool {
-	for _, g := range gc {
-		if !g.Within(p) {
-			return false
-		}
-	}
-	return true
-}
