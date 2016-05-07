@@ -39,6 +39,6 @@ type Polygonal interface {
 type PointLike interface {
 	Geom
 	Points() []Point
-	On(l Linear, tolerance float64) bool
+	//On(l Linear, tolerance float64) bool
 	Within(Polygonal) bool
 }
