@@ -20,6 +20,7 @@ type Linear interface {
 	//Clip(Polygonal) Linear
 	//Intersection(Linear) MultiPoint
 	Simplify(tolerance float64) Geom
+	Within(Polygonal) bool
 }
 
 // Polygonal is an interface for types that are polygonal in nature.
