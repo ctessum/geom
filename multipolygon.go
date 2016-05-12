@@ -18,9 +18,10 @@ func (mp MultiPolygon) Bounds() *Bounds {
 	return b
 }
 
-// Area returns the combined area of the polygons in p,
-//  assuming that none of the polygons in the p
-// overlap and that nested polygons have alternating winding directions.
+// Area returns the combined area of the polygons in p.
+// The function works correctly for polygons with
+// holes, regardless of the winding order of the holes, but may give the wrong
+// result for self-intersecting polygons, or polygons in mp that overlap each other.
 func (mp MultiPolygon) Area() float64 {
 	a := 0.
 	for _, pp := range mp {
@@ -51,7 +52,7 @@ func (mp MultiPolygon) Difference(p2 Polygonal) Polygon {
 
 func (mp MultiPolygon) op(p2 Polygonal, op polyclip.Op) Polygon {
 	var pp polyclip.Polygon
-	for _, ppx := range mp.Polygons() {
+	for _, ppx := range mp {
 		pp = append(pp, ppx.toPolyClip()...)
 	}
 	var pp2 polyclip.Polygon
@@ -77,7 +78,7 @@ func (mp MultiPolygon) Centroid() Point {
 	var A, xA, yA float64
 	for _, p := range mp {
 		for _, r := range p {
-			a := area(r)
+			a := area(r, p)
 			cx, cy := 0., 0.
 			for i := 0; i < len(r)-1; i++ {
 				cx += (r[i].X + r[i+1].X) *

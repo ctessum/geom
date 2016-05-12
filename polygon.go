@@ -75,29 +75,42 @@ func polyClipToPolygon(p polyclip.Polygon) Polygon {
 	return pp
 }
 
-// Area returns the area of p, assuming
-// that nested polygons have alternating winding directions.
+// Area returns the area of p. The function works correctly for polygons with
+// holes, regardless of the winding order of the holes, but will give the wrong
+// result for self-intersecting polygons.
 func (p Polygon) Area() float64 {
 	a := 0.
 	for _, r := range p {
-		a += area(r)
+		a += area(r, p)
 	}
-	return math.Abs(a)
+	return a
 }
 
-// see http://www.mathopenref.com/coordpolygonarea2.html
-func area(polygon []Point) float64 {
-	if len(polygon) < 2 {
+// area calculates the area of r, where r is a ring within p.
+// It returns a negative value if r represents a hole in p.
+// It is adapted http://www.mathopenref.com/coordpolygonarea2.html
+// to allow arbitrary winding order.
+func area(r []Point, p Polygon) float64 {
+	if len(r) < 2 {
 		return 0
 	}
-	highI := len(polygon) - 1
-	A := (polygon[highI].X +
-		polygon[0].X) * (polygon[0].Y - polygon[highI].Y)
+	highI := len(r) - 1
+	A := (r[highI].X +
+		r[0].X) * (r[0].Y - r[highI].Y)
 	for i := 0; i < highI; i++ {
-		A += (polygon[i].X +
-			polygon[i+1].X) * (polygon[i+1].Y - polygon[i].Y)
+		A += (r[i].X +
+			r[i+1].X) * (r[i+1].Y - r[i].Y)
 	}
-	return A / 2.
+	A = math.Abs(A / 2.)
+	// check if a point inside or outside this ring is also inside or outside
+	// the polygon.
+	pp := r[0]
+	if pp.Within(Polygon{r}) == pp.Within(p) {
+		// This is not a hole.
+		return A
+	}
+	// This is a hole.
+	return -A
 }
 
 // Centroid calculates the centroid of p, from
@@ -110,7 +123,7 @@ func area(polygon []Point) float64 {
 func (p Polygon) Centroid() Point {
 	var A, xA, yA float64
 	for _, r := range p {
-		a := area(r)
+		a := area(r, p)
 		cx, cy := 0., 0.
 		for i := 0; i < len(r)-1; i++ {
 			cx += (r[i].X + r[i+1].X) *
