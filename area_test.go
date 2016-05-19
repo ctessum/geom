@@ -72,11 +72,82 @@ func TestArea(t *testing.T) {
 			},
 			expected: 8.,
 		},
+		{
+			// Polygon with inner ring that touches edge.
+			test: Polygon{
+				[]Point{
+					Point{X: 0, Y: 1},
+					Point{X: 1, Y: 0},
+					Point{X: 2, Y: 1},
+					Point{X: 1, Y: 2},
+				},
+				[]Point{
+					Point{X: 0, Y: 1},
+					Point{X: 1, Y: 0.5},
+					Point{X: 2, Y: 1},
+					Point{X: 1, Y: 1.5},
+				},
+			},
+			expected: 2. - 1.,
+		},
+		{
+			// Polygon with inner ring where all points of the inner ring
+			// touch the edge.
+			test: Polygon{
+				[]Point{
+					Point{X: 0, Y: 0},
+					Point{X: 2, Y: 0},
+					Point{X: 2, Y: 2},
+					Point{X: 0, Y: 2},
+				},
+				[]Point{
+					Point{X: 0, Y: 1},
+					Point{X: 1, Y: 0},
+					Point{X: 2, Y: 1},
+					Point{X: 1, Y: 2},
+				},
+			},
+			expected: 4. - 2.,
+		},
+		{
+			// Polygon with inner ring where all points of the inner ring
+			// touch the edge.
+			test: Polygon{
+				[]Point{
+					Point{X: 0, Y: 0},
+					Point{X: 2, Y: 0},
+					Point{X: 2, Y: 2},
+					Point{X: 0, Y: 2},
+				},
+				[]Point{
+					Point{X: 1, Y: 0},
+					Point{X: 2, Y: 2},
+					Point{X: 0, Y: 2},
+				},
+			},
+			expected: 4. - 2.,
+		},
+		{
+			// Polygon with outer ring where some of points of the inner ring
+			// touch the edge.
+			test: Polygon{
+				[]Point{
+					Point{X: 0, Y: 0},
+					Point{X: 2, Y: 0},
+					Point{X: 2, Y: 2},
+					Point{X: 0, Y: 2},
+				},
+				[]Point{
+					Point{X: 0, Y: 0},
+					Point{X: 0, Y: 1},
+					Point{X: 0, Y: 2},
+					Point{X: -1, Y: 1},
+				},
+			},
+			expected: 4. + 1.,
+		},
 	}
 	for i, test := range tests {
-		if i != 3 {
-			continue
-		}
 		result := test.test.Area()
 		if result != test.expected {
 			t.Errorf("%d: expected %g, got %g", i, test.expected, result)

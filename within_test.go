@@ -1,8 +1,6 @@
 package geom
 
-import (
-	"testing"
-	)
+import "testing"
 
 func TestWithin1(t *testing.T) {
 	p := Point{620858.7034230313, -1.3334340701764394e+06}
@@ -48,7 +46,7 @@ func TestWithin2(t *testing.T) {
 		poly{
 			name:    "square",
 			sides:   Polygon{[]Point{p1, p2, p3, p4, p1}},
-			results: []bool{true, true, false, false, true, true, false, true, true},
+			results: []bool{true, true, false, true, true, true, true, true, true},
 		},
 		poly{
 			name: "square hole",
@@ -56,21 +54,21 @@ func TestWithin2(t *testing.T) {
 				[]Point{p1, p2, p3, p4, p1},
 				[]Point{p5, p6, p7, p8, p5},
 			},
-			results: []bool{false, true, false, false, true, true, false, true, true},
+			results: []bool{false, true, false, true, true, true, true, true, true},
 		},
 		poly{
-			name: "strange",
-			sides: Polygon{[]Point{p1, p5, p4, p8, p7, p3, p2, p5}},
-			results: []bool{true, false, false, false, true, true, false, false, false},
+			name:    "strange",
+			sides:   Polygon{[]Point{p1, p5, p4, p8, p7, p3, p2, p5}},
+			results: []bool{true, false, false, false, true, true, true, false, false},
 		},
 		poly{
-			name: "exagon",
-			sides: Polygon{[]Point{p11, p12, p10, p13, p14, p9, p11}},
-			results: []bool{true, true, false, false, true, true, false, false, false},
+			name:    "exagon",
+			sides:   Polygon{[]Point{p11, p12, p10, p13, p14, p9, p11}},
+			results: []bool{true, true, false, true, true, true, false, false, false},
 		},
 	}
 
-	var tpt = []Point{{5, 5}, {5, 8}, {-10, 5}, {0, 5}, {10, 5}, {8, 5}, {10, 10},{1, 2}, {2, 1}}
+	var tpt = []Point{{5, 5}, {5, 8}, {-10, 5}, {0, 5}, {10, 5}, {8, 5}, {10, 10}, {1, 2}, {2, 1}}
 
 	for _, pg := range tpg {
 		for i, pt := range tpt {
@@ -78,5 +76,30 @@ func TestWithin2(t *testing.T) {
 				t.Errorf("point %v within polygon %v should be %v", pt, pg.name, pg.results[i])
 			}
 		}
+	}
+}
+
+func TestWithin3(t *testing.T) {
+	p := Point{X: 2, Y: 2}
+	poly := Polygon{{
+		Point{X: 1, Y: 0},
+		Point{X: 2, Y: 2},
+		Point{X: 0, Y: 2},
+	}}
+	if !p.Within(poly) {
+		t.Errorf("%v should be within %v", p, poly)
+	}
+}
+
+func TestWithin4(t *testing.T) {
+	p := Point{X: 1, Y: 0.5}
+	poly := Polygon{{
+		Point{X: 0, Y: 1},
+		Point{X: 1, Y: 0},
+		Point{X: 2, Y: 1},
+		Point{X: 1, Y: 2},
+	}}
+	if !p.Within(poly) {
+		t.Errorf("%v should be within %v", p, poly)
 	}
 }

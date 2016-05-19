@@ -80,8 +80,8 @@ func polyClipToPolygon(p polyclip.Polygon) Polygon {
 // result for self-intersecting polygons.
 func (p Polygon) Area() float64 {
 	a := 0.
-	for _, r := range p {
-		a += area(r, p)
+	for i, r := range p {
+		a += area(r, i, p)
 	}
 	return a
 }
@@ -90,24 +90,28 @@ func (p Polygon) Area() float64 {
 // It returns a negative value if r represents a hole in p.
 // It is adapted http://www.mathopenref.com/coordpolygonarea2.html
 // to allow arbitrary winding order.
-func area(r []Point, p Polygon) float64 {
+func area(r []Point, i int, p Polygon) float64 {
 	if len(r) < 2 {
 		return 0
 	}
 	highI := len(r) - 1
 	A := (r[highI].X +
 		r[0].X) * (r[0].Y - r[highI].Y)
-	for i := 0; i < highI; i++ {
-		A += (r[i].X +
-			r[i+1].X) * (r[i+1].Y - r[i].Y)
+	for ii := 0; ii < highI; ii++ {
+		A += (r[ii].X +
+			r[ii+1].X) * (r[ii+1].Y - r[ii].Y)
 	}
 	A = math.Abs(A / 2.)
-	// check if a point inside or outside this ring is also inside or outside
+	// check whether all of the points on this ring are inside
 	// the polygon.
-	pp := r[0]
-	if pp.Within(Polygon{r}) == pp.Within(p) {
-		// This is not a hole.
-		return A
+	for _, pp := range r {
+		pWithoutRing := make(Polygon, len(p))
+		copy(pWithoutRing, p)
+		pWithoutRing = Polygon(append(pWithoutRing[:i], pWithoutRing[i+1:]...))
+		if !pp.Within(pWithoutRing) {
+			// This is not a hole.
+			return A
+		}
 	}
 	// This is a hole.
 	return -A
@@ -120,10 +124,11 @@ func area(r []Point, p Polygon) float64 {
 // self-intersecting.
 // The algorithm will not check to make sure the holes are
 // actually inside the outer rings.
+// This has not been thoroughly tested.
 func (p Polygon) Centroid() Point {
 	var A, xA, yA float64
-	for _, r := range p {
-		a := area(r, p)
+	for i, r := range p {
+		a := area(r, i, p)
 		cx, cy := 0., 0.
 		for i := 0; i < len(r)-1; i++ {
 			cx += (r[i].X + r[i+1].X) *

@@ -20,6 +20,9 @@ type Linear interface {
 	//Clip(Polygonal) Linear
 	//Intersection(Linear) MultiPoint
 	Simplify(tolerance float64) Geom
+
+	// Within determines whether this geometry is within the Polygonal geometry.
+	// Points that lie on the edge of the polygon are considered within.
 	Within(Polygonal) bool
 }
 
@@ -41,5 +44,8 @@ type PointLike interface {
 	Geom
 	Points() []Point
 	//On(l Linear, tolerance float64) bool
+
+	// Within determines whether this geometry is within the Polygonal geometry.
+	// Points that lie on the edge of the polygon are considered within.
 	Within(Polygonal) bool
 }

@@ -19,3 +19,8 @@ func (p Point) Bounds() *Bounds {
 func (p Point) Within(poly Polygonal) bool {
 	return pointInPolygonal(p, poly)
 }
+
+// Equals returns whether p is equal to p2.
+func (p Point) Equals(p2 Point) bool {
+	return p.X == p2.X && p.Y == p2.Y
+}

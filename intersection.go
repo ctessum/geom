@@ -2,6 +2,12 @@ package geom
 
 import "math"
 
+var nanPoint Point
+
+func init() {
+	nanPoint = Point{X: math.NaN(), Y: math.NaN()}
+}
+
 // Modified from package github.com/akavel/polyclip-go.
 // Copyright (c) 2011 Mateusz Czapliński (Go port)
 // Copyright (c) 2011 Mahir Iqbal (as3 version)
@@ -26,12 +32,13 @@ import "math"
 // based on http://code.google.com/p/as3polyclip/ (MIT licensed)
 // and code by Martínez et al: http://wwwdi.ujaen.es/~fmartin/bool_op.html (public domain)
 func findIntersection(seg0, seg1 segment) (int, Point, Point) {
-	var pi0, pi1 Point
+	pi0 := nanPoint
+	pi1 := nanPoint
 	p0 := seg0.start
 	d0 := Point{seg0.end.X - p0.X, seg0.end.Y - p0.Y}
 	p1 := seg1.start
 	d1 := Point{seg1.end.X - p1.X, seg1.end.Y - p1.Y}
-	sqrEpsilon := 1.e-7 // was 1e-3 earlier
+	sqrEpsilon := 0. // was 1e-3 earlier
 	E := Point{p1.X - p0.X, p1.Y - p0.Y}
 	kross := d0.X*d1.Y - d0.Y*d1.X
 	sqrKross := kross * kross
@@ -46,7 +53,7 @@ func findIntersection(seg0, seg1 segment) (int, Point, Point) {
 		}
 		t := (E.X*d0.Y - E.Y*d0.X) / kross
 		if t < 0 || t > 1 {
-			return 0, Point{}, Point{}
+			return 0, nanPoint, nanPoint
 		}
 		// intersection of lines is a point an each segment [MC: ?]
 		pi0.X = p0.X + s*d0.X
@@ -54,7 +61,7 @@ func findIntersection(seg0, seg1 segment) (int, Point, Point) {
 
 		// [MC: commented fragment removed]
 
-		return 1, pi0, pi1
+		return 1, pi0, nanPoint
 	}
 
 	// lines of the segments are parallel
@@ -63,7 +70,7 @@ func findIntersection(seg0, seg1 segment) (int, Point, Point) {
 	sqrKross = kross * kross
 	if sqrKross > sqrEpsilon*sqrLen0*sqrLenE {
 		// lines of the segment are different
-		return 0, pi0, pi1
+		return 0, nanPoint, nanPoint
 	}
 
 	// Lines of the segment are the same. Need to test for overlap of segments.
@@ -73,7 +80,7 @@ func findIntersection(seg0, seg1 segment) (int, Point, Point) {
 	s1 := s0 + (d0.X*d1.X+d0.Y*d1.Y)/sqrLen0
 	smin := math.Min(s0, s1)
 	smax := math.Max(s0, s1)
-	var w []float64
+	w := make([]float64, 0, 2)
 	imax := findIntersection2(0.0, 1.0, smin, smax, &w)
 
 	if imax > 0 {
@@ -87,6 +94,7 @@ func findIntersection(seg0, seg1 segment) (int, Point, Point) {
 			pi1.Y = p0.Y + w[1]*d0.Y
 		}
 	}
+
 	return imax, pi0, pi1
 }
 
@@ -94,28 +102,31 @@ func findIntersection2(u0, u1, v0, v1 float64, w *[]float64) int {
 	if u1 < v0 || u0 > v1 {
 		return 0
 	}
-	if u1 > v0 {
-		if u0 < v1 {
-			if u0 < v0 {
-				*w = append(*w, v0)
-			} else {
-				*w = append(*w, u0)
-			}
-			if u1 > v1 {
-				*w = append(*w, v1)
-			} else {
-				*w = append(*w, u1)
-			}
-			return 2
-		}
-		// u0 == v1
+	if u1 == v0 {
+		*w = append(*w, u1)
+		return 1
+	}
+
+	// u1 > v0
+
+	if u0 == v1 {
 		*w = append(*w, u0)
 		return 1
 	}
 
-	// u1 == v0
-	*w = append(*w, u1)
-	return 1
+	// u0 < v1
+
+	if u0 < v0 {
+		*w = append(*w, v0)
+	} else {
+		*w = append(*w, u0)
+	}
+	if u1 > v1 {
+		*w = append(*w, v1)
+	} else {
+		*w = append(*w, u1)
+	}
+	return 2
 }
 
 // Length returns distance from p to point (0, 0).
