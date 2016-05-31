@@ -15,7 +15,7 @@ func pointInPolygonal(pt Point, pg Polygonal) (in bool) {
 			}
 			// check segment between beginning and ending points
 			if !ring[len(ring)-1].Equals(ring[0]) {
-				if distPointToSegment(pt, ring[len(ring)-1], ring[0]) == 0 {
+				if pointOnSegment(pt, ring[len(ring)-1], ring[0]) {
 					return true
 				}
 				if rayIntersectsSegment(pt, ring[len(ring)-1], ring[0]) {
@@ -24,7 +24,7 @@ func pointInPolygonal(pt Point, pg Polygonal) (in bool) {
 			}
 			// check the rest of the segments.
 			for i := 1; i < len(ring); i++ {
-				if distPointToSegment(pt, ring[i-1], ring[i]) == 0 {
+				if pointOnSegment(pt, ring[i-1], ring[i]) {
 					return true
 				}
 				if rayIntersectsSegment(pt, ring[i-1], ring[i]) {

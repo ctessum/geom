@@ -139,6 +139,23 @@ func segMakesNotSimple(segStart, segEnd Point, paths [][]Point) bool {
 	return false
 }
 
+// pointOnSegment calculates whether point p is exactly on the finite line segment
+// defined by points l1 and l2.
+func pointOnSegment(p, l1, l2 Point) bool {
+	if (p.X < l1.X && p.X < l2.X) || (p.X > l1.X && p.X > l2.X) ||
+		(p.Y < l1.Y && p.Y < l2.Y) || (p.Y > l1.Y && p.Y > l2.Y) {
+		return false
+	}
+	d1 := pointSubtract(l1, p)
+	d2 := pointSubtract(l2, l1)
+
+	// If the two slopes are the same, then the point is on the line
+	if (d1.X == 0 && d2.X == 0) || d1.Y/d1.X == d2.Y/d2.X {
+		return true
+	}
+	return false
+}
+
 // dist_Point_to_Segment(): get the distance of a point to a segment
 //     Input:  a Point P and a Segment S (in any dimension)
 //     Return: the shortest distance from P to S

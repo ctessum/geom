@@ -104,6 +104,9 @@ func area(r []Point, i int, p Polygon) float64 {
 	A = math.Abs(A / 2.)
 	// check whether all of the points on this ring are inside
 	// the polygon.
+	if len(p) == 1 {
+		return A // This is not a hole.
+	}
 	for _, pp := range r {
 		pWithoutRing := make(Polygon, len(p))
 		copy(pWithoutRing, p)
