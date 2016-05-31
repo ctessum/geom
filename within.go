@@ -11,7 +11,12 @@ func pointInPolygonal(pt Point, pg Polygonal) (in bool) {
 	for _, poly := range pg.Polygons() {
 		for _, ring := range poly {
 			if len(ring) < 3 {
-				return false
+				continue
+			}
+			b := NewBounds()
+			b.extendPoints(ring)
+			if !b.Overlaps(NewBoundsPoint(pt)) {
+				continue
 			}
 			// check segment between beginning and ending points
 			if !ring[len(ring)-1].Equals(ring[0]) {
