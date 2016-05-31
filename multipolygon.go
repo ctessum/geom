@@ -77,8 +77,9 @@ func (mp MultiPolygon) Polygons() []Polygon {
 func (mp MultiPolygon) Centroid() Point {
 	var A, xA, yA float64
 	for _, p := range mp {
+		b := p.ringBounds()
 		for i, r := range p {
-			a := area(r, i, p)
+			a := area(r, i, p, b)
 			cx, cy := 0., 0.
 			for i := 0; i < len(r)-1; i++ {
 				cx += (r[i].X + r[i+1].X) *

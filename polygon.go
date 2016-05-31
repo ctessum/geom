@@ -80,17 +80,26 @@ func polyClipToPolygon(p polyclip.Polygon) Polygon {
 // result for self-intersecting polygons.
 func (p Polygon) Area() float64 {
 	a := 0.
+
+	// Calculate the bounds of all the rings.
+	bounds := make([]*Bounds, len(p))
 	for i, r := range p {
-		a += area(r, i, p)
+		b := NewBounds()
+		b.extendPoints(r)
+		bounds[i] = b
+	}
+
+	for i, r := range p {
+		a += area(r, i, p, bounds)
 	}
 	return a
 }
 
 // area calculates the area of r, where r is a ring within p.
 // It returns a negative value if r represents a hole in p.
-// It is adapted http://www.mathopenref.com/coordpolygonarea2.html
-// to allow arbitrary winding order.
-func area(r []Point, i int, p Polygon) float64 {
+// It is adapted from http://www.mathopenref.com/coordpolygonarea2.html
+// to allow arbitrary winding order. bounds is the bounds of each ring in p.
+func area(r []Point, i int, p Polygon, bounds []*Bounds) float64 {
 	if len(r) < 2 {
 		return 0
 	}
@@ -107,17 +116,31 @@ func area(r []Point, i int, p Polygon) float64 {
 	if len(p) == 1 {
 		return A // This is not a hole.
 	}
+	pWithoutRing := make(Polygon, len(p))
+	copy(pWithoutRing, p)
+	pWithoutRing = Polygon(append(pWithoutRing[:i], pWithoutRing[i+1:]...))
+	boundsWithoutRing := make([]*Bounds, len(p))
+	copy(boundsWithoutRing, bounds)
+	boundsWithoutRing = append(boundsWithoutRing[:i], boundsWithoutRing[i+1:]...)
+
 	for _, pp := range r {
-		pWithoutRing := make(Polygon, len(p))
-		copy(pWithoutRing, p)
-		pWithoutRing = Polygon(append(pWithoutRing[:i], pWithoutRing[i+1:]...))
-		if !pp.Within(pWithoutRing) {
+		if !pointInPolygon(pp, pWithoutRing, boundsWithoutRing) {
 			// This is not a hole.
 			return A
 		}
 	}
 	// This is a hole.
 	return -A
+}
+
+func (p Polygon) ringBounds() []*Bounds {
+	bounds := make([]*Bounds, len(p))
+	for i, r := range p {
+		pgBounds := NewBounds()
+		pgBounds.extendPoints(r)
+		bounds[i] = pgBounds
+	}
+	return bounds
 }
 
 // Centroid calculates the centroid of p, from
@@ -130,8 +153,9 @@ func area(r []Point, i int, p Polygon) float64 {
 // This has not been thoroughly tested.
 func (p Polygon) Centroid() Point {
 	var A, xA, yA float64
+	b := p.ringBounds()
 	for i, r := range p {
-		a := area(r, i, p)
+		a := area(r, i, p, b)
 		cx, cy := 0., 0.
 		for i := 0; i < len(r)-1; i++ {
 			cx += (r[i].X + r[i+1].X) *

@@ -9,32 +9,45 @@ import "math"
 // are considered inside.
 func pointInPolygonal(pt Point, pg Polygonal) (in bool) {
 	for _, poly := range pg.Polygons() {
-		for _, ring := range poly {
-			if len(ring) < 3 {
-				continue
+		pgBounds := poly.ringBounds()
+		tempIn := pointInPolygon(pt, poly, pgBounds)
+		if tempIn {
+			in = !in
+		}
+	}
+	return in
+}
+
+// pointInPolygon determines whether "pt" is
+// within "pg".
+// adapted from https://rosettacode.org/wiki/Ray-casting_algorithm#Go.
+// In this version of the algorithm, points that lie on the edge of the polygon
+// are considered inside.
+// pgBounds is the bounds of each ring in pg.
+func pointInPolygon(pt Point, pg Polygon, pgBounds []*Bounds) (in bool) {
+	for i, ring := range pg {
+		if len(ring) < 3 {
+			continue
+		}
+		if !pgBounds[i].Overlaps(NewBoundsPoint(pt)) {
+			continue
+		}
+		// check segment between beginning and ending points
+		if !ring[len(ring)-1].Equals(ring[0]) {
+			if pointOnSegment(pt, ring[len(ring)-1], ring[0]) {
+				return true
 			}
-			b := NewBounds()
-			b.extendPoints(ring)
-			if !b.Overlaps(NewBoundsPoint(pt)) {
-				continue
+			if rayIntersectsSegment(pt, ring[len(ring)-1], ring[0]) {
+				in = !in
 			}
-			// check segment between beginning and ending points
-			if !ring[len(ring)-1].Equals(ring[0]) {
-				if pointOnSegment(pt, ring[len(ring)-1], ring[0]) {
-					return true
-				}
-				if rayIntersectsSegment(pt, ring[len(ring)-1], ring[0]) {
-					in = !in
-				}
+		}
+		// check the rest of the segments.
+		for i := 1; i < len(ring); i++ {
+			if pointOnSegment(pt, ring[i-1], ring[i]) {
+				return true
 			}
-			// check the rest of the segments.
-			for i := 1; i < len(ring); i++ {
-				if pointOnSegment(pt, ring[i-1], ring[i]) {
-					return true
-				}
-				if rayIntersectsSegment(pt, ring[i-1], ring[i]) {
-					in = !in
-				}
+			if rayIntersectsSegment(pt, ring[i-1], ring[i]) {
+				in = !in
 			}
 		}
 	}
