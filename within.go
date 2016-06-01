@@ -7,24 +7,43 @@ import "math"
 // adapted from https://rosettacode.org/wiki/Ray-casting_algorithm#Go.
 // In this version of the algorithm, points that lie on the edge of the polygon
 // are considered inside.
-func pointInPolygonal(pt Point, pg Polygonal) (in bool) {
+func pointInPolygonal(pt Point, pg Polygonal) (in WithinStatus) {
 	for _, poly := range pg.Polygons() {
 		pgBounds := poly.ringBounds()
 		tempIn := pointInPolygon(pt, poly, pgBounds)
-		if tempIn {
-			in = !in
+		if tempIn == OnEdge {
+			return tempIn
+		} else if tempIn == Inside {
+			in = in.invert()
 		}
 	}
 	return in
 }
 
+// WithinStatus gives the status of a point relative to a polygon: whether
+// it is inside, outside, or on the edge.
+type WithinStatus int
+
+// WithinStatus gives the status of a point relative to a polygon: whether
+// it is inside, outside, or on the edge.
+const (
+	Outside WithinStatus = iota
+	Inside
+	OnEdge
+)
+
+func (w WithinStatus) invert() WithinStatus {
+	if w == Outside {
+		return Inside
+	}
+	return Outside
+}
+
 // pointInPolygon determines whether "pt" is
 // within "pg".
 // adapted from https://rosettacode.org/wiki/Ray-casting_algorithm#Go.
-// In this version of the algorithm, points that lie on the edge of the polygon
-// are considered inside.
 // pgBounds is the bounds of each ring in pg.
-func pointInPolygon(pt Point, pg Polygon, pgBounds []*Bounds) (in bool) {
+func pointInPolygon(pt Point, pg Polygon, pgBounds []*Bounds) (in WithinStatus) {
 	for i, ring := range pg {
 		if len(ring) < 3 {
 			continue
@@ -35,19 +54,19 @@ func pointInPolygon(pt Point, pg Polygon, pgBounds []*Bounds) (in bool) {
 		// check segment between beginning and ending points
 		if !ring[len(ring)-1].Equals(ring[0]) {
 			if pointOnSegment(pt, ring[len(ring)-1], ring[0]) {
-				return true
+				return OnEdge
 			}
 			if rayIntersectsSegment(pt, ring[len(ring)-1], ring[0]) {
-				in = !in
+				in = in.invert()
 			}
 		}
 		// check the rest of the segments.
 		for i := 1; i < len(ring); i++ {
 			if pointOnSegment(pt, ring[i-1], ring[i]) {
-				return true
+				return OnEdge
 			}
 			if rayIntersectsSegment(pt, ring[i-1], ring[i]) {
-				in = !in
+				in = in.invert()
 			}
 		}
 	}

@@ -12,12 +12,13 @@ func (mp MultiPoint) Bounds() *Bounds {
 	return b
 }
 
-// Within calculates whether all of the points in mp are within poly.
-func (mp MultiPoint) Within(poly Polygonal) bool {
+// Within calculates whether all of the points in mp are within poly or touching
+// its edge.
+func (mp MultiPoint) Within(poly Polygonal) WithinStatus {
 	for _, p := range mp {
-		if !pointInPolygonal(p, poly) {
-			return false
+		if pointInPolygonal(p, poly) == Outside {
+			return Outside
 		}
 	}
-	return true
+	return Inside
 }

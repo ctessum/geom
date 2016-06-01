@@ -124,13 +124,31 @@ func area(r []Point, i int, p Polygon, bounds []*Bounds) float64 {
 	boundsWithoutRing = append(boundsWithoutRing[:i], boundsWithoutRing[i+1:]...)
 
 	for _, pp := range r {
-		if !pointInPolygon(pp, pWithoutRing, boundsWithoutRing) {
-			// This is not a hole.
-			return A
+		in := pointInPolygon(pp, pWithoutRing, boundsWithoutRing)
+		if in == OnEdge {
+			continue // It is not clear whether this is a hole or not.
+		} else if in == Outside {
+			return A // This is not a hole.
+		}
+		return -A // This is a hole
+	}
+
+	// All of the points on this ring are on the edge of the polygon. In this
+	// case we check if this ring exactly matches, and therefore cancels out,
+	// any of the other rings.
+	matches := 0
+	for _, rr := range pWithoutRing {
+		if pointsSimilar(r, rr, 0) {
+			matches++
 		}
 	}
-	// This is a hole.
-	return -A
+	if matches%2 == 1 {
+		return 0 // There is an odd number of matches so the area cancels out.
+	}
+	// If we get here there is an even number of matches. If the polygon is not
+	// self-intersecting (only self-touching) that means this is a hole.
+	// The algorithm is not guaranteed to work with self-intersecting polygons.
+	return -A // This is a hole
 }
 
 func (p Polygon) ringBounds() []*Bounds {

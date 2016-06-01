@@ -69,6 +69,11 @@ func (b *Bounds) Bounds() *Bounds {
 }
 
 // Within calculates whether b is within poly.
-func (b *Bounds) Within(poly Polygonal) bool {
-	return pointInPolygonal(b.Min, poly) && pointInPolygonal(b.Max, poly)
+func (b *Bounds) Within(poly Polygonal) WithinStatus {
+	minIn := pointInPolygonal(b.Min, poly)
+	maxIn := pointInPolygonal(b.Max, poly)
+	if minIn == Outside || maxIn == Outside {
+		return Outside
+	}
+	return Inside
 }

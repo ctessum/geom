@@ -23,7 +23,7 @@ type Linear interface {
 
 	// Within determines whether this geometry is within the Polygonal geometry.
 	// Points that lie on the edge of the polygon are considered within.
-	Within(Polygonal) bool
+	Within(Polygonal) WithinStatus
 }
 
 // Polygonal is an interface for types that are polygonal in nature.
@@ -46,6 +46,5 @@ type PointLike interface {
 	//On(l Linear, tolerance float64) bool
 
 	// Within determines whether this geometry is within the Polygonal geometry.
-	// Points that lie on the edge of the polygon are considered within.
-	Within(Polygonal) bool
+	Within(Polygonal) WithinStatus
 }

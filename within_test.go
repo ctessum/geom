@@ -13,7 +13,7 @@ func TestWithin1(t *testing.T) {
 			{-2.758081092115788e+06, -2.1035219712004187e+06},
 		},
 	}
-	if !p.Within(b) {
+	if p.Within(b) != Inside {
 		t.Errorf("Point %v should be within polygon %v", p, b)
 	}
 }
@@ -39,14 +39,14 @@ func TestWithin2(t *testing.T) {
 	type poly struct {
 		name    string
 		sides   Polygon
-		results []bool
+		results []WithinStatus
 	}
 
 	var tpg = []poly{
 		poly{
 			name:    "square",
 			sides:   Polygon{[]Point{p1, p2, p3, p4, p1}},
-			results: []bool{true, true, false, true, true, true, true, true, true},
+			results: []WithinStatus{Inside, Inside, Outside, OnEdge, OnEdge, Inside, OnEdge, Inside, Inside},
 		},
 		poly{
 			name: "square hole",
@@ -54,17 +54,17 @@ func TestWithin2(t *testing.T) {
 				[]Point{p1, p2, p3, p4, p1},
 				[]Point{p5, p6, p7, p8, p5},
 			},
-			results: []bool{false, true, false, true, true, true, true, true, true},
+			results: []WithinStatus{Outside, Inside, Outside, OnEdge, OnEdge, Inside, OnEdge, Inside, Inside},
 		},
 		poly{
 			name:    "strange",
 			sides:   Polygon{[]Point{p1, p5, p4, p8, p7, p3, p2, p5}},
-			results: []bool{true, false, false, false, true, true, true, false, false},
+			results: []WithinStatus{Inside, Outside, Outside, Outside, OnEdge, Inside, OnEdge, Outside, Outside},
 		},
 		poly{
 			name:    "exagon",
 			sides:   Polygon{[]Point{p11, p12, p10, p13, p14, p9, p11}},
-			results: []bool{true, true, false, true, true, true, false, false, false},
+			results: []WithinStatus{Inside, Inside, Outside, OnEdge, OnEdge, Inside, Outside, Outside, Outside},
 		},
 	}
 
@@ -86,8 +86,8 @@ func TestWithin3(t *testing.T) {
 		Point{X: 2, Y: 2},
 		Point{X: 0, Y: 2},
 	}}
-	if !p.Within(poly) {
-		t.Errorf("%v should be within %v", p, poly)
+	if p.Within(poly) != OnEdge {
+		t.Errorf("%v should be on edge of %v", p, poly)
 	}
 }
 
@@ -99,7 +99,7 @@ func TestWithin4(t *testing.T) {
 		Point{X: 2, Y: 1},
 		Point{X: 1, Y: 2},
 	}}
-	if !p.Within(poly) {
+	if p.Within(poly) != Inside {
 		t.Errorf("%v should be within %v", p, poly)
 	}
 }
