@@ -161,8 +161,8 @@ func TestNoIntersectionJustTouches(t *testing.T) {
 
 	// rect1 and rect2 fail to overlap in just one dimension (second)
 
-	if intersect(rect1, rect2) {
-		t.Errorf("Expected intersect(%v, %v) == nil", rect1, rect2)
+	if !intersect(rect1, rect2) {
+		t.Errorf("Expected intersect(%v, %v) == true", rect1, rect2)
 	}
 }
 

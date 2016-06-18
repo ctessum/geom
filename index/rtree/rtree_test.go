@@ -697,7 +697,7 @@ func TestSearchIntersect(t *testing.T) {
 	bb := mustRect(geom.Point{2, 1.5}, geom.Point{10, 5.5})
 	q := rt.SearchIntersect(bb)
 
-	expected := []int{1, 2, 3, 4, 6, 7}
+	expected := []int{1, 2, 3, 4, 5, 6, 7}
 	if len(q) != len(expected) {
 		t.Errorf("SearchIntersect failed to find all objects")
 	}

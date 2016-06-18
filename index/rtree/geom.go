@@ -220,10 +220,10 @@ func intersect(r1, r2 *geom.Bounds) bool {
 	// Enforced by constructor: a1 <= b1 and a2 <= b2.  So we can just
 	// check the endpoints.
 
-	if r2.Max.X <= r1.Min.X || r1.Max.X <= r2.Min.X {
+	if r2.Max.X < r1.Min.X || r1.Max.X < r2.Min.X {
 		return false
 	}
-	if r2.Max.Y <= r1.Min.Y || r1.Max.Y <= r2.Min.Y {
+	if r2.Max.Y < r1.Min.Y || r1.Max.Y < r2.Min.Y {
 		return false
 	}
 	return true
