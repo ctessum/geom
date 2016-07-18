@@ -495,14 +495,23 @@ func (c *ColorMap) Legend(canvas *draw.Canvas, label string) (err error) {
 		tickx := barLeft + vg.Length(tickloc)*(barRight-barLeft)
 		if c.negativeOutlier && i == 0 ||
 			c.positiveOutlier && i == len(c.ticklocs)-1 {
-			c.Canvas.FillText(textStyle, vg.Point{tickx, unitsYover}, -0.5, 0, valStr)
+			sty := textStyle
+			sty.XAlign = -0.5
+			sty.YAlign = 0
+			c.Canvas.FillText(sty, vg.Point{tickx, unitsYover}, valStr)
 		} else if !(c.Type == Linear && (i == 0 || i == len(c.ticklocs)-1)) {
-			c.Canvas.FillText(textStyle, vg.Point{tickx, unitsYunder}, -0.5, -1, valStr)
+			sty := textStyle
+			sty.XAlign = -0.5
+			sty.YAlign = -1
+			c.Canvas.FillText(sty, vg.Point{tickx, unitsYunder}, valStr)
 		}
 		c.Canvas.StrokeLine2(ls, tickx, barBottom, tickx,
 			barBottom+tickLength)
 	}
-	c.Canvas.FillText(textStyle, vg.Point{labelX, labelY}, -0.5, -1., label)
+	sty := textStyle
+	sty.XAlign = -0.5
+	sty.YAlign = -1
+	c.Canvas.FillText(sty, vg.Point{labelX, labelY}, label)
 	return
 }
 
