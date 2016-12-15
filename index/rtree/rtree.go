@@ -443,6 +443,9 @@ func (tree *Rtree) searchIntersect(n *node, bb *geom.Bounds) []geom.Geom {
 // Implemented per "Nearest Neighbor Queries" by Roussopoulos et al
 func (tree *Rtree) NearestNeighbor(p geom.Point) geom.Geom {
 	obj, _ := tree.nearestNeighbor(p, tree.root, math.MaxFloat64, nil)
+	if obj == nil {
+		panic("rtree: nearest neighbor is nil, probably because point is outside of tree bounds")
+	}
 	return obj
 }
 
@@ -515,7 +518,6 @@ func (tree *Rtree) nearestNeighbor(p geom.Point, n *node, d float64,
 			}
 		}
 	}
-
 	return nearest, d
 }
 
