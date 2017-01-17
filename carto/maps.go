@@ -288,7 +288,7 @@ func NewMapData(numShapes int, Type ColorMapType) *MapData {
 
 func (m *MapData) WriteGoogleMapTile(w io.Writer, zoom, x, y int) error {
 	//strokeColor := color.NRGBA{0, 0, 0, 255}
-	N, S, E, W := getGoogleTileBounds(zoom, x, y)
+	N, S, E, W := GetGoogleTileBounds(zoom, x, y)
 	maptile := NewRasterMap(N, S, E, W, 256)
 
 	var markerGlyph draw.GlyphStyle
@@ -313,7 +313,7 @@ func (m *MapData) WriteGoogleMapTile(w io.Writer, zoom, x, y int) error {
 	return maptile.WriteTo(w)
 }
 
-func getGoogleTileBounds(zoom, x, y int) (N, S, E, W float64) {
+func GetGoogleTileBounds(zoom, x, y int) (N, S, E, W float64) {
 	const originShift = math.Pi * 6378137. // for mercator projection
 	// get boundaries in lat/lon
 	n := math.Pow(2, float64(zoom))
