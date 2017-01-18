@@ -1349,7 +1349,7 @@ func init() {
 
 func RandomPoly(maxWidth, maxHeight float64, vertCnt int) geom.Geom {
 	var result geom.Polygon
-	result = make([][]geom.Point, 1)
+	result = make([]geom.Path, 1)
 	result[0] = make([]geom.Point, vertCnt)
 	for i := 0; i < vertCnt-1; i++ {
 		result[0][i] = geom.Point{rand.Float64() * maxWidth,

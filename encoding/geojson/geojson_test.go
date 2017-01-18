@@ -1,9 +1,10 @@
 package geojson
 
 import (
-	"github.com/ctessum/geom"
 	"reflect"
 	"testing"
+
+	"github.com/ctessum/geom"
 )
 
 func TestGeoJSON(t *testing.T) {
@@ -16,11 +17,11 @@ func TestGeoJSON(t *testing.T) {
 			[]byte(`{"type":"Point","coordinates":[1,2]}`),
 		},
 		{
-			geom.LineString([]geom.Point{{1, 2}, {3, 4}}),
+			geom.LineString(geom.Path{{1, 2}, {3, 4}}),
 			[]byte(`{"type":"LineString","coordinates":[[1,2],[3,4]]}`),
 		},
 		{
-			geom.Polygon([][]geom.Point{{{1, 2}, {3, 4}, {5, 6}}}),
+			geom.Polygon([]geom.Path{{{1, 2}, {3, 4}, {5, 6}}}),
 			[]byte(`{"type":"Polygon","coordinates":[[[1,2],[3,4],[5,6]]]}`),
 		},
 	}

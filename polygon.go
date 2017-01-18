@@ -2,9 +2,22 @@ package geom
 
 import "github.com/ctessum/polyclip-go"
 
+// A Path is a series of connected points.
+type Path []Point
+
+// Len returns the number of Points in the receiver.
+func (p Path) Len() int {
+	return len(p)
+}
+
+// XY returns the coordinates of point i.
+func (p Path) XY(i int) (x, y float64) {
+	return p[i].X, p[i].Y
+}
+
 // A Polygon is a series of closed rings. The inner rings should be nested
 // inside of the outer ring.
-type Polygon [][]Point
+type Polygon []Path
 
 // Bounds gives the rectangular extents of the polygon.
 func (p Polygon) Bounds() *Bounds {

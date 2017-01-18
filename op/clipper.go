@@ -86,7 +86,7 @@ func (c *clipper) compute(operation Op) (geom.Geom, error) {
 			result := Clone(c.subject)
 			for _, rcont := range c.clipping {
 				cont := contour(rcont)
-				result = append(result, cont.Clone())
+				result = append(result, geom.Path(cont.Clone()))
 			}
 			return result, nil
 		}

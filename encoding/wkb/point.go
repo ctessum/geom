@@ -37,7 +37,7 @@ func writePoints(w io.Writer, byteOrder binary.ByteOrder, points []geom.Point) e
 	return binary.Write(w, byteOrder, &points)
 }
 
-func writePointss(w io.Writer, byteOrder binary.ByteOrder, pointss [][]geom.Point) error {
+func writePointss(w io.Writer, byteOrder binary.ByteOrder, pointss []geom.Path) error {
 	if err := binary.Write(w, byteOrder, uint32(len(pointss))); err != nil {
 		return err
 	}

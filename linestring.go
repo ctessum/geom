@@ -3,7 +3,7 @@ package geom
 import "math"
 
 // LineString is a number of points that make up a path or line.
-type LineString []Point
+type LineString Path
 
 // Bounds gives the rectangular extents of the LineString.
 func (l LineString) Bounds() *Bounds {

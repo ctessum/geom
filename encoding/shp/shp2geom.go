@@ -72,7 +72,7 @@ func getStartEnd(parts []int32, points []shp.Point, i int) (start, end int) {
 	return
 }
 func polygon2geom(s shp.Polygon) geom.Geom {
-	var pg geom.Polygon = make([][]geom.Point, len(s.Parts))
+	var pg geom.Polygon = make([]geom.Path, len(s.Parts))
 	for i := 0; i < len(s.Parts); i++ {
 		start, end := getStartEnd(s.Parts, s.Points, i)
 		pg[i] = make([]geom.Point, end-start)
@@ -88,7 +88,7 @@ func polygon2geom(s shp.Polygon) geom.Geom {
 	return pg
 }
 func polygonM2geom(s shp.PolygonM) geom.Geom {
-	var pg geom.Polygon = make([][]geom.Point, len(s.Parts))
+	var pg geom.Polygon = make([]geom.Path, len(s.Parts))
 	jj := 0
 	for i := 0; i < len(s.Parts); i++ {
 		start, end := getStartEnd(s.Parts, s.Points, i)
@@ -107,7 +107,7 @@ func polygonM2geom(s shp.PolygonM) geom.Geom {
 }
 
 func polygonZ2geom(s shp.PolygonZ) geom.Geom {
-	var pg geom.Polygon = make([][]geom.Point, len(s.Parts))
+	var pg geom.Polygon = make([]geom.Path, len(s.Parts))
 	jj := -1
 	for i := 0; i < len(s.Parts); i++ {
 		start, end := getStartEnd(s.Parts, s.Points, i)

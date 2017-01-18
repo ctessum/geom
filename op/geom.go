@@ -90,7 +90,7 @@ func numVertices(p geom.Polygon) int {
 // Clone returns a duplicate of a polygon.
 func Clone(p geom.Polygon) geom.Polygon {
 	var r geom.Polygon
-	r = make([][]geom.Point, len(p))
+	r = make([]geom.Path, len(p))
 	for i, rr := range p {
 		r[i] = make([]geom.Point, len(rr))
 		for j, pp := range p[i] {
@@ -177,7 +177,7 @@ func convertToPolygon(g geom.Geom) geom.Polygon {
 	case geom.Polygon:
 		out = g.(geom.Polygon)
 	case geom.MultiPolygon:
-		out = make([][]geom.Point, 0)
+		out = make([]geom.Path, 0)
 		for _, p := range g.(geom.MultiPolygon) {
 			for _, r := range p {
 				out = append(out, r)
@@ -185,14 +185,14 @@ func convertToPolygon(g geom.Geom) geom.Polygon {
 		}
 	case geom.LineString:
 		g2 := g.(geom.LineString)
-		out = make([][]geom.Point, 1)
+		out = make([]geom.Path, 1)
 		out[0] = make([]geom.Point, len(g2))
 		for j, p := range g2 {
 			out[0][j] = p
 		}
 	case geom.MultiLineString:
 		g2 := g.(geom.MultiLineString)
-		out = make([][]geom.Point, len(g2))
+		out = make([]geom.Path, len(g2))
 		for i, ls := range g2 {
 			out[i] = make([]geom.Point, len(ls))
 			for j, p := range ls {

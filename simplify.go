@@ -17,7 +17,7 @@ type Simplifier interface {
 // J. L. G. Pallero, Robust line simplification on the plane.
 // Comput. Geosci. 61, 152–159 (2013).
 func (p Polygon) Simplify(tolerance float64) Geom {
-	var out Polygon = make([][]Point, len(p))
+	var out Polygon = make([]Path, len(p))
 	for i, r := range p {
 		out[i] = simplifyCurve(r, p, tolerance)
 	}
@@ -50,7 +50,7 @@ func (mp MultiPolygon) Simplify(tolerance float64) Geom {
 // J. L. G. Pallero, Robust line simplification on the plane.
 // Comput. Geosci. 61, 152–159 (2013).
 func (l LineString) Simplify(tolerance float64) Geom {
-	return LineString(simplifyCurve(l, [][]Point{}, tolerance))
+	return LineString(simplifyCurve(Path(l), []Path{}, tolerance))
 }
 
 // Simplify simplifies ml
@@ -69,8 +69,8 @@ func (ml MultiLineString) Simplify(tolerance float64) Geom {
 	return out
 }
 
-func simplifyCurve(curve []Point,
-	otherCurves [][]Point, tol float64) []Point {
+func simplifyCurve(curve Path,
+	otherCurves []Path, tol float64) []Point {
 	out := make([]Point, 0, len(curve))
 
 	if len(curve) == 0 {
@@ -91,8 +91,8 @@ func simplifyCurve(curve []Point,
 						// Make sure this simplification doesn't cause any self
 						// intersections.
 						if j > i+2 &&
-							(segMakesNotSimple(curve[i], curve[j-1], [][]Point{out[0:i]}) ||
-								segMakesNotSimple(curve[i], curve[j-1], [][]Point{curve[j:]}) ||
+							(segMakesNotSimple(curve[i], curve[j-1], []Path{out[0:i]}) ||
+								segMakesNotSimple(curve[i], curve[j-1], []Path{curve[j:]}) ||
 								segMakesNotSimple(curve[i], curve[j-1], otherCurves)) {
 							j--
 						} else {
@@ -120,7 +120,7 @@ func simplifyCurve(curve []Point,
 	return out
 }
 
-func segMakesNotSimple(segStart, segEnd Point, paths [][]Point) bool {
+func segMakesNotSimple(segStart, segEnd Point, paths []Path) bool {
 	seg1 := segment{segStart, segEnd}
 	for _, p := range paths {
 		for i := 0; i < len(p)-1; i++ {

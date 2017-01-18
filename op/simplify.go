@@ -44,7 +44,7 @@ func simplify(g geom.Geom, tolerance float64) (geom.Geom, error) {
 		return g, nil
 	case geom.Polygon:
 		p := g.(geom.Polygon)
-		var out geom.Polygon = make([][]geom.Point, len(p))
+		var out geom.Polygon = make([]geom.Path, len(p))
 		for i, r := range p {
 			out[i] = simplifyCurve(r, p, tolerance)
 		}
@@ -64,7 +64,7 @@ func simplify(g geom.Geom, tolerance float64) (geom.Geom, error) {
 		return out, nil
 	case geom.LineString:
 		l := g.(geom.LineString)
-		out := geom.LineString(simplifyCurve(l, [][]geom.Point{}, tolerance))
+		out := geom.LineString(simplifyCurve(l, []geom.Path{}, tolerance))
 		return out, nil
 	case geom.MultiLineString:
 		ml := g.(geom.MultiLineString)
@@ -85,7 +85,7 @@ func simplify(g geom.Geom, tolerance float64) (geom.Geom, error) {
 }
 
 func simplifyCurve(curve []geom.Point,
-	otherCurves [][]geom.Point, tol float64) []geom.Point {
+	otherCurves []geom.Path, tol float64) []geom.Point {
 	out := make([]geom.Point, 0, len(curve))
 
 	i := 0
@@ -102,9 +102,9 @@ func simplifyCurve(curve []geom.Point,
 						// Make sure this simplifcation doesn't cause any self
 						// intersections.
 						if segMakesNotSimple(curve[i], curve[j-1],
-							[][]geom.Point{out[0 : len(out)-1]}) ||
+							[]geom.Path{out[0 : len(out)-1]}) ||
 							segMakesNotSimple(curve[i], curve[j-1],
-								[][]geom.Point{curve[j:]}) ||
+								[]geom.Path{curve[j:]}) ||
 							segMakesNotSimple(curve[i], curve[j-1],
 								otherCurves) {
 							j--
@@ -132,7 +132,7 @@ func simplifyCurve(curve []geom.Point,
 	return out
 }
 
-func segMakesNotSimple(segStart, segEnd geom.Point, paths [][]geom.Point) bool {
+func segMakesNotSimple(segStart, segEnd geom.Point, paths []geom.Path) bool {
 	seg1 := segment{segStart, segEnd}
 	for _, p := range paths {
 		for i := 0; i < len(p)-1; i++ {

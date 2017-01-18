@@ -24,8 +24,9 @@
 package op
 
 import (
-	"github.com/ctessum/geom"
 	"math"
+
+	"github.com/ctessum/geom"
 )
 
 type outputType int
@@ -120,7 +121,7 @@ func (c *connector) toShape() geom.Geom {
 	switch c.outType {
 	case outputPolygons:
 		var poly geom.Polygon
-		poly = make([][]geom.Point, len(c.closedPolys))
+		poly = make([]geom.Path, len(c.closedPolys))
 		for i, chain := range c.closedPolys {
 			poly[i] = make([]geom.Point, len(chain.points)+1)
 			for j, p := range chain.points {

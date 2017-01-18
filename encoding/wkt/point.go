@@ -22,7 +22,7 @@ func appendPointsCoords(dst []byte, points []geom.Point) []byte {
 	return dst
 }
 
-func appendPointssCoords(dst []byte, pointss [][]geom.Point) []byte {
+func appendPointssCoords(dst []byte, pointss []geom.Path) []byte {
 	for i, points := range pointss {
 		if i != 0 {
 			dst = append(dst, ',')

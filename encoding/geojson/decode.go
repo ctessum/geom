@@ -2,6 +2,7 @@ package geojson
 
 import (
 	"encoding/json"
+
 	"github.com/ctessum/geom"
 )
 
@@ -44,8 +45,8 @@ func decodeCoordinates3(jsonCoordinates interface{}) [][][]float64 {
 	return coordinates
 }
 
-func makeLinearRing(coordinates [][]float64) []geom.Point {
-	points := make([]geom.Point, len(coordinates))
+func makeLinearRing(coordinates [][]float64) geom.Path {
+	points := make(geom.Path, len(coordinates))
 	for i, element := range coordinates {
 		if len(element) == 2 {
 			points[i].X = element[0]
@@ -57,8 +58,8 @@ func makeLinearRing(coordinates [][]float64) []geom.Point {
 	return points
 }
 
-func makeLinearRings(coordinates [][][]float64) [][]geom.Point {
-	pointss := make([][]geom.Point, len(coordinates))
+func makeLinearRings(coordinates [][][]float64) []geom.Path {
+	pointss := make([]geom.Path, len(coordinates))
 	for i, element := range coordinates {
 		pointss[i] = makeLinearRing(element)
 	}

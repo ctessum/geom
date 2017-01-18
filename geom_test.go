@@ -20,7 +20,7 @@ func TestBounds(t *testing.T) {
 			&Bounds{Point{1, 2}, Point{3, 4}},
 		},
 		{
-			Polygon([][]Point{{{1, 2}, {3, 4}, {5, 6}}}),
+			Polygon([]Path{{{1, 2}, {3, 4}, {5, 6}}}),
 			&Bounds{Point{1, 2}, Point{5, 6}},
 		},
 		{

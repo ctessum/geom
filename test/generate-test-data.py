@@ -52,7 +52,7 @@ class RandomPolygon(shapely.geometry.Polygon):
 
     def goify(self):
         rings = [self.exterior.coords] + [i.coords for i in self.interiors]
-        return 'geom.Polygon{[][]geom.Point{' + ', '.join('{' + ', '.join('{%f, %f}' % c for c in ring) + '}' for ring in rings) + '}}'
+        return 'geom.Polygon{[]geom.Path{' + ', '.join('{' + ', '.join('{%f, %f}' % c for c in ring) + '}' for ring in rings) + '}}'
 
 
 class RandomMultiPoint(shapely.geometry.MultiPoint):

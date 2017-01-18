@@ -20,7 +20,7 @@ func TestWKT(t *testing.T) {
 			[]byte(`LINESTRING(1 2,3 4)`),
 		},
 		{
-			geom.Polygon([][]geom.Point{{{1, 2}, {3, 4}, {5, 6}, {1, 2}}}),
+			geom.Polygon([]geom.Path{{{1, 2}, {3, 4}, {5, 6}, {1, 2}}}),
 			[]byte(`POLYGON((1 2,3 4,5 6,1 2))`),
 		},
 	}

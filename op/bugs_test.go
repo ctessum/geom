@@ -50,7 +50,7 @@ func normalize(poly geom.Polygon) geom.Polygon {
 	sort.Sort(sorter(poly))
 
 	var poly2 geom.Polygon
-	poly2 = make([][]geom.Point, len(poly))
+	poly2 = make([]geom.Path, len(poly))
 	for i, r := range poly {
 		poly2[i] = make([]geom.Point, 0, len(r))
 		for j, p := range r {

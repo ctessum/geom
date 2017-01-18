@@ -2,8 +2,9 @@ package geojson
 
 import (
 	"encoding/json"
-	"github.com/ctessum/geom"
 	"reflect"
+
+	"github.com/ctessum/geom"
 )
 
 func pointCoordinates(point geom.Point) []float64 {
@@ -18,7 +19,7 @@ func pointsCoordinates(points []geom.Point) [][]float64 {
 	return coordinates
 }
 
-func pointssCoordinates(pointss [][]geom.Point) [][][]float64 {
+func pointssCoordinates(pointss []geom.Path) [][][]float64 {
 	coordinates := make([][][]float64, len(pointss))
 	for i, points := range pointss {
 		coordinates[i] = pointsCoordinates(points)

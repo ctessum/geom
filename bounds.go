@@ -52,7 +52,7 @@ func (b *Bounds) extendPoints(points []Point) {
 	}
 }
 
-func (b *Bounds) extendPointss(pointss [][]Point) {
+func (b *Bounds) extendPointss(pointss []Path) {
 	for _, points := range pointss {
 		b.extendPoints(points)
 	}
