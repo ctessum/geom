@@ -2,9 +2,10 @@ package carto
 
 import (
 	"encoding/json"
+	"io"
+
 	"github.com/ctessum/geom"
 	"github.com/ctessum/geom/encoding/geojson"
-	"io"
 )
 
 type GeoJSONfeature struct {
@@ -13,9 +14,9 @@ type GeoJSONfeature struct {
 	Properties map[string]float64 `json:"properties"`
 }
 type GeoJSON struct {
-	Type     string `json:"type"`
-	CRS      Crs    `json:"crs"`
-	Features []*GeoJSONfeature
+	Type     string            `json:"type"`
+	CRS      Crs               `json:"crs"`
+	Features []*GeoJSONfeature `json:"features"`
 }
 
 // Coordinate reference system. Used for GeoJSON
