@@ -1,8 +1,11 @@
 package martinez
 
-// compareEvents compares two SweepEvents, returning
+import "github.com/Workiva/go-datastructures/queue"
+
+// Compare compares two SweepEvents, returning
 // 1 if e1 > e2 and -1 if e2 > e1.
-func compareEvents(e1, e2 SweepEvent) int {
+func (e1 *SweepEvent) Compare(e2I queue.Item) int {
+	e2 := e2I.(*SweepEvent)
 	var p1 = e1.point
 	var p2 = e2.point
 
@@ -26,7 +29,7 @@ func compareEvents(e1, e2 SweepEvent) int {
 	return specialCases(e1, e2, p1, p2)
 }
 
-func specialCases(e1, e2 SweepEvent, p1, p2 Point) int {
+func specialCases(e1, e2 *SweepEvent, p1, p2 Point) int {
 	// Same coordinates, but one is a left endpoint and the other is
 	// a right endpoint. The right endpoint is processed first
 	if e1.left != e2.left {

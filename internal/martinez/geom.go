@@ -68,7 +68,7 @@ func (b *bounds) Extend(p Point) {
 	b.max.y = math.Max(b.max.y, p.Y())
 }
 
-// A path represents a connected chain of points.
+// A Path represents a connected chain of points.
 type Path interface {
 	Len() int
 	At(int) Point
@@ -80,7 +80,7 @@ func (p path) Len() int       { return len(p) }
 func (p path) At(i int) Point { return p[i] }
 
 // NewPath creates a new Path from the specified points.
-func NewPath(points ...Point) { return path(points) }
+func NewPath(points ...Point) Path { return path(points) }
 
 // A MultiPath represents a set of related paths.
 type MultiPath interface {
@@ -107,4 +107,4 @@ func NewPolygon(paths ...Path) Polygon {
 type LineString Path
 
 // NewLineString creates a new LineString from the specified Points.
-func NewLineString(points ...Point) { return path(points) }
+func NewLineString(points ...Point) LineString { return path(points) }

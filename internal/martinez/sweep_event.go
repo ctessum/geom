@@ -1,18 +1,22 @@
 package martinez
 
+import "github.com/glycerine/rbtree"
+
 // SweepEvent is a sweep line event wraps around a vertex point.
 type SweepEvent struct {
 	left         bool //Is left endpoint?
 	point        Point
 	otherEvent   *SweepEvent // other edge reference
 	isSubject    bool        // Belongs to source or clipping polygon
-	edgetype     edgeType    // Edge contribution type (default is normal).
+	edgeType     edgeType    // Edge contribution type (default is normal).
 	inOut        bool        // In-out transition for the sweepline crossing polygon
 	otherInOut   bool
 	prevInResult *SweepEvent // Previous event in result?
 	inResult     bool        // Does event belong to result?
 	resultInOut  bool
 	contourId    int
+	iterator     rbtree.Iterator
+	pos          int
 }
 
 // NewSweepEvent creates a new sweepline event for point p.
@@ -22,7 +26,7 @@ func NewSweepEvent(point Point, left bool, otherEvent *SweepEvent, isSubject boo
 		point:      point,
 		otherEvent: otherEvent, // other edge reference
 		isSubject:  isSubject,  // Belongs to source or clipping polygon
-		edgetype:   edgeType,   // Edge contribution type (default is normal).
+		edgeType:   edgeType,   // Edge contribution type (default is normal).
 		inOut:      false,      // In-out transition for the sweepline crossing polygon
 		otherInOut: false,
 	}

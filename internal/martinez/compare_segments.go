@@ -1,8 +1,11 @@
 package martinez
 
+import "github.com/glycerine/rbtree"
+
 // compareSegments compares two segments and returns 1 if le1 > le2,
 // -1 if le2 > le1, and 0 if le1 == le2
-func compareSegments(le1, le2 SweepEvent) int {
+func compareSegments(le1I, le2I rbtree.Item) int {
+	le1, le2 := le1I.(*SweepEvent), le2I.(*SweepEvent)
 	if le1 == le2 {
 		return 0
 	}
@@ -29,7 +32,7 @@ func compareSegments(le1, le2 SweepEvent) int {
 
 		// has the line segment associated to e1 been inserted
 		// into S after the line segment associated to e2 ?
-		if compareEvents(le1, le2) == 1 {
+		if le1.Compare(le2) == 1 {
 			if le2.isAbove(le1.point) {
 				return -1
 			}
@@ -48,12 +51,11 @@ func compareSegments(le1, le2 SweepEvent) int {
 		if equals(le1.point, le2.point) {
 			if equals(le1.otherEvent.point, le2.otherEvent.point) {
 				return 0
-			} else {
-				if le1.contourId > le2.contourId {
-					return 1
-				}
-				return -1
 			}
+			if le1.contourId > le2.contourId {
+				return 1
+			}
+			return -1
 		}
 	} else { // Segments are collinear, but belong to separate polygons
 		if le1.isSubject {
@@ -62,7 +64,7 @@ func compareSegments(le1, le2 SweepEvent) int {
 		return 1
 	}
 
-	if compareEvents(le1, le2) == 1 {
+	if le1.Compare(le2) == 1 {
 		return 1
 	}
 	return -1
