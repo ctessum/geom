@@ -52,7 +52,7 @@ func compareSegments(le1I, le2I rbtree.Item) int {
 			if equals(le1.otherEvent.point, le2.otherEvent.point) {
 				return 0
 			}
-			if le1.contourId > le2.contourId {
+			if le1.contourID > le2.contourID {
 				return 1
 			}
 			return -1

@@ -12,14 +12,11 @@ type operation int
 
 // These are the available operations.
 const (
-	INTERSECTION operation = iota
-	UNION
-	DIFFERENCE
-	XOR
+	intersection operation = iota
+	union
+	difference
+	xor
 )
-
-//var Queue           = require('tinyqueue');
-//var Tree            = require('bintrees').RBTree;
 
 /**
  * @param  {<Array.<Number>} s1
@@ -32,11 +29,11 @@ func processSegment(s1, s2 Point, isSubject bool, depth int, eventQueue *queue.P
 	// Possible degenerate condition.
 	// if (equals(s1, s2)) return;
 
-	var e1 = NewSweepEvent(s1, false, nil, isSubject, NORMAL)
-	var e2 = NewSweepEvent(s2, false, e1, isSubject, NORMAL)
+	var e1 = NewSweepEvent(s1, false, nil, isSubject, normal)
+	var e2 = NewSweepEvent(s2, false, e1, isSubject, normal)
 	e1.otherEvent = e2
 
-	e1.contourId, e2.contourId = depth, depth
+	e1.contourID, e2.contourID = depth, depth
 
 	if e1.Compare(e2) > 0 {
 		e2.left = true
@@ -103,23 +100,23 @@ func computeFields(event, prev *SweepEvent, sweepLine *rbtree.Tree, op operation
 
 func inResult(event *SweepEvent, op operation) bool {
 	switch event.edgeType {
-	case NORMAL:
+	case normal:
 		switch op {
-		case INTERSECTION:
+		case intersection:
 			return !event.otherInOut
-		case UNION:
+		case union:
 			return event.otherInOut
-		case DIFFERENCE:
+		case difference:
 			return (event.isSubject && event.otherInOut) ||
 				(!event.isSubject && !event.otherInOut)
-		case XOR:
+		case xor:
 			return true
 		}
-	case SAME_TRANSITION:
-		return op == INTERSECTION || op == UNION
-	case DIFFERENT_TRANSITION:
-		return op == DIFFERENCE
-	case NON_CONTRIBUTING:
+	case sameTransition:
+		return op == intersection || op == union
+	case differentTransition:
+		return op == difference
+	case nonContributing:
 		return false
 	}
 	return false
@@ -151,7 +148,7 @@ func possibleIntersection(se1, se2 *SweepEvent, queue *queue.PriorityQueue) int 
 	}
 
 	if nintersections == 2 && se1.isSubject == se2.isSubject {
-		if se1.contourId == se2.contourId {
+		if se1.contourID == se2.contourID {
 			panic(fmt.Errorf("Edges of the same polygon overlap, %+v, %+v, %+v, %+v",
 				se1.point, se1.otherEvent.point, se2.point, se2.otherEvent.point))
 		}
@@ -196,11 +193,11 @@ func possibleIntersection(se1, se2 *SweepEvent, queue *queue.PriorityQueue) int 
 
 	if (leftCoincide && rightCoincide) || leftCoincide {
 		// both line segments are equal or share the left endpoint
-		se1.edgeType = NON_CONTRIBUTING
+		se1.edgeType = nonContributing
 		if se1.inOut == se2.inOut {
-			se2.edgeType = SAME_TRANSITION
+			se2.edgeType = sameTransition
 		}
-		se2.edgeType = DIFFERENT_TRANSITION
+		se2.edgeType = differentTransition
 
 		if leftCoincide && !rightCoincide {
 			// honestly no idea, but changing events selection from [2, 1]
@@ -237,14 +234,14 @@ func possibleIntersection(se1, se2 *SweepEvent, queue *queue.PriorityQueue) int 
  * @return {Queue}
  */
 func divideSegment(se *SweepEvent, p Point, queue *queue.PriorityQueue) *queue.PriorityQueue {
-	var r = NewSweepEvent(p, false, se, se.isSubject, NORMAL)
-	var l = NewSweepEvent(p, true, se.otherEvent, se.isSubject, NORMAL)
+	var r = NewSweepEvent(p, false, se, se.isSubject, normal)
+	var l = NewSweepEvent(p, true, se.otherEvent, se.isSubject, normal)
 
 	if equals(se.point, se.otherEvent.point) {
 		panic(fmt.Errorf("what is that? %+v", se))
 	}
 
-	r.contourId, l.contourId = se.contourId, se.contourId
+	r.contourID, l.contourID = se.contourID, se.contourID
 
 	// avoid a rounding error. The left event would be processed after the right event
 	if l.Compare(se.otherEvent) > 0 {
@@ -281,8 +278,8 @@ func subdivideSegments(eventQueue *queue.PriorityQueue, subject, clipping Polygo
 		sortedEvents = append(sortedEvents, event)
 
 		// optimization by bboxes for intersection and difference goes here
-		if (op == INTERSECTION && event.point.X() > rightbound) ||
-			(op == DIFFERENCE && event.point.X() > sbbox.Max().X()) {
+		if (op == intersection && event.point.X() > rightbound) ||
+			(op == difference && event.point.X() > sbbox.Max().X()) {
 			break
 		}
 
@@ -449,22 +446,22 @@ func connectEdges(sortedEvents []*SweepEvent) multiPath {
 		var contour path
 		result = append(result, contour)
 
-		var ringId = len(result) - 1
+		var ringID = len(result) - 1
 		depth = append(depth, 0)
 		holeOf = append(holeOf, -1)
 
 		if resultEvents[i].prevInResult != nil {
-			var lowerContourId = resultEvents[i].prevInResult.contourId
+			var lowerContourID = resultEvents[i].prevInResult.contourID
 			if !resultEvents[i].prevInResult.resultInOut {
 				//      addHole(result[lowerContourId], ringId);
-				holeOf[ringId] = lowerContourId
-				depth[ringId] = depth[lowerContourId] + 1
-				isHole[ringId] = true
-			} else if isHole[lowerContourId] {
+				holeOf[ringID] = lowerContourID
+				depth[ringID] = depth[lowerContourID] + 1
+				isHole[ringID] = true
+			} else if isHole[lowerContourID] {
 				//    addHole(result[holeOf[lowerContourId]], ringId);
-				holeOf[ringId] = holeOf[lowerContourId]
-				depth[ringId] = depth[lowerContourId]
-				isHole[ringId] = true
+				holeOf[ringID] = holeOf[lowerContourID]
+				depth[ringID] = depth[lowerContourID]
+				isHole[ringID] = true
 			}
 		}
 
@@ -477,10 +474,10 @@ func connectEdges(sortedEvents []*SweepEvent) multiPath {
 
 			if resultEvents[pos].left {
 				resultEvents[pos].resultInOut = false
-				resultEvents[pos].contourId = ringId
+				resultEvents[pos].contourID = ringID
 			} else {
 				resultEvents[pos].otherEvent.resultInOut = true
-				resultEvents[pos].otherEvent.contourId = ringId
+				resultEvents[pos].otherEvent.contourID = ringID
 			}
 
 			pos = resultEvents[pos].pos
@@ -497,11 +494,11 @@ func connectEdges(sortedEvents []*SweepEvent) multiPath {
 		processed[pos] = true
 		processed[resultEvents[pos].pos] = true
 		resultEvents[pos].otherEvent.resultInOut = true
-		resultEvents[pos].otherEvent.contourId = ringId
+		resultEvents[pos].otherEvent.contourID = ringID
 
 		// depth is even
 		/* eslint-disable no-bitwise */
-		if depth[ringId]%2 == 0 {
+		if depth[ringID]%2 == 0 {
 			changeOrientation(contour)
 		}
 		/* eslint-enable no-bitwise */
@@ -540,11 +537,11 @@ func trivialOperation(subject, clipping Polygon, op operation) Polygon {
 	if subject.Len()*clipping.Len() != 0 {
 		return nil
 	}
-	if op == INTERSECTION {
+	if op == intersection {
 		return nil
-	} else if op == DIFFERENCE {
+	} else if op == difference {
 		return subject
-	} else if op == UNION || op == XOR {
+	} else if op == union || op == xor {
 		if subject.Len() == 0 {
 			return clipping
 		}
@@ -561,13 +558,13 @@ func compareBBoxes(subject, clipping Polygon, sbbox, cbbox Bounds, op operation)
 		cbbox.Min().X() > sbbox.Max().X() ||
 		sbbox.Min().Y() > cbbox.Max().Y() ||
 		cbbox.Min().Y() > sbbox.Max().Y() {
-		if op == INTERSECTION {
+		if op == intersection {
 			// The result here is nil if there is no overlap.
 			return nil
-		} else if op == DIFFERENCE {
+		} else if op == difference {
 			// The result here is the subject if there is no overlap.
 			return subject
-		} else if op == UNION || op == XOR {
+		} else if op == union || op == xor {
 			// The result here is the combination of the subject and
 			// clipping polygons if there is no overlap.
 			result := make(multiPath, subject.Len()+clipping.Len())

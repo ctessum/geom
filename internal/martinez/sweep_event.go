@@ -14,7 +14,7 @@ type SweepEvent struct {
 	prevInResult *SweepEvent // Previous event in result?
 	inResult     bool        // Does event belong to result?
 	resultInOut  bool
-	contourId    int
+	contourID    int
 	iterator     rbtree.Iterator
 	pos          int
 }

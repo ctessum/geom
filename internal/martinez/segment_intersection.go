@@ -2,7 +2,7 @@ package martinez
 
 import "math"
 
-const EPSILON = 1e-9
+const epsilon = 1e-9
 
 // krossProduct Finds the magnitude of the cross product of two vectors (if we pretend
 // they're in three dimensions).
@@ -64,7 +64,7 @@ func segmentIntersection(a1, a2, b1, b2 Point, noEndpointTouch bool) (i1, i2 Poi
 	// cross product is the 0 vector. The full calculation involves relative error
 	// to account for possible very small line segments. See Schneider & Eberly
 	// for details.
-	if sqrKross > EPSILON*sqrLenA*sqrLenB {
+	if sqrKross > epsilon*sqrLenA*sqrLenB {
 		// If they're not parallel, then (because these are line segments) they
 		// still might not actually intersect. This code checks that the
 		// intersection point of the lines is actually on both line segments.
@@ -94,7 +94,7 @@ func segmentIntersection(a1, a2, b1, b2 Point, noEndpointTouch bool) (i1, i2 Poi
 	kross = krossProduct(e, va)
 	sqrKross = kross * kross
 
-	if sqrKross > EPSILON*sqrLenA*sqrLenE {
+	if sqrKross > epsilon*sqrLenA*sqrLenE {
 		// Lines are just parallel, not the same. No overlap.
 		return point{}, point{}, 0
 	}
