@@ -42,12 +42,14 @@ func specialCases(e1, e2 *SweepEvent, p1, p2 Point) int {
 	// Same coordinates, both events
 	// are left endpoints or right endpoints.
 	// not collinear
-	if signedArea(p1, e1.otherEvent.point, e2.otherEvent.point) != 0 {
-		// the event associate to the bottom segment is processed first
-		if !e1.isBelow(e2.otherEvent.point) {
-			return 1
+	if e1.otherEvent != nil && e2.otherEvent != nil {
+		if signedArea(p1, e1.otherEvent.point, e2.otherEvent.point) != 0 {
+			// the event associate to the bottom segment is processed first
+			if !e1.isBelow(e2.otherEvent.point) {
+				return 1
+			}
+			return -1
 		}
-		return -1
 	}
 
 	// uncomment this if you want to play with multipolygons
@@ -65,5 +67,5 @@ func specialCases(e1, e2 *SweepEvent, p1, p2 Point) int {
 		}
 		return -1
 	}
-	panic("martinez: multiple identical edges in same object")
+	return 0
 }
