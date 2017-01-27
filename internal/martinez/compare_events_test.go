@@ -80,7 +80,7 @@ func TestQueue(t *testing.T) {
 	})
 }
 
-func TestSweepEvent(t *testing.T) {
+func TestSweepEvent_Compare(t *testing.T) {
 	t.Run("sweep event comparison x coordinates", func(t *testing.T) {
 		var e1 = &SweepEvent{point: point{x: 0.0, y: 0.0}}
 		var e2 = &SweepEvent{point: point{x: 0.5, y: 0.5}}
