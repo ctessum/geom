@@ -61,6 +61,11 @@ func Example() {
 		}
 		fmt.Printf("polygon area %.3g, value %g\n", rec.Polygon.Area(), rec.Val)
 	}
+	// Check to see if any errors occured during decoding.
+	if err = d.Error(); err != nil {
+		panic(err)
+	}
+	d.Close()
 	// Output:
 	// polygon area 2.3, value 6
 	// polygon area 2.17, value 1
