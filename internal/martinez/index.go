@@ -67,14 +67,20 @@ func fillQueue(subject, clipping Polygon, sbbox, cbbox Bounds) *queue.PriorityQu
 	return eventQueue
 }
 
-func computeFields(event, prev *SweepEvent, sweepLine *rbtree.Tree, op operation) {
+// computeFieldsFirst computes the fields for the first event in the queue.
+func computeFieldsFirst(event *SweepEvent, op operation) {
 	// compute inOut and otherInOut fields
-	if prev == nil {
-		event.inOut = false
-		event.otherInOut = true
+	event.inOut = false
+	event.otherInOut = true
 
-		// previous line segment in sweepline belongs to the same polygon
-	} else if event.isSubject == prev.isSubject {
+	// check if the line segment belongs to the Boolean operation
+	event.inResult = inResult(event, op)
+}
+
+func computeFields(event, prev *SweepEvent, op operation) {
+	// compute inOut and otherInOut fields
+	// previous line segment in sweepline belongs to the same polygon
+	if event.isSubject == prev.isSubject {
 		event.inOut = !prev.inOut
 		event.otherInOut = prev.otherInOut
 
@@ -88,11 +94,10 @@ func computeFields(event, prev *SweepEvent, sweepLine *rbtree.Tree, op operation
 	}
 
 	// compute prevInResult field
-	if prev != nil {
-		if !inResult(prev, op) || prev.isVertical() {
-			event.prevInResult = prev.prevInResult
-		}
-		event.prevInResult = prev // TODO: not sure what this means.
+	if !inResult(prev, op) || prev.isVertical() {
+		event.prevInResult = prev.prevInResult
+	} else {
+		event.prevInResult = prev
 	}
 	// check if the line segment belongs to the Boolean operation
 	event.inResult = inResult(event, op)
@@ -134,7 +139,7 @@ func possibleIntersection(se1, se2 *SweepEvent, queue *queue.PriorityQueue) int 
 	// out of respect
 	// if (se1.isSubject === se2.isSubject) return;
 
-	p1, _, nintersections := segmentIntersection(se1.point, se1.otherEvent.point, se2.point, se2.otherEvent.point, false) // TODO: I think this should be false but not sure.
+	p1, _, nintersections := segmentIntersection(se1.point, se1.otherEvent.point, se2.point, se2.otherEvent.point, false)
 
 	if nintersections == 0 {
 		return 0
@@ -261,21 +266,24 @@ func divideSegment(se *SweepEvent, p Point, queue *queue.PriorityQueue) *queue.P
 	return queue
 }
 
-func subdivideSegments(eventQueue *queue.PriorityQueue, subject, clipping Polygon, sbbox, cbbox Bounds, op operation) []*SweepEvent {
+// subdivideSegments subdivides all the segments in the subject and clipping
+// objects and returns a sorted list of non-crossing segements.
+func subdivideSegments(eventQueue *queue.PriorityQueue, sbbox, cbbox Bounds, op operation) []*SweepEvent {
 	sweepLine := rbtree.NewTree(compareSegments)
 	var sortedEvents []*SweepEvent
 
 	var rightbound = math.Min(sbbox.Max().X(), cbbox.Max().X())
 
-	var prev, next rbtree.Iterator
+	var iter, prev, next rbtree.Iterator
 
-	for eventQueue.Len() > 0 {
-		var eventI, err = eventQueue.Get(1)
+	for eventQueue.Len() > 0 { // Keep going as long there are still more segments.
+		var eventI, err = eventQueue.Get(1) // Get the next event.
 		if err != nil {
 			panic(err)
 		}
 		event := eventI[0].(*SweepEvent)
 		sortedEvents = append(sortedEvents, event)
+		fmt.Println(sortedEvents)
 
 		// optimization by bboxes for intersection and difference goes here
 		if (op == intersection && event.point.X() > rightbound) ||
@@ -287,69 +295,56 @@ func subdivideSegments(eventQueue *queue.PriorityQueue, subject, clipping Polygo
 			sweepLine.Insert(event)
 			// _renderSweepLine(sweepLine, event.point, event);
 
-			next = sweepLine.FindGE(event)
-			prev = sweepLine.FindLE(event)
-			event.iterator = sweepLine.FindGE(event)
-
-			// Cannot get out of the tree what we just put there
-			/*if prev == nil || next == nil {
-				fmt.Println("brute")
-				var iterators = findIterBrute(sweepLine)
-				prev = iterators[0]
-				next = iterators[1]
-			}*/
-
-			if !prev.Min() {
-				prev = prev.Prev()
+			iter = sweepLine.FindGE(event)
+			next = iter.Next()
+			prev = iter.Prev()
+			if prev.NegativeLimit() {
+				computeFieldsFirst(event, op)
 			} else {
-				prev = sweepLine.Min().Next()
+				computeFields(event, prev.Item().(*SweepEvent), op)
 			}
-			next = next.Next()
 
-			computeFields(event, prev.Item().(*SweepEvent), sweepLine, op)
-
-			if next.Item() != nil {
+			if !next.Limit() {
 				if possibleIntersection(event, next.Item().(*SweepEvent), eventQueue) == 2 {
-					computeFields(event, prev.Item().(*SweepEvent), sweepLine, op)
-					computeFields(event, next.Item().(*SweepEvent), sweepLine, op)
+					if !prev.NegativeLimit() {
+						computeFields(event, prev.Item().(*SweepEvent), op)
+					} else {
+						computeFieldsFirst(event, op)
+					}
+					computeFields(event, next.Item().(*SweepEvent), op)
 				}
 			}
 
-			if prev.Item() != nil {
+			if !prev.NegativeLimit() {
 				if possibleIntersection(prev.Item().(*SweepEvent), event, eventQueue) == 2 {
-					var prevprev = sweepLine.FindLE(prev)
-					if !prevprev.Min() {
-						prevprev = prevprev.Prev()
+					prevprev := prev.Prev()
+					if !prevprev.NegativeLimit() {
+						computeFields(prev.Item().(*SweepEvent), prevprev.Item().(*SweepEvent), op)
 					} else {
-						prevprev = sweepLine.Max()
-						prevprev = prevprev.Next()
+						computeFieldsFirst(prev.Item().(*SweepEvent), op)
 					}
-					computeFields(prev.Item().(*SweepEvent), prevprev.Item().(*SweepEvent), sweepLine, op)
-					computeFields(event, prev.Item().(*SweepEvent), sweepLine, op)
+					computeFields(event, prev.Item().(*SweepEvent), op)
 				}
 			}
 		} else {
 			event = event.otherEvent
-			next = sweepLine.FindGE(event)
-			prev = sweepLine.FindLE(event)
+			iter = sweepLine.FindGE(event)
+			next = iter.Next()
+			prev = iter.Prev()
 
 			// _renderSweepLine(sweepLine, event.otherEvent.point, event);
 
-			if prev.Limit() || next.Limit() {
+			if prev.NegativeLimit() || next.Limit() {
 				continue
 			}
 
-			if !prev.Min() {
-				prev = prev.Prev()
-			} else {
-				prev = sweepLine.Min().Next()
-			}
+			prev = prev.Prev()
 			next = next.Next()
-			sweepLine.DeleteWithKey(event)
+			sweepLine.DeleteWithIterator(iter)
 
 			//_renderSweepLine(sweepLine, event.otherEvent.point, event);
 
-			if next.Item() != nil && prev.Item() != nil {
+			if !next.Limit() && !prev.NegativeLimit() {
 				possibleIntersection(prev.Item().(*SweepEvent), next.Item().(*SweepEvent), eventQueue)
 			}
 		}
@@ -595,6 +590,6 @@ func boolean(subject, clipping Polygon, op operation) Polygon {
 	if trivial != nil {
 		return trivial
 	}
-	var sortedEvents = subdivideSegments(eventQueue, subject, clipping, sbbox, cbbox, op)
+	var sortedEvents = subdivideSegments(eventQueue, sbbox, cbbox, op)
 	return connectEdges(sortedEvents)
 }

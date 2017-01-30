@@ -8,6 +8,7 @@ import (
 )
 
 func TestSweepLine(t *testing.T) {
+	// Two triangles
 	s := NewPolygon(NewPath(NewPoint(20, -23.5), NewPoint(170, 74), NewPoint(226, -113.5), NewPoint(20, -23.5)))
 	c := NewPolygon(NewPath(NewPoint(54.5, -170.5), NewPoint(140.5, 33.5), NewPoint(239.5, -198), NewPoint(54.4, -170.5)))
 

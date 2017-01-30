@@ -1,7 +1,5 @@
 package martinez
 
-import "github.com/glycerine/rbtree"
-
 // SweepEvent is a sweep line event wraps around a vertex point.
 type SweepEvent struct {
 	left         bool //Is left endpoint?
@@ -15,8 +13,8 @@ type SweepEvent struct {
 	inResult     bool        // Does event belong to result?
 	resultInOut  bool
 	contourID    int
-	iterator     rbtree.Iterator
-	pos          int
+	//iterator     rbtree.Iterator
+	pos int
 }
 
 // NewSweepEvent creates a new sweepline event for point p.
