@@ -34,6 +34,13 @@ func adjust_lon(x float64) float64 {
 	return (x - (sign(x) * twoPi))
 }
 
+func adjust_lat(x float64) float64 {
+	if math.Abs(x) < halfPi {
+		return x
+	}
+	return (x - (sign(x) * math.Pi))
+}
+
 func tsfnz(eccent, phi, sinphi float64) float64 {
 	var con = eccent * sinphi
 	var com = 0.5 * eccent
@@ -94,4 +101,16 @@ func qsfnz(eccent, sinphi float64) float64 {
 	} else {
 		return (2 * sinphi)
 	}
+}
+
+func imlfn(ml, e0, e1, e2, e3 float64) (float64, error) {
+	phi := ml / e0
+	for i := 0; i < 15; i++ {
+		dphi := (ml - (e0*phi - e1*math.Sin(2*phi) + e2*math.Sin(4*phi) - e3*math.Sin(6*phi))) / (e0 - 2*e1*math.Cos(2*phi) + 4*e2*math.Cos(4*phi) - 6*e3*math.Cos(6*phi))
+		phi += dphi
+		if math.Abs(dphi) <= 0.0000000001 {
+			return phi, nil
+		}
+	}
+	return math.NaN(), fmt.Errorf("proj: imlfn: Latitude failed to converge after 15 iterations")
 }

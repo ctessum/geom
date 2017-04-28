@@ -90,7 +90,9 @@ func TestProj4(t *testing.T) {
 			strings.Contains(strings.ToLower(testPoint.Code), "albers") ||
 			strings.Contains(strings.ToLower(testPoint.Code), "aea") ||
 			strings.Contains(strings.ToLower(testPoint.Code), "lambert") ||
-			strings.Contains(strings.ToLower(testPoint.Code), "lcc")) ||
+			strings.Contains(strings.ToLower(testPoint.Code), "lcc") ||
+			strings.Contains(strings.ToLower(testPoint.Code), "equidistant_conic") ||
+			strings.Contains(strings.ToLower(testPoint.Code), "eqdc")) ||
 			strings.Contains(strings.ToLower(testPoint.Code), "oblique") ||
 			strings.Contains(strings.ToLower(testPoint.Code), "azimuthal") {
 			continue
