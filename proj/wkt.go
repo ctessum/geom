@@ -69,6 +69,8 @@ func (sr *SR) parseWKTGeogCS(secName []string, secData string) error {
 		return sr.parseWKTUnit(secName, secData)
 	} else if secName[len(secName)-1] == "AUTHORITY" {
 		return nil // Don't do anything with authority for now.
+	} else if secName[len(secName)-1] == "METADATA" {
+		return nil
 	}
 	return fmt.Errorf("proj.parseWKTGeogCS: unknown WKT section %v", secName)
 }
