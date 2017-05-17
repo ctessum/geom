@@ -292,7 +292,7 @@ func NewEncoder(filename string, archetype interface{}) (*Encoder, error) {
 				shp.StringField(sField.Name, stringLength))
 			e.fieldIndices = append(e.fieldIndices, i)
 		case reflect.Struct, reflect.Slice:
-			switch sField.Name {
+			switch sField.Type.Name() {
 			case "Point":
 				shpType = shp.POINT
 				e.geomIndex = i
