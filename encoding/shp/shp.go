@@ -161,10 +161,11 @@ func (r *Decoder) DecodeRowFields(fieldNames ...string) (
 	// Get fields
 	for _, name := range fieldNames {
 		if i, ok := r.fieldIndices[strings.ToLower(name)]; ok {
-			fields[name] = r.ReadAttribute(r.row, i)
+			f := r.ReadAttribute(r.row, i)
 			if r.err != nil {
 				return
 			}
+			fields[name] = strings.Trim(f, "\x00")
 		} else {
 			r.err = fmt.Errorf("Shapefile does not contain field `%s`", name)
 			return
