@@ -245,7 +245,7 @@ func (r Decoder) setFieldToAttribute(fValue reflect.Value,
 		}
 		fValue.SetInt(d)
 	case reflect.String:
-		fValue.SetString(dataStr)
+		fValue.SetString(strings.Trim(dataStr, "\x00"))
 	default:
 		panic("Struct field type can only be float64, int, or string.")
 	}
