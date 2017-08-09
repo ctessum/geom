@@ -2,6 +2,7 @@ package shp
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/ctessum/geom"
 )
@@ -48,8 +49,9 @@ func Example() {
 	d.Close()
 	e.Close()
 
+	const testFile = "testdata/testout"
 	// Read the data back in from the output file.
-	d, err = NewDecoder("testdata/testout.shp")
+	d, err = NewDecoder(testFile + ".shp")
 	if err != nil {
 		panic(err)
 	}
@@ -66,6 +68,11 @@ func Example() {
 		panic(err)
 	}
 	d.Close()
+
+	os.Remove(testFile + ".shp")
+	os.Remove(testFile + ".shx")
+	os.Remove(testFile + ".dbf")
+
 	// Output:
 	// polygon area 2.3, value 6
 	// polygon area 2.17, value 1

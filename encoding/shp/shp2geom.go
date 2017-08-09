@@ -57,7 +57,7 @@ func point2geom(s shp.Point) geom.Geom {
 	return geom.Point(s)
 }
 func pointM2geom(s shp.PointM) geom.Geom {
-	return geom.Point{s.X, s.Y}
+	return geom.Point{X: s.X, Y: s.Y}
 }
 func pointZ2geom(s shp.PointZ) geom.Geom {
 	return geom.Point{s.X, s.Y}
