@@ -10,9 +10,9 @@ import (
 	"reflect"
 
 	"github.com/ctessum/geom"
-	"github.com/gonum/plot/vg"
-	"github.com/gonum/plot/vg/draw"
-	"github.com/gonum/plot/vg/vgimg"
+	"gonum.org/v1/plot/vg"
+	"gonum.org/v1/plot/vg/draw"
+	"gonum.org/v1/plot/vg/vgimg"
 )
 
 // Canvas is a canvas for drawing maps.

@@ -27,7 +27,7 @@ import (
 	"fmt"
 
 	"github.com/ctessum/geom"
-	"github.com/gonum/floats"
+	"gonum.org/v1/gonum/floats"
 )
 
 // A container for endpoint data. A endpoint represents a location of interest (vertex between two polygon edges)

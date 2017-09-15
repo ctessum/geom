@@ -8,11 +8,11 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gonum/plot/vg"
-	"github.com/gonum/plot/vg/draw"
+	"gonum.org/v1/plot/vg"
+	"gonum.org/v1/plot/vg/draw"
 	//"github.com/gonum/plot/vg/vgimg"
 	//"github.com/gonum/plot/vg/vgsvg"
-	"github.com/gonum/plot/vg/vgpdf"
+	"gonum.org/v1/plot/vg/vgpdf"
 )
 
 type Colorlist struct {
