@@ -1,6 +1,10 @@
 package geom
 
-import "math"
+import (
+	"math"
+
+	polyclip "github.com/ctessum/polyclip-go"
+)
 
 // MultiLineString is a holder for multiple related LineStrings.
 type MultiLineString []LineString
@@ -41,4 +45,18 @@ func (ml MultiLineString) Distance(p Point) float64 {
 		d = math.Min(d, lDist)
 	}
 	return d
+}
+
+// Clip returns the part of the receiver that falls within the given polygon.
+func (ml MultiLineString) Clip(p Polygonal) Linear {
+	pTemp := make(Polygon, len(ml))
+	for i, l := range ml {
+		pTemp[i] = Path(l)
+	}
+	pTemp = pTemp.op(p, polyclip.CLIPLINE)
+	o := make(MultiLineString, len(pTemp))
+	for i, pp := range pTemp {
+		o[i] = LineString(pp[0 : len(pp)-1])
+	}
+	return o
 }

@@ -1,6 +1,10 @@
 package geom
 
-import "math"
+import (
+	"math"
+
+	polyclip "github.com/ctessum/polyclip-go"
+)
 
 // LineString is a number of points that make up a path or line.
 type LineString Path
@@ -41,4 +45,14 @@ func (l LineString) Distance(p Point) float64 {
 		d = math.Min(d, segDist)
 	}
 	return d
+}
+
+// Clip returns the part of the receiver that falls within the given polygon.
+func (l LineString) Clip(p Polygonal) Linear {
+	pTemp := Polygon{Path(l)}.op(p, polyclip.CLIPLINE)
+	o := make(MultiLineString, len(pTemp))
+	for i, pp := range pTemp {
+		o[i] = LineString(pp[0 : len(pp)-1])
+	}
+	return o
 }

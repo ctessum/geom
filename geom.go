@@ -16,8 +16,10 @@ type Geom interface {
 type Linear interface {
 	Geom
 	Length() float64
-	//Clip(Polygonal) Linear
-	//Intersection(Linear) MultiPoint
+
+	// Clip returns the part of the line that falls within the given polygon.
+	Clip(Polygonal) Linear
+
 	Simplify(tolerance float64) Geom
 
 	// Within determines whether this geometry is within the Polygonal geometry.
