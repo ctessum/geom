@@ -60,3 +60,25 @@ func (ml MultiLineString) Clip(p Polygonal) Linear {
 	}
 	return o
 }
+
+// Len returns the number of points in the receiver.
+func (ml MultiLineString) Len() int {
+	var i int
+	for _, l := range ml {
+		i += len(l)
+	}
+	return i
+}
+
+// Points returns an iterator for the points in the receiver.
+func (ml MultiLineString) Points() func() Point {
+	var i, j int
+	return func() Point {
+		if i == len(ml[j]) {
+			j++
+			i = 0
+		}
+		i++
+		return ml[j][i-1]
+	}
+}

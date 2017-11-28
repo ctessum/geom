@@ -83,3 +83,25 @@ func polyClipToPolygon(p polyclip.Polygon) Polygon {
 	}
 	return pp
 }
+
+// Len returns the number of points in the receiver.
+func (p Polygon) Len() int {
+	var i int
+	for _, r := range p {
+		i += len(r)
+	}
+	return i
+}
+
+// Points returns an iterator for the points in the receiver.
+func (p Polygon) Points() func() Point {
+	var i, j int
+	return func() Point {
+		if i == len(p[j]) {
+			j++
+			i = 0
+		}
+		i++
+		return p[j][i-1]
+	}
+}

@@ -10,6 +10,13 @@ type Geom interface {
 	Bounds() *Bounds
 	Similar(Geom, float64) bool
 	Transform(proj.Transformer) (Geom, error)
+
+	// Len returns the total number of points in the geometry
+	Len() int
+
+	// Points returns an iterator that returns the points in the
+	// geometry.
+	Points() func() Point
 }
 
 // Linear is an interface for types that are linear in nature.
@@ -46,7 +53,6 @@ type Polygonal interface {
 // PointLike is an interface for types that are pointlike in nature.
 type PointLike interface {
 	Geom
-	Points() []Point
 	//On(l Linear, tolerance float64) bool
 
 	// Within determines whether this geometry is within the Polygonal geometry.

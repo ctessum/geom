@@ -77,3 +77,27 @@ func (b *Bounds) Within(poly Polygonal) WithinStatus {
 	}
 	return Inside
 }
+
+// Len returns the number of points in the receiver (always==5).
+func (b *Bounds) Len() int { return 5 }
+
+// Points returns an iterator for the corners of the receiver.
+func (b *Bounds) Points() func() Point {
+	var i int
+	return func() Point {
+		switch i {
+		case 0:
+			return b.Min
+		case 1:
+			return Point{b.Max.X, b.Min.Y}
+		case 2:
+			return b.Max
+		case 3:
+			return Point{b.Min.X, b.Max.Y}
+		case 4:
+			return b.Min
+		default:
+			panic("out of bounds")
+		}
+	}
+}

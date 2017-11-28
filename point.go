@@ -52,3 +52,12 @@ func (p Point) Buffer(radius float64, segments int) Polygon {
 	}
 	return o
 }
+
+// Len returns the number of points in the receiver (always==1).
+func (p Point) Len() int { return 1 }
+
+// Points returns an iterator for the points in the receiver (there will only
+// be one point).
+func (p Point) Points() func() Point {
+	return func() Point { return p }
+}

@@ -96,3 +96,29 @@ func (mp MultiPolygon) Centroid() Point {
 	}
 	return Point{X: xA / A, Y: yA / A}
 }
+
+// Len returns the number of points in the receiver.
+func (mp MultiPolygon) Len() int {
+	var i int
+	for _, p := range mp {
+		i += p.Len()
+	}
+	return i
+}
+
+// Points returns an iterator for the points in the receiver.
+func (mp MultiPolygon) Points() func() Point {
+	var i, j, k int
+	return func() Point {
+		if i == len(mp[k][j]) {
+			j++
+			i = 0
+			if j == len(mp[k]) {
+				k++
+				j = 0
+			}
+		}
+		i++
+		return mp[k][j][i-1]
+	}
+}

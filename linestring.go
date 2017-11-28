@@ -56,3 +56,15 @@ func (l LineString) Clip(p Polygonal) Linear {
 	}
 	return o
 }
+
+// Len returns the number of points in the receiver.
+func (l LineString) Len() int { return len(l) }
+
+// Points returns an iterator for the points in the receiver.
+func (l LineString) Points() func() Point {
+	var i int
+	return func() Point {
+		i++
+		return l[i-1]
+	}
+}

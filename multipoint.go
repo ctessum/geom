@@ -22,3 +22,15 @@ func (mp MultiPoint) Within(poly Polygonal) WithinStatus {
 	}
 	return Inside
 }
+
+// Len returns the number of points in the receiver.
+func (mp MultiPoint) Len() int { return len(mp) }
+
+// Points returns an iterator for the points in the receiver.
+func (mp MultiPoint) Points() func() Point {
+	var i int
+	return func() Point {
+		i++
+		return mp[i-1]
+	}
+}
