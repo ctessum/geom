@@ -186,3 +186,42 @@ func relationToGeometryCollection(relation *osmpbf.Relation,
 	}
 	return p, nil
 }
+
+type GeomType int
+
+const (
+	Point GeomType = iota
+	Line
+	Poly
+	Collection
+)
+
+// DominantType returns the most frequently occurring type among the
+// given features.
+func DominantType(gt []*GeomTags) (GeomType, error) {
+	var points, lines, polys, collections int
+	for _, g := range gt {
+		switch g.Geom.(type) {
+		case geom.PointLike:
+			points++
+		case geom.Linear:
+			lines++
+		case geom.Polygonal:
+			polys++
+		case geom.GeometryCollection:
+			collections++
+		default:
+			return -1, fmt.Errorf("invalid geometry type %#v", g.Geom)
+		}
+	}
+	if points >= lines && points >= polys && points >= collections {
+		return Point, nil
+	}
+	if lines > points && lines >= polys && lines >= collections {
+		return Line, nil
+	}
+	if polys > points && polys > lines && polys >= collections {
+		return Poly, nil
+	}
+	return Collection, nil
+}
