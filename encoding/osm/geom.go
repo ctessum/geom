@@ -217,7 +217,6 @@ func DominantType(gt []*GeomTags) (GeomType, error) {
 			return -1, fmt.Errorf("invalid geometry type %#v", g.Geom)
 		}
 	}
-	fmt.Println(points, lines, polys)
 	if points >= lines && points >= polys && points >= collections {
 		return Point, nil
 	}
