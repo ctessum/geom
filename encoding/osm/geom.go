@@ -202,18 +202,22 @@ func DominantType(gt []*GeomTags) (GeomType, error) {
 	var points, lines, polys, collections int
 	for _, g := range gt {
 		switch g.Geom.(type) {
-		case geom.PointLike:
+		case geom.Point:
 			points++
-		case geom.Linear:
+		case geom.MultiPoint:
+			points++
+		case geom.LineString:
 			lines++
-		case geom.Polygonal:
+		case geom.Polygon:
 			polys++
 		case geom.GeometryCollection:
 			collections++
+			continue
 		default:
 			return -1, fmt.Errorf("invalid geometry type %#v", g.Geom)
 		}
 	}
+	fmt.Println(points, lines, polys)
 	if points >= lines && points >= polys && points >= collections {
 		return Point, nil
 	}
