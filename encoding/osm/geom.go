@@ -123,7 +123,7 @@ func relationToMultiPoint(relation *osmpbf.Relation,
 		case osmpbf.NodeType:
 			p[i] = nodeToPoint(nodes[m.ID])
 		default:
-			panic(fmt.Errorf("unsupported relation type %v", m.Type))
+			panic(fmt.Errorf("unsupported relation type %T", m.Type))
 		}
 	}
 	return p
@@ -138,7 +138,7 @@ func relationToPolygon(relation *osmpbf.Relation, ways map[int64]*osmpbf.Way,
 		case osmpbf.WayType:
 			p = append(p, wayToPolygon(ways[m.ID], nodes)[0])
 		default:
-			panic(fmt.Errorf("unsupported relation type %v", m.Type))
+			panic(fmt.Errorf("unsupported relation type %T", m.Type))
 		}
 	}
 	if err := op.FixOrientation(p); err != nil {
@@ -157,7 +157,7 @@ func relationToMultiLineString(relation *osmpbf.Relation, ways map[int64]*osmpbf
 		case osmpbf.WayType:
 			p = append(p, wayToLineString(ways[m.ID], nodes))
 		default:
-			panic(fmt.Errorf("unsupported relation type %v", m.Type))
+			panic(fmt.Errorf("unsupported relation type %T", m.Type))
 		}
 	}
 	return p
@@ -181,7 +181,7 @@ func relationToGeometryCollection(relation *osmpbf.Relation,
 				return nil, err
 			}
 		default:
-			panic(fmt.Errorf("unsupported relation type %v", m.Type))
+			panic(fmt.Errorf("unsupported relation type %T", m.Type))
 		}
 	}
 	return p, nil
@@ -206,7 +206,7 @@ func DominantType(gt []*GeomTags) (GeomType, error) {
 			points++
 		case geom.MultiPoint:
 			points++
-		case geom.LineString:
+		case geom.LineString, geom.MultiLineString:
 			lines++
 		case geom.Polygon:
 			polys++
@@ -214,7 +214,7 @@ func DominantType(gt []*GeomTags) (GeomType, error) {
 			collections++
 			continue
 		default:
-			return -1, fmt.Errorf("invalid geometry type %#v", g.Geom)
+			return -1, fmt.Errorf("invalid geometry type %T", g.Geom)
 		}
 	}
 	if points >= lines && points >= polys && points >= collections {
