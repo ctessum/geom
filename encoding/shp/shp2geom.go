@@ -197,13 +197,15 @@ func geom2Shp(g geom.Geom) (shp.Shape, error) {
 		return geom2point(g.(geom.Point)), nil
 	case geom.Polygon:
 		return geom2polygon(g.(geom.Polygon)), nil
+	case geom.LineString:
+		return geom2polyLine(geom.MultiLineString{g.(geom.LineString)}), nil
 	case geom.MultiLineString:
 		return geom2polyLine(g.(geom.MultiLineString)), nil
 	//case t == "MultiPatch": // not yet supported
 	case geom.MultiPoint:
 		return geom2multiPoint(g.(geom.MultiPoint)), nil
 	default:
-		return nil, fmt.Errorf("Unsupported geom type: %v", t)
+		return nil, fmt.Errorf("Unsupported geom type: %T", t)
 	}
 }
 
