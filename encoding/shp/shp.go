@@ -144,7 +144,11 @@ func (r *Decoder) DecodeRowFields(fieldNames ...string) (
 	var err error
 
 	more = r.Next()
-	if !more || r.err != nil {
+	if r.Err() != nil {
+		r.err = r.Err()
+		return
+	}
+	if !more {
 		return
 	}
 
