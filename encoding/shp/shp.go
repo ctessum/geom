@@ -25,7 +25,7 @@ const (
 	intLength = 10
 
 	// floatLength is the float length to use when creating shapefiles
-	floatLength = 10
+	floatLength = 30
 
 	// floatPrecision is the float precision to use when creating shapefiles
 	floatPrecision = 10
@@ -390,7 +390,9 @@ func (e *Encoder) Encode(d interface{}) error {
 	}
 	v := reflect.Indirect(reflect.ValueOf(d))
 	for i, j := range e.fieldIndices {
-		e.Writer.WriteAttribute(e.row, i, v.Field(j).Interface())
+		if err := e.Writer.WriteAttribute(e.row, i, v.Field(j).Interface()); err != nil {
+			return fmt.Errorf("shp: %v", err)
+		}
 	}
 
 	shape, err := geom2Shp(v.Field(e.geomIndex).Interface().(geom.Geom))
