@@ -10,15 +10,15 @@ import (
 	"github.com/ctessum/geom"
 	"github.com/ctessum/geom/index/rtree"
 	"github.com/ctessum/geom/op"
-	"github.com/gonum/graph"
-	"github.com/gonum/graph/path"
+	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/path"
 )
 
 // A Network is a holder for network data (e.g., a road network)
 type Network struct {
 	nodes, edges   *rtree.Rtree
-	neighbors      map[int]map[int]*edge
-	nodeMap        map[int]*node
+	neighbors      map[int64]map[int64]*edge
+	nodeMap        map[int64]*node
 	maxID          int
 	freeMap        map[int]struct{}
 	minimizeOption MinimizeOption
@@ -29,8 +29,8 @@ type Network struct {
 // the shortest route (either by Distance or Time).
 func NewNetwork(m MinimizeOption) *Network {
 	return &Network{
-		neighbors:      make(map[int]map[int]*edge),
-		nodeMap:        make(map[int]*node),
+		neighbors:      make(map[int64]map[int64]*edge),
+		nodeMap:        make(map[int64]*node),
 		maxID:          0,
 		nodes:          rtree.NewTree(25, 50),
 		edges:          rtree.NewTree(25, 50),
@@ -41,8 +41,8 @@ func NewNetwork(m MinimizeOption) *Network {
 
 // Has returns whether the node exists within the graph.
 // It is not intended for direct use in this package.
-func (net Network) Has(n graph.Node) bool {
-	_, ok := net.nodeMap[n.ID()]
+func (net Network) Has(n int64) bool {
+	_, ok := net.nodeMap[n]
 	return ok
 }
 
@@ -61,13 +61,13 @@ func (net Network) Nodes() []graph.Node {
 // From returns all nodes that can be reached directly
 // from the given node.
 // It is not intended for direct use in this package.
-func (net Network) From(n graph.Node) []graph.Node {
+func (net Network) From(n int64) []graph.Node {
 	if !net.Has(n) {
 		return nil
 	}
-	neighbors := make([]graph.Node, len(net.neighbors[n.ID()]))
+	neighbors := make([]graph.Node, len(net.neighbors[n]))
 	i := 0
-	for id := range net.neighbors[n.ID()] {
+	for id := range net.neighbors[n] {
 		neighbors[i] = net.nodeMap[id]
 		i++
 	}
@@ -77,8 +77,8 @@ func (net Network) From(n graph.Node) []graph.Node {
 // HasEdge returns whether an edge exists between
 // nodes x and y without considering direction.
 // It is not intended for direct use in this package.
-func (net Network) HasEdge(x, y graph.Node) bool {
-	_, ok := net.neighbors[x.ID()][y.ID()]
+func (net Network) HasEdge(x, y int64) bool {
+	_, ok := net.neighbors[x][y]
 	return ok
 }
 
@@ -86,13 +86,13 @@ func (net Network) HasEdge(x, y graph.Node) bool {
 // exists and nil otherwise. The node v must be directly
 // reachable from u as defined by the From method.
 // It is not intended for direct use in this package.
-func (net Network) Edge(u, v graph.Node) graph.Edge {
+func (net Network) Edge(u, v int64) graph.Edge {
 	// We don't need to check if neigh exists because
 	// it's implicit in the neighbors access.
 	if !net.Has(u) {
 		return nil
 	}
-	return net.neighbors[u.ID()][v.ID()]
+	return net.neighbors[u][v]
 }
 
 // The math package only provides explicitly sized max
@@ -131,7 +131,7 @@ func (net *Network) addNode(n graph.Node) {
 		panic(fmt.Sprintf("route: node ID collision: %d", n.ID()))
 	}
 	net.nodeMap[n.ID()] = n.(*node)
-	net.neighbors[n.ID()] = make(map[int]*edge)
+	net.neighbors[n.ID()] = make(map[int64]*edge)
 	net.nodes.Insert(n.(*node))
 }
 
@@ -161,10 +161,10 @@ func (net *Network) AddLink(l geom.LineString, speed float64) {
 	if fid == tid {
 		panic("concrete: adding self edge")
 	}
-	if !net.Has(from) {
+	if !net.Has(from.ID()) {
 		net.addNode(from)
 	}
-	if !net.Has(to) {
+	if !net.Has(to.ID()) {
 		net.addNode(to)
 	}
 	net.edges.Insert(e)
@@ -215,8 +215,8 @@ type node struct {
 	id int
 }
 
-func (n node) ID() int {
-	return n.id
+func (n node) ID() int64 {
+	return int64(n.id)
 }
 
 // MinimizeOption specifies how the shortest route should be chosen.
@@ -245,7 +245,7 @@ func (net Network) ShortestRoute(from, to geom.Point) (
 	startDistance = op.Distance(from, startNode.Point)
 	endDistance = op.Distance(to, endNode.Point)
 	shortest, _ := path.AStar(startNode, endNode, net, net.costHeuristic)
-	nodes, _ := shortest.To(endNode)
+	nodes, _ := shortest.To(endNode.ID())
 	for i := 0; i < len(nodes)-1; i++ {
 		e, ok := net.neighbors[nodes[i].ID()][nodes[i+1].ID()]
 		if !ok {
@@ -274,4 +274,14 @@ func (net *Network) costHeuristic(x, y graph.Node) float64 {
 	default:
 		panic(fmt.Errorf("Invalid MinimizeOption %v", net.minimizeOption))
 	}
+}
+
+// HasEdgeBetween returns whether an edge exists between nodes x and y without
+// considering direction.
+func (net Network) HasEdgeBetween(xid, yid int64) bool {
+	if _, ok := net.neighbors[xid][yid]; ok {
+		return true
+	}
+	_, ok := net.neighbors[yid][xid]
+	return ok
 }
