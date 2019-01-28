@@ -17,12 +17,33 @@ func TestGeoJSON(t *testing.T) {
 			[]byte(`{"type":"Point","coordinates":[1,2]}`),
 		},
 		{
+			geom.MultiPoint{
+				geom.Point{1, 2},
+				geom.Point{3, 4},
+			},
+			[]byte(`{"type":"MultiPoint","coordinates":[[1,2],[3,4]]}`),
+		},
+		{
 			geom.LineString(geom.Path{{1, 2}, {3, 4}}),
 			[]byte(`{"type":"LineString","coordinates":[[1,2],[3,4]]}`),
 		},
 		{
+			geom.MultiLineString{
+				geom.LineString(geom.Path{{1, 2}, {3, 4}}),
+				geom.LineString(geom.Path{{5, 6}, {7, 8}}),
+			},
+			[]byte(`{"type":"MultiLineString","coordinates":[[[1,2],[3,4]],[[5,6],[7,8]]]}`),
+		},
+		{
 			geom.Polygon([]geom.Path{{{1, 2}, {3, 4}, {5, 6}}}),
 			[]byte(`{"type":"Polygon","coordinates":[[[1,2],[3,4],[5,6]]]}`),
+		},
+		{
+			geom.MultiPolygon{
+				geom.Polygon([]geom.Path{{{1, 2}, {3, 4}, {5, 6}}}),
+				geom.Polygon([]geom.Path{{{7, 8}, {9, 10}, {11, 12}}}),
+			},
+			[]byte(`{"type":"MultiPolygon","coordinates":[[[[1,2],[3,4],[5,6]]],[[[7,8],[9,10],[11,12]]]]}`),
 		},
 	}
 	for _, tc := range testCases {
@@ -44,6 +65,8 @@ func TestGeoJSONDecode(t *testing.T) {
 		[]byte(`{"coordinates":[1],"type":"Point"}`),
 		[]byte(`{"coordinates":[1,2,3,4],"type":"Point"}`),
 		[]byte(`{"coordinates":[""],"type":"Point"}`),
+		[]byte(`{"type":"MultiPoint"}`),
+		[]byte(`{"coordinates":[1,2],type":"MultiPoint"}`),
 		[]byte(`{"type":"LineString"}`),
 		[]byte(`{"coordinates":[],"type":"LineString"}`),
 		[]byte(`{"coordinates":[[]],"type":"LineString"}`),
@@ -51,11 +74,15 @@ func TestGeoJSONDecode(t *testing.T) {
 		[]byte(`{"coordinates":[[1,2],[3,4,5]],"type":"LineString"}`),
 		[]byte(`{"coordinates":[""],"type":"LineString"}`),
 		[]byte(`{"coordinates":[[1,2,3,4],[5,6,7,8]],"type":"LineString"}`),
+		[]byte(`{"type":"MultiLineString"}`),
+		[]byte(`{"coordinates":[[1,2,3,4],[5,6,7,8]],"type":"MultiLineString"}`),
 		[]byte(`{"type":"Polygon"}`),
 		[]byte(`{"coordinates":[],"type":"Polygon"}`),
 		[]byte(`{"coordinates":[[]],"type":"Polygon"}`),
 		[]byte(`{"coordinates":[[[]]],"type":"Polygon"}`),
 		[]byte(`{"coordinates":[[[1,2],[3,4,5]]],"type":"Polygon"}`),
+		[]byte(`{"type":"MultiPolygon"}`),
+		[]byte(`{"coordinates":[[[1,2],[3,4,5]]],"type":"MultiPolygon"}`),
 	}
 	for _, tc := range testCases {
 		if got, err := Decode(tc); err == nil {
