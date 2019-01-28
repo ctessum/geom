@@ -45,6 +45,18 @@ func decodeCoordinates3(jsonCoordinates interface{}) [][][]float64 {
 	return coordinates
 }
 
+func decodeCoordinates4(jsonCoordinates interface{}) [][][][]float64 {
+	array, ok := jsonCoordinates.([]interface{})
+	if !ok {
+		panic(&InvalidGeometryError{})
+	}
+	coordinates := make([][][][]float64, len(array))
+	for i, element := range array {
+		coordinates[i] = decodeCoordinates3(element)
+	}
+	return coordinates
+}
+
 func makeLinearRing(coordinates [][]float64) geom.Path {
 	points := make(geom.Path, len(coordinates))
 	for i, element := range coordinates {
@@ -76,6 +88,17 @@ func doFromGeoJSON(g *Geometry) geom.Geom {
 		default:
 			panic(&InvalidGeometryError{})
 		}
+	case "MultiPoint":
+		coordinates := decodeCoordinates2(g.Coordinates)
+		if len(coordinates) == 0 {
+			panic(&InvalidGeometryError{})
+		}
+		switch len(coordinates[0]) {
+		case 2:
+			return geom.MultiPoint(makeLinearRing(coordinates))
+		default:
+			panic(&InvalidGeometryError{})
+		}
 	case "LineString":
 		coordinates := decodeCoordinates2(g.Coordinates)
 		if len(coordinates) == 0 {
@@ -87,6 +110,21 @@ func doFromGeoJSON(g *Geometry) geom.Geom {
 		default:
 			panic(&InvalidGeometryError{})
 		}
+	case "MultiLineString":
+		coordinates := decodeCoordinates3(g.Coordinates)
+		if len(coordinates) == 0 || len(coordinates[0]) == 0 {
+			panic(&InvalidGeometryError{})
+		}
+		switch len(coordinates[0][0]) {
+		case 2:
+			multiLineString := make(geom.MultiLineString, len(coordinates))
+			for i, coord := range coordinates {
+				multiLineString[i] = geom.LineString(makeLinearRing(coord))
+			}
+			return multiLineString
+		default:
+			panic(&InvalidGeometryError{})
+		}
 	case "Polygon":
 		coordinates := decodeCoordinates3(g.Coordinates)
 		if len(coordinates) == 0 || len(coordinates[0]) == 0 {
@@ -95,6 +133,21 @@ func doFromGeoJSON(g *Geometry) geom.Geom {
 		switch len(coordinates[0][0]) {
 		case 2:
 			return geom.Polygon(makeLinearRings(coordinates))
+		default:
+			panic(&InvalidGeometryError{})
+		}
+	case "MultiPolygon":
+		coordinates := decodeCoordinates4(g.Coordinates)
+		if len(coordinates) == 0 || len(coordinates[0]) == 0 || len(coordinates[0][0]) == 0 {
+			panic(&InvalidGeometryError{})
+		}
+		switch len(coordinates[0][0][0]) {
+		case 2:
+			multiPolygon := make(geom.MultiPolygon, len(coordinates))
+			for i, coord := range coordinates {
+				multiPolygon[i] = makeLinearRings(coord)
+			}
+			return multiPolygon
 		default:
 			panic(&InvalidGeometryError{})
 		}
