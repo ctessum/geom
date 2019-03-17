@@ -417,7 +417,7 @@ func (tree *Rtree) condenseTree(n *node) {
 
 // Searching
 
-// SearchIntersectBB returns all objects that intersect the specified rectangle.
+// SearchIntersect returns all objects that intersect the specified rectangle.
 //
 // Implemented per Section 3.1 of "R-trees: A Dynamic Index Structure for
 // Spatial Searching" by A. Guttman, Proceedings of ACM SIGMOD, p. 47-57, 1984.

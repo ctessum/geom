@@ -218,7 +218,7 @@ func (c *ColorMap) getColorOnLegend(gradLoc, barLeft,
 	panic("Problem getting color")
 }
 
-// get color for input value. Must run c.Set() first.
+// GetColor gets color for input value. Must run c.Set() first.
 func (cm *ColorMap) GetColor(v float64) color.NRGBA {
 	var R, G, B uint8
 	c := cm.stopcolors
