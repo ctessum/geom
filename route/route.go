@@ -11,6 +11,7 @@ import (
 	"github.com/ctessum/geom/index/rtree"
 	"github.com/ctessum/geom/op"
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/iterator"
 	"gonum.org/v1/gonum/graph/path"
 )
 
@@ -48,20 +49,20 @@ func (net Network) Has(n int64) bool {
 
 // Nodes returns all the nodes in the graph.
 // It is not intended for direct use in this package.
-func (net Network) Nodes() []graph.Node {
+func (net Network) Nodes() graph.Nodes {
 	nodes := make([]graph.Node, len(net.nodeMap))
 	i := 0
 	for _, n := range net.nodeMap {
 		nodes[i] = n
 		i++
 	}
-	return nodes
+	return iterator.NewOrderedNodes(nodes)
 }
 
 // From returns all nodes that can be reached directly
 // from the given node.
 // It is not intended for direct use in this package.
-func (net Network) From(n int64) []graph.Node {
+func (net Network) From(n int64) graph.Nodes {
 	if !net.Has(n) {
 		return nil
 	}
@@ -71,7 +72,7 @@ func (net Network) From(n int64) []graph.Node {
 		neighbors[i] = net.nodeMap[id]
 		i++
 	}
-	return neighbors
+	return iterator.NewOrderedNodes(neighbors)
 }
 
 // HasEdge returns whether an edge exists between
@@ -94,6 +95,8 @@ func (net Network) Edge(u, v int64) graph.Edge {
 	}
 	return net.neighbors[u][v]
 }
+
+func (net Network) Node(id int64) graph.Node { return net.nodeMap[id] }
 
 // The math package only provides explicitly sized max
 // values. This ensures we get the max for the actual
