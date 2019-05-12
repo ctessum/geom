@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"github.com/ctessum/geom"
 	"io"
 	"reflect"
+
+	"github.com/ctessum/geom"
 )
 
 const (
@@ -76,7 +77,7 @@ func Read(r io.Reader) (geom.Geom, error) {
 	case wkbNDR:
 		byteOrder = binary.LittleEndian
 	default:
-		return nil, fmt.Errorf("invalid byte order %u", wkbByteOrder)
+		return nil, fmt.Errorf("invalid byte order %v", wkbByteOrder)
 	}
 
 	var wkbGeometryType uint32
@@ -87,7 +88,7 @@ func Read(r io.Reader) (geom.Geom, error) {
 	if reader, ok := wkbReaders[wkbGeometryType]; ok {
 		return reader(r, byteOrder)
 	} else {
-		return nil, fmt.Errorf("unsupported geometry type %u", wkbGeometryType)
+		return nil, fmt.Errorf("unsupported geometry type %v", wkbGeometryType)
 	}
 
 }

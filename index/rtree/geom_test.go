@@ -18,7 +18,7 @@ func TestDist(t *testing.T) {
 	q := geom.Point{4, 6}
 	dst := math.Sqrt(25)
 	if d := dist(p, q); d != dst {
-		t.Errorf("dist(%v, %v) = %v; expected %v", p, q, d, dist)
+		t.Errorf("dist(%v, %v) = %v; expected %v", p, q, d, dst)
 	}
 }
 
@@ -55,7 +55,7 @@ func TestRectSize(t *testing.T) {
 	sze := lengths.X * lengths.Y
 	actual := size(rect)
 	if sze != actual {
-		t.Errorf("Expected %v.size() == %v, got %v", rect, size, actual)
+		t.Errorf("Expected %v.size() == %v, got %v", rect, sze, actual)
 	}
 }
 
