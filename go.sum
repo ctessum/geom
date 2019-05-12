@@ -4,6 +4,8 @@ github.com/ctessum/polyclip-go v0.0.0-20180821205400-6614925d6d70 h1:eLtDUl8TQ00
 github.com/ctessum/polyclip-go v0.0.0-20180821205400-6614925d6d70/go.mod h1:SD0O6gO+//zcwVFZTBwD46M8YLMP1dlm4U4wX+utHSs=
 github.com/ctessum/polyclip-go v0.0.1 h1:AWsNwckk0f+rV6+DC2K5WxhSf1531y1uQuRVwSfLajY=
 github.com/ctessum/polyclip-go v0.0.1/go.mod h1:1tv0XZG7csEYkXRpshWyswi35FMqOAaeyE2dQ6v1vFs=
+github.com/ctessum/polyclip-go v1.0.0 h1:qcKICYLjcaM88zIoXuCiSUe2PlaM4Hh98VSmzF4CeRc=
+github.com/ctessum/polyclip-go v1.0.0/go.mod h1:e/Lh1JOGyynZwLr0M4tZGIyx07wXw9T+pu6hFut+kFQ=
 github.com/go-gl/gl v0.0.0-20180407155706-68e253793080/go.mod h1:482civXOzJJCPzJ4ZOX/pwvXBWSnzD4OKMdH4ClKGbk=
 github.com/go-gl/glfw v0.0.0-20180426074136-46a8d530c326/go.mod h1:vR7hzQXu2zJy9AVAgeJqvqgH9Q5CA+iKCZ2gyEVpxRU=
 github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 h1:DACJavvAHhabrF08vX0COfcOBJRhZ8lUbR+ZWIs0Y5g=
@@ -12,6 +14,8 @@ github.com/golang/protobuf v1.2.0 h1:P3YflyNX/ehuJFLhxviNdFxQPkGK5cDcApsge1SqnvM
 github.com/golang/protobuf v1.2.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
 github.com/gonum/floats v0.0.0-20180125090339-7de1f4ea7ab5 h1:YEwYZI2QOW/49JC7hb5X5irk1J4BJc6Q37OnahdSuek=
 github.com/gonum/floats v0.0.0-20180125090339-7de1f4ea7ab5/go.mod h1:PxC8OnwL11+aosOB5+iEPoV3picfs8tUpkVd0pDo+Kg=
+github.com/gonum/floats v0.0.0-20181209220543-c233463c7e82 h1:EvokxLQsaaQjcWVWSV38221VAK7qc2zhaO17bKys/18=
+github.com/gonum/floats v0.0.0-20181209220543-c233463c7e82/go.mod h1:PxC8OnwL11+aosOB5+iEPoV3picfs8tUpkVd0pDo+Kg=
 github.com/gonum/internal v0.0.0-20181124074243-f884aa714029 h1:8jtTdc+Nfj9AR+0soOeia9UZSvYBvETVHZrugUowJ7M=
 github.com/gonum/internal v0.0.0-20181124074243-f884aa714029/go.mod h1:Pu4dmpkhSyOzRwuXkOgAvijx4o+4YMUJJo9OvPYMkks=
 github.com/jonas-p/go-shp v0.1.1 h1:LY81nN67DBCz6VNFn2kS64CjmnDo9IP8rmSkTvhO9jE=
