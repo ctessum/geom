@@ -110,66 +110,6 @@ const (
 	XOR
 )
 
-// Function Construct computes a 2D polygon, which is a result of performing
-// specified Boolean operation on the provided pair of polygons (p <Op> clipping).
-// It uses an algorithm described by F. Martínez, A. J. Rueda, F. R. Feito
-// in "A new algorithm for computing Boolean operations on polygons"
-// - see: http://wwwdi.ujaen.es/~fmartin/bool_op.html
-// The paper describes the algorithm as performing in time O((n+k) log n),
-// where n is number of all edges of all polygons in operation, and
-// k is number of intersections of all polygon edges.
-// "subject" and "clipping" can both be of type geom.Polygon,
-// geom.MultiPolygon, geom.LineString, or geom.MultiLineString.
-func Construct(subject, clipping geom.Geom, operation Op) (geom.Geom, error) {
-	if subject == nil && clipping == nil {
-		return nil, nil
-	} else if subject == nil {
-		if operation == INTERSECTION || operation == DIFFERENCE {
-			return nil, nil
-		} else {
-			return clipping, nil
-		}
-	} else if clipping == nil {
-		if operation == INTERSECTION {
-			return nil, nil
-		} else {
-			return subject, nil
-		}
-	}
-	// Prepare the input shapes
-	var c clipper
-	switch clipping.(type) {
-	case geom.Polygon, geom.MultiPolygon:
-		c.subject = convertToPolygon(subject)
-		c.clipping = convertToPolygon(clipping)
-		switch subject.(type) {
-		case geom.Polygon, geom.MultiPolygon:
-			c.outType = outputPolygons
-		case geom.LineString, geom.MultiLineString:
-			c.outType = outputLines
-		default:
-			return nil, newUnsupportedGeometryError(subject)
-		}
-	case geom.LineString, geom.MultiLineString:
-		switch subject.(type) {
-		case geom.Polygon, geom.MultiPolygon:
-			// swap clipping and subject
-			c.subject = convertToPolygon(clipping)
-			c.clipping = convertToPolygon(subject)
-			c.outType = outputLines
-		case geom.LineString, geom.MultiLineString:
-			c.subject = convertToPolygon(subject)
-			c.clipping = convertToPolygon(clipping)
-			c.outType = outputPoints
-		default:
-			return nil, newUnsupportedGeometryError(subject)
-		}
-	default:
-		return nil, newUnsupportedGeometryError(clipping)
-	}
-	return c.compute(operation)
-}
-
 // convert input shapes to polygon to make internal processing easier
 func convertToPolygon(g geom.Geom) geom.Polygon {
 	var out geom.Polygon
