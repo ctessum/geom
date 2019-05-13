@@ -215,6 +215,17 @@ func (e edge) To() graph.Node {
 	return e.end
 }
 
+func (e edge) ReversedEdge() graph.Edge {
+	return edge{
+		LineString: e.LineString,
+		start:      e.end,
+		end:        e.start,
+		length:     e.length,
+		speed:      e.speed,
+		time:       e.time,
+	}
+}
+
 type node struct {
 	geom.Point
 	id int
