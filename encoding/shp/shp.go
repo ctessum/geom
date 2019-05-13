@@ -213,7 +213,7 @@ func shpFieldName2String(name [11]byte) string {
 // shpAttrbuteToFloat converts a shapefile attribute (which may contain
 // "\x00" characters to a float.
 func shpAttributeToFloat(attr string) (float64, error) {
-	f, err := strconv.ParseFloat(strings.Trim(attr, "\x00"), 64)
+	f, err := strconv.ParseFloat(strings.Trim(attr, "\x00 "), 64)
 	if err != nil {
 		err = fmt.Errorf("shp: %v", err)
 	}
@@ -223,14 +223,14 @@ func shpAttributeToFloat(attr string) (float64, error) {
 // shpAttrbuteToInt converts a shapefile attribute (which may contain
 // "\x00" characters to an int.
 func shpAttributeToInt(attr string) (int64, error) {
-	i, err := strconv.ParseInt(strings.Trim(attr, "\x00"), 10, 64)
+	i, err := strconv.ParseInt(strings.Trim(attr, "\x00 "), 10, 64)
 	if err != nil {
 		err = fmt.Errorf("shp: %v", err)
 	}
 	return i, err
 }
 
-func (r Decoder) setFieldToAttribute(fValue reflect.Value,
+func (r *Decoder) setFieldToAttribute(fValue reflect.Value,
 	fType reflect.Type, index int) {
 	dataStr := r.ReadAttribute(r.row, index)
 	switch fType.Kind() {
@@ -284,17 +284,21 @@ func NewEncoder(filename string, archetype interface{}) (*Encoder, error) {
 	var shpFields []shp.Field
 	for i := 0; i < t.NumField(); i++ {
 		sField := t.Field(i)
+		fieldName := strings.ToLower(sField.Tag.Get(tag))
+		if fieldName == "" {
+			fieldName = sField.Name
+		}
 		switch sField.Type.Kind() {
 		case reflect.Int:
-			shpFields = append(shpFields, shp.NumberField(sField.Name, intLength))
+			shpFields = append(shpFields, shp.NumberField(fieldName, intLength))
 			e.fieldIndices = append(e.fieldIndices, i)
 		case reflect.Float64:
 			shpFields = append(shpFields,
-				shp.FloatField(sField.Name, floatLength, floatPrecision))
+				shp.FloatField(fieldName, floatLength, floatPrecision))
 			e.fieldIndices = append(e.fieldIndices, i)
 		case reflect.String:
 			shpFields = append(shpFields,
-				shp.StringField(sField.Name, stringLength))
+				shp.StringField(fieldName, stringLength))
 			e.fieldIndices = append(e.fieldIndices, i)
 		case reflect.Struct, reflect.Slice:
 			switch sField.Type.Name() {
