@@ -119,9 +119,11 @@ func (net *Network) newNodeID() int {
 // Check if there is already a node at this location, and if there
 // is return that one, otherwise create a new node.
 func (net *Network) newNode(p geom.Point) *node {
-	nearest := net.nodes.NearestNeighbor(p)
-	if nearest != nil && op.PointEquals(p, nearest.(*node).Point) {
-		return nearest.(*node)
+	if net.nodes.Size() != 0 {
+		nearest := net.nodes.NearestNeighbor(p)
+		if nearest != nil && op.PointEquals(p, nearest.(*node).Point) {
+			return nearest.(*node)
+		}
 	}
 	return &node{
 		Point: p,
