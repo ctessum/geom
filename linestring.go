@@ -60,11 +60,8 @@ func (l LineString) Clip(p Polygonal) Linear {
 // Len returns the number of points in the receiver.
 func (l LineString) Len() int { return len(l) }
 
-// Points returns an iterator for the points in the receiver.
-func (l LineString) Points() func() Point {
-	var i int
-	return func() Point {
-		i++
-		return l[i-1]
-	}
+// XY returns the coordinates of point at location i in the receiver.
+func (l LineString) XY(i int) (x, y float64) {
+	p := l[i]
+	return p.X, p.Y
 }

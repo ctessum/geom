@@ -84,24 +84,18 @@ func polyClipToPolygon(p polyclip.Polygon) Polygon {
 	return pp
 }
 
-// Len returns the number of points in the receiver.
+// Len returns the number of rings in the receiver.
 func (p Polygon) Len() int {
-	var i int
-	for _, r := range p {
-		i += len(r)
-	}
-	return i
+	return len(p)
 }
 
-// Points returns an iterator for the points in the receiver.
-func (p Polygon) Points() func() Point {
-	var i, j int
-	return func() Point {
-		if i == len(p[j]) {
-			j++
-			i = 0
-		}
-		i++
-		return p[j][i-1]
-	}
+// LenAt returns the number of points in ring i.
+func (p Polygon) LenAt(i int) int {
+	return len(p[i])
+}
+
+// XY returns the coordinates of point j in ring i.
+func (p Polygon) XY(i, j int) (x, y float64) {
+	pt := p[i][j]
+	return pt.X, pt.Y
 }
