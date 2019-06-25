@@ -70,6 +70,14 @@ func (b *Bounds) Bounds() *Bounds {
 
 // Within calculates whether b is within poly.
 func (b *Bounds) Within(poly Polygonal) WithinStatus {
+	if bp, ok := poly.(*Bounds); ok {
+		if b.Min.Equals(bp.Min) && b.Max.Equals(bp.Max) {
+			return OnEdge
+		} else if b.Min.X >= bp.Min.X && b.Min.Y >= bp.Min.Y && b.Max.X <= bp.Max.X && b.Max.Y <= bp.Max.Y {
+			return Inside
+		}
+		return Outside
+	}
 	minIn := pointInPolygonal(b.Min, poly)
 	maxIn := pointInPolygonal(b.Max, poly)
 	if minIn == Outside || maxIn == Outside {
@@ -79,12 +87,15 @@ func (b *Bounds) Within(poly Polygonal) WithinStatus {
 }
 
 // Len returns the number of points in the receiver (always==5).
-func (b *Bounds) Len() int { return 5 }
+func (b *Bounds) Len() int { return 4 }
 
 // Points returns an iterator for the corners of the receiver.
 func (b *Bounds) Points() func() Point {
 	var i int
 	return func() Point {
+		defer func() {
+			i++
+		}()
 		switch i {
 		case 0:
 			return b.Min
@@ -94,10 +105,65 @@ func (b *Bounds) Points() func() Point {
 			return b.Max
 		case 3:
 			return Point{b.Min.X, b.Max.Y}
-		case 4:
-			return b.Min
 		default:
 			panic("out of bounds")
 		}
 	}
+}
+
+// Polygons returns a rectangle polygon
+// to fulfill the Polygonal interface.
+func (b *Bounds) Polygons() []Polygon {
+	return []Polygon{{{b.Min, Point{b.Max.X, b.Min.Y}, b.Max, Point{b.Min.X, b.Max.Y}}}}
+}
+
+// Intersection returns the Intersection of the receiver with p.
+func (b *Bounds) Intersection(p Polygonal) Polygonal {
+	bp := p.Bounds()
+	if w := bp.Within(b); w == Inside || w == OnEdge {
+		// Polygon fully within bounds.
+		return p
+	} else if bbp, ok := p.(*Bounds); ok {
+		// Polygon is bounds.
+		if w := b.Within(bbp); w == Inside || w == OnEdge {
+			return b
+		}
+	}
+	if !b.Overlaps(bp) {
+		return nil
+	}
+	return b.Polygons()[0].Intersection(p)
+}
+
+// Union returns the combination of the receiver and p.
+func (b *Bounds) Union(p Polygonal) Polygonal {
+	// TODO: optimize
+	return b.Polygons()[0].Union(p)
+}
+
+// XOr returns the area(s) occupied by either the receiver or p but not both.
+func (b *Bounds) XOr(p Polygonal) Polygonal {
+	// TODO: optimize
+	return b.Polygons()[0].XOr(p)
+}
+
+// Difference subtracts p from b.
+func (b *Bounds) Difference(p Polygonal) Polygonal {
+	// TODO: optimize
+	return b.Polygons()[0].Difference(p)
+}
+
+// Area returns the area of the reciever.
+func (b *Bounds) Area() float64 {
+	return (b.Max.X - b.Min.X) * (b.Max.Y - b.Min.Y)
+}
+
+// Simplify returns the receiver
+// to fulfill the Polygonal interface.
+func (b *Bounds) Simplify(tolerance float64) Geom {
+	return b
+}
+
+func (b *Bounds) Centroid() Point {
+	return Point{(b.Min.X + b.Max.X) / 2, (b.Min.Y + b.Max.Y) / 2}
 }

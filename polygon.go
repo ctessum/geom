@@ -32,22 +32,22 @@ func (p Polygon) Polygons() []Polygon {
 }
 
 // Intersection returns the area(s) shared by p and p2.
-func (p Polygon) Intersection(p2 Polygonal) Polygon {
+func (p Polygon) Intersection(p2 Polygonal) Polygonal {
 	return p.op(p2, polyclip.INTERSECTION)
 }
 
 // Union returns the combination of p and p2.
-func (p Polygon) Union(p2 Polygonal) Polygon {
+func (p Polygon) Union(p2 Polygonal) Polygonal {
 	return p.op(p2, polyclip.UNION)
 }
 
 // XOr returns the area(s) occupied by either p or p2 but not both.
-func (p Polygon) XOr(p2 Polygonal) Polygon {
+func (p Polygon) XOr(p2 Polygonal) Polygonal {
 	return p.op(p2, polyclip.XOR)
 }
 
 // Difference subtracts p2 from p.
-func (p Polygon) Difference(p2 Polygonal) Polygon {
+func (p Polygon) Difference(p2 Polygonal) Polygonal {
 	return p.op(p2, polyclip.DIFFERENCE)
 }
 

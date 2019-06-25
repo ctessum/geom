@@ -41,10 +41,10 @@ type Linear interface {
 type Polygonal interface {
 	Geom
 	Polygons() []Polygon
-	Intersection(Polygonal) Polygon
-	Union(Polygonal) Polygon
-	XOr(Polygonal) Polygon
-	Difference(Polygonal) Polygon
+	Intersection(Polygonal) Polygonal
+	Union(Polygonal) Polygonal
+	XOr(Polygonal) Polygonal
+	Difference(Polygonal) Polygonal
 	Area() float64
 	Simplify(tolerance float64) Geom
 	Centroid() Point

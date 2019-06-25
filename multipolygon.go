@@ -31,26 +31,26 @@ func (mp MultiPolygon) Area() float64 {
 }
 
 // Intersection returns the area(s) shared by mp and p2.
-func (mp MultiPolygon) Intersection(p2 Polygonal) Polygon {
+func (mp MultiPolygon) Intersection(p2 Polygonal) Polygonal {
 	return mp.op(p2, polyclip.INTERSECTION)
 }
 
 // Union returns the combination of mp and p2.
-func (mp MultiPolygon) Union(p2 Polygonal) Polygon {
+func (mp MultiPolygon) Union(p2 Polygonal) Polygonal {
 	return mp.op(p2, polyclip.UNION)
 }
 
 // XOr returns the area(s) occupied by either mp or p2 but not both.
-func (mp MultiPolygon) XOr(p2 Polygonal) Polygon {
+func (mp MultiPolygon) XOr(p2 Polygonal) Polygonal {
 	return mp.op(p2, polyclip.XOR)
 }
 
 // Difference subtracts p2 from mp.
-func (mp MultiPolygon) Difference(p2 Polygonal) Polygon {
+func (mp MultiPolygon) Difference(p2 Polygonal) Polygonal {
 	return mp.op(p2, polyclip.DIFFERENCE)
 }
 
-func (mp MultiPolygon) op(p2 Polygonal, op polyclip.Op) Polygon {
+func (mp MultiPolygon) op(p2 Polygonal, op polyclip.Op) Polygonal {
 	var pp polyclip.Polygon
 	for _, ppx := range mp {
 		pp = append(pp, ppx.toPolyClip()...)
