@@ -197,6 +197,8 @@ func geom2Shp(g geom.Geom) (shp.Shape, error) {
 		return geom2point(g.(geom.Point)), nil
 	case geom.Polygon:
 		return geom2polygon(g.(geom.Polygon)), nil
+	case *geom.Bounds:
+		return geom2polygon(g.(*geom.Bounds).Polygons()[0]), nil
 	case geom.LineString:
 		return geom2polyLine(geom.MultiLineString{g.(geom.LineString)}), nil
 	case geom.MultiLineString:
@@ -216,12 +218,16 @@ func geom2point(g geom.Point) shp.Shape {
 	return &p
 }
 func geom2polygon(g geom.Polygon) shp.Shape {
-	parts := make([][]shp.Point, len(g))
+	parts := make([][]shp.Point, len(g), len(g)+1)
 	for i, r := range g {
 		parts[i] = make([]shp.Point, len(r))
 		// switch the winding direction
 		for j := len(r) - 1; j >= 0; j-- {
 			parts[i][j] = shp.Point(r[j])
+		}
+		if len(r) > 0 && !r[0].Equals(r[len(r)-1]) {
+			// Close the ring if it is not already closed.
+			parts[i] = append(parts[i], parts[i][0])
 		}
 	}
 	p := shp.Polygon(*shp.NewPolyLine(parts))

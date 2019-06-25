@@ -343,6 +343,11 @@ func NewEncoder(filename string, archetype interface{}) (*Encoder, error) {
 				e.geomIndex = i
 				//shpType = shp.MULTIPATCH
 			}
+		case reflect.Ptr:
+			if sField.Type.Elem().Name() == "Bounds" {
+				shpType = shp.POLYGON
+				e.geomIndex = i
+			}
 		default:
 			panic(fmt.Sprintf("Invalid type `%v` for field `%v`.",
 				sField.Type.Kind(), sField.Name))

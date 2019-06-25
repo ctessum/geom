@@ -73,3 +73,57 @@ func TestEncoder_polygon(t *testing.T) {
 	os.Remove(testFile + ".shx")
 	os.Remove(testFile + ".dbf")
 }
+
+func TestEncoder_bounds(t *testing.T) {
+
+	const testFile = "testdata/test_output"
+
+	type bounds struct {
+		*geom.Bounds
+	}
+	type polygon struct {
+		geom.Polygon
+	}
+
+	p := bounds{
+		Bounds: &geom.Bounds{
+			Min: geom.Point{0, 0},
+			Max: geom.Point{1, 1},
+		},
+	}
+
+	shape, err := NewEncoder(testFile+".shp", bounds{})
+	if err != nil {
+		t.Fatalf("error creating output shapefile: %v", err)
+	}
+	if err = shape.Encode(p); err != nil {
+		fmt.Printf("error writing output shapefile: %v", err)
+	}
+	shape.Close()
+
+	// Load geometries.
+	d, err := NewDecoder(testFile + ".shp")
+	if err != nil {
+		panic(err)
+	}
+
+	var p2 polygon
+	d.DecodeRow(&p2)
+
+	// Check to see if any errors occured during decoding.
+	if err := d.Error(); err != nil {
+		t.Fatalf("error decoding shapefile: %v", err)
+	}
+	d.Close()
+
+	want := geom.Polygon{{{X: 0, Y: 0}, {X: 1, Y: 0}, {X: 1, Y: 1}, {X: 0, Y: 1}, {X: 0, Y: 0}}}
+
+	if !reflect.DeepEqual(p2.Polygon, want) {
+		t.Errorf("%v != %v", p2.Polygon, want)
+	}
+
+	os.Remove(testFile + ".shp")
+	os.Remove(testFile + ".shx")
+	os.Remove(testFile + ".dbf")
+
+}
