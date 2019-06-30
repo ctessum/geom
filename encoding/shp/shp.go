@@ -118,6 +118,11 @@ func (r *Decoder) DecodeRow(rec interface{}) bool {
 				r.err = err
 				return false
 			}
+
+			if g == nil {
+				continue
+			}
+
 			fValue.Set(reflect.ValueOf(g))
 
 			// Then, check the tag name
