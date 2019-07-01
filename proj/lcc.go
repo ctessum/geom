@@ -36,19 +36,19 @@ func LCC(this *SR) (forward, inverse Transformer, err error) {
 	}
 
 	temp := this.B / this.A
-	this.E = math.Sqrt(1 - temp*temp)
+	E := math.Sqrt(1 - temp*temp)
 
 	var sin1 = math.Sin(this.Lat1)
 	var cos1 = math.Cos(this.Lat1)
-	var ms1 = msfnz(this.E, sin1, cos1)
-	var ts1 = tsfnz(this.E, this.Lat1, sin1)
+	var ms1 = msfnz(E, sin1, cos1)
+	var ts1 = tsfnz(E, this.Lat1, sin1)
 
 	var sin2 = math.Sin(this.Lat2)
 	var cos2 = math.Cos(this.Lat2)
-	var ms2 = msfnz(this.E, sin2, cos2)
-	var ts2 = tsfnz(this.E, this.Lat2, sin2)
+	var ms2 = msfnz(E, sin2, cos2)
+	var ts2 = tsfnz(E, this.Lat2, sin2)
 
-	var ts0 = tsfnz(this.E, this.Lat0, math.Sin(this.Lat0))
+	var ts0 = tsfnz(E, this.Lat0, math.Sin(this.Lat0))
 
 	var NS float64
 	if math.Abs(this.Lat1-this.Lat2) > epsln {
@@ -61,9 +61,9 @@ func LCC(this *SR) (forward, inverse Transformer, err error) {
 	}
 	F0 := ms1 / (NS * math.Pow(ts1, NS))
 	RH := this.A * F0 * math.Pow(ts0, NS)
-	if this.Title == "" {
-		this.Title = "Lambert Conformal Conic"
-	}
+	//if this.Title == "" {
+	//	this.Title = "Lambert Conformal Conic"
+	//}
 
 	// Lambert Conformal conic forward equations--mapping lat,long to x,y
 	// -----------------------------------------------------------------
@@ -76,7 +76,7 @@ func LCC(this *SR) (forward, inverse Transformer, err error) {
 		con := math.Abs(math.Abs(lat) - halfPi)
 		var ts, rh1 float64
 		if con > epsln {
-			ts = tsfnz(this.E, lat, math.Sin(lat))
+			ts = tsfnz(E, lat, math.Sin(lat))
 			rh1 = this.A * F0 * math.Pow(ts, NS)
 		} else {
 			con = lat * NS
@@ -114,7 +114,7 @@ func LCC(this *SR) (forward, inverse Transformer, err error) {
 		if (rh1 != 0) || (NS > 0) {
 			con = 1 / NS
 			ts = math.Pow((rh1 / (this.A * F0)), con)
-			lat, err = phi2z(this.E, ts)
+			lat, err = phi2z(E, ts)
 			if err != nil {
 				return
 			}

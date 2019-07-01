@@ -16,26 +16,27 @@ func Merc(this *SR) (forward, inverse Transformer, err error) {
 		this.Long0 = 0
 	}
 	var con = this.B / this.A
-	this.Es = 1 - con*con
+	Es := 1 - con*con
 	if math.IsNaN(this.X0) {
 		this.X0 = 0
 	}
 	if math.IsNaN(this.Y0) {
 		this.Y0 = 0
 	}
-	this.E = math.Sqrt(this.Es)
+	E := math.Sqrt(Es)
+	K0 := this.K0
 	if !math.IsNaN(this.LatTS) {
 		if this.sphere {
-			this.K0 = math.Cos(this.LatTS)
+			K0 = math.Cos(this.LatTS)
 		} else {
-			this.K0 = msfnz(this.E, math.Sin(this.LatTS), math.Cos(this.LatTS))
+			K0 = msfnz(E, math.Sin(this.LatTS), math.Cos(this.LatTS))
 		}
 	} else {
-		if math.IsNaN(this.K0) {
+		if math.IsNaN(K0) {
 			if !math.IsNaN(this.K) {
-				this.K0 = this.K
+				K0 = this.K
 			} else {
-				this.K0 = 1
+				K0 = 1
 			}
 		}
 	}
@@ -53,13 +54,13 @@ func Merc(this *SR) (forward, inverse Transformer, err error) {
 			return
 		}
 		if this.sphere {
-			x = this.X0 + this.A*this.K0*adjust_lon(lon-this.Long0)
-			y = this.Y0 + this.A*this.K0*math.Log(math.Tan(fortPi+0.5*lat))
+			x = this.X0 + this.A*K0*adjust_lon(lon-this.Long0)
+			y = this.Y0 + this.A*K0*math.Log(math.Tan(fortPi+0.5*lat))
 		} else {
 			var sinphi = math.Sin(lat)
 			var ts = tsfnz(this.E, lat, sinphi)
-			x = this.X0 + this.A*this.K0*adjust_lon(lon-this.Long0)
-			y = this.Y0 - this.A*this.K0*math.Log(ts)
+			x = this.X0 + this.A*K0*adjust_lon(lon-this.Long0)
+			y = this.Y0 - this.A*K0*math.Log(ts)
 		}
 		return
 	}
@@ -70,15 +71,15 @@ func Merc(this *SR) (forward, inverse Transformer, err error) {
 		y -= this.Y0
 
 		if this.sphere {
-			lat = halfPi - 2*math.Atan(math.Exp(-y/(this.A*this.K0)))
+			lat = halfPi - 2*math.Atan(math.Exp(-y/(this.A*K0)))
 		} else {
-			var ts = math.Exp(-y / (this.A * this.K0))
+			var ts = math.Exp(-y / (this.A * K0))
 			lat, err = phi2z(this.E, ts)
 			if err != nil {
 				return
 			}
 		}
-		lon = adjust_lon(this.Long0 + x/(this.A*this.K0))
+		lon = adjust_lon(this.Long0 + x/(this.A*K0))
 		return
 	}
 	return
