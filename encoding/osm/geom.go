@@ -16,7 +16,6 @@ type GeomTags struct {
 
 // Geom converts the OSM data to geometry objects, keeping the tag information.
 func (o *Data) Geom() ([]*GeomTags, error) {
-
 	items := make([]*GeomTags, 0, len(o.Ways))
 	for _, r := range o.Relations {
 		if _, ok := o.dependentRelations[r.ID]; !ok {

@@ -8,13 +8,86 @@ import (
 	"runtime"
 	"sort"
 
+	"github.com/ctessum/geom"
 	"github.com/qedus/osmpbf"
 )
 
-// ExtractTag extracts OpenStreetMap data with the given tag set to one of the
-// given values.
-func ExtractTag(rs io.ReadSeeker, tag string, values ...string) (*Data, error) {
+// KeepFunc is a function that determines whether an OSM object should
+// be included in the output. The object may be either *osmpbf.Node,
+// *osmpbf.Way, or *osmpbf.Relation
+type KeepFunc func(d *Data, object interface{}) bool
 
+// KeepTags keeps OSM objects that contain the given tag key
+// with at least one of the given tag values, where
+// the keys and values correspond to the keys and values
+// of the 'tags' input. If no
+// tag valuse are given, then all object with the given
+// key will be kept.
+func KeepTags(tags map[string][]string) KeepFunc {
+	return func(_ *Data, object interface{}) bool {
+		switch object.(type) {
+		case *osmpbf.Node:
+			return hasTag(object.(*osmpbf.Node).Tags, tags)
+		case *osmpbf.Way:
+			return hasTag(object.(*osmpbf.Way).Tags, tags)
+		case *osmpbf.Relation:
+			return hasTag(object.(*osmpbf.Relation).Tags, tags)
+		default:
+			panic(fmt.Errorf("osm: invalid object type %T", object))
+		}
+	}
+}
+
+// KeepBounds keeps OSM objects that overlap with b.
+// Using KeepBounds in combination with other KeepFuncs may
+// result in unexpected results.
+func KeepBounds(b *geom.Bounds) KeepFunc {
+	return func(o *Data, object interface{}) bool {
+		switch object.(type) {
+		case *osmpbf.Node:
+			// For nodes, keep anything that is within b.
+			n := object.(*osmpbf.Node)
+			return b.Overlaps(geom.Point{X: n.Lon, Y: n.Lat}.Bounds())
+		case *osmpbf.Way:
+			// For ways, keep anything that requires a node that we're already keeping.
+			w := object.(*osmpbf.Way)
+			for _, n := range w.NodeIDs {
+				if has, _ := o.hasNeedNode(n); has {
+					return true
+				}
+			}
+		case *osmpbf.Relation:
+			// For relations, keep anything that requires a node, way or relation that
+			// we're already keeping.
+			r := object.(*osmpbf.Relation)
+			for _, m := range r.Members {
+				switch m.Type {
+				case osmpbf.NodeType:
+					if has, _ := o.hasNeedNode(m.ID); has {
+						return true
+					}
+				case osmpbf.WayType:
+					if has, _ := o.hasNeedWay(m.ID); has {
+						return true
+					}
+				case osmpbf.RelationType:
+					if has, _ := o.hasNeedRelation(m.ID); has {
+						return true
+					}
+				default:
+					panic(fmt.Errorf("unknown member type %v", m.Type))
+				}
+			}
+		default:
+			panic(fmt.Errorf("osm: invalid object type %T", object))
+		}
+		return false
+	}
+}
+
+// Extract extracts OpenStreetMap data from osm.pbf file rs.
+// keep determines which records are included in the output.
+func Extract(rs io.ReadSeeker, keep KeepFunc) (*Data, error) {
 	o := &Data{
 		Nodes:     make(map[int64]*osmpbf.Node),
 		Ways:      make(map[int64]*osmpbf.Way),
@@ -46,13 +119,13 @@ func ExtractTag(rs io.ReadSeeker, tag string, values ...string) (*Data, error) {
 			}
 			switch vtype := v.(type) {
 			case *osmpbf.Node:
-				o.processNode(v.(*osmpbf.Node), tag, values)
+				o.processNode(v.(*osmpbf.Node), keep)
 			case *osmpbf.Way:
-				if o.processWay(v.(*osmpbf.Way), tag, values) {
+				if o.processWay(v.(*osmpbf.Way), keep) {
 					needAnotherPass = true
 				}
 			case *osmpbf.Relation:
-				if o.processRelation(v.(*osmpbf.Relation), tag, values) {
+				if o.processRelation(v.(*osmpbf.Relation), keep) {
 					needAnotherPass = true
 				}
 			default:
@@ -68,12 +141,20 @@ func ExtractTag(rs io.ReadSeeker, tag string, values ...string) (*Data, error) {
 	return o, nil
 }
 
+// ExtractTag extracts OpenStreetMap data with the given tag set to one of the
+// given values.
+func ExtractTag(rs io.ReadSeeker, tag string, values ...string) (*Data, error) {
+	return Extract(rs, KeepTags(map[string][]string{tag: values}))
+}
+
 // ObjectType specifies the valid OpenStreetMap types.
 type ObjectType int
 
 const (
 	// Node is an OpenStreetMap node.
 	Node ObjectType = iota
+	// Way can be either open or closed.
+	Way
 	// ClosedWay is an OpenStreetMap way that is closed (i.e., a polygon).
 	ClosedWay
 	// OpenWay is an OpenStreetMap way that is open (i.e., a line string).
@@ -158,6 +239,7 @@ func (t *TagCount) DominantType() ObjectType {
 	for typ, vv := range t.ObjectCount {
 		if vv > v {
 			result = typ
+			v = vv
 		}
 	}
 	return result
@@ -241,24 +323,61 @@ type Data struct {
 	Ways      map[int64]*osmpbf.Way
 	Relations map[int64]*osmpbf.Relation
 
+	// These list the objects that are dependent on other objects,
+	// and the objects that they are dependent on.
 	dependentNodes     map[int64]empty
-	dependentWays      map[int64]empty
 	dependentRelations map[int64]empty
+	dependentWays      map[int64]empty
 }
 
-// hasTag checks if tags[t] is one of the values in v. If len(v) == 0,
+// Filter returns a copy of the receiver where only objects
+// selected by keep are retained.
+func (o *Data) Filter(keep KeepFunc) *Data {
+	out := &Data{
+		Nodes:     make(map[int64]*osmpbf.Node),
+		Ways:      make(map[int64]*osmpbf.Way),
+		Relations: make(map[int64]*osmpbf.Relation),
+
+		dependentNodes:     make(map[int64]empty),
+		dependentWays:      make(map[int64]empty),
+		dependentRelations: make(map[int64]empty),
+	}
+
+	needAnotherPass := true
+	for needAnotherPass {
+		needAnotherPass = false
+		for _, n := range o.Nodes {
+			out.processNode(n, keep)
+		}
+		for _, w := range o.Ways {
+			if out.processWay(w, keep) {
+				needAnotherPass = true
+			}
+		}
+		for _, r := range o.Relations {
+			if out.processRelation(r, keep) {
+				needAnotherPass = true
+			}
+		}
+	}
+	return out
+}
+
+// hasTag checks if tags[t] is one of the values in wantTags. If len(v) == 0,
 // the function will return true is tags[t] has any value.
-func hasTag(tags map[string]string, t string, v []string) bool {
-	vv, ok := tags[t]
-	if !ok {
-		return false
-	}
-	if len(v) == 0 {
-		return true
-	}
-	for _, vvv := range v {
-		if vv == vvv {
+func hasTag(tags map[string]string, wantTags map[string][]string) bool {
+	for t, v := range wantTags {
+		vv, ok := tags[t]
+		if !ok {
+			continue
+		}
+		if len(v) == 0 {
 			return true
+		}
+		for _, vvv := range v {
+			if vv == vvv {
+				return true
+			}
 		}
 	}
 	return false
@@ -298,24 +417,24 @@ func (o *Data) hasNeedRelation(id int64) (has, need bool) {
 }
 
 // If the node has the tag we want, add it to the list.
-func (o *Data) processNode(n *osmpbf.Node, tag string, vals []string) {
+func (o *Data) processNode(n *osmpbf.Node, keep KeepFunc) {
 	hasNode, needNode := o.hasNeedNode(n.ID)
 	if hasNode {
 		return
 	}
-	if hasTag(n.Tags, tag, vals) || needNode {
+	if keep(o, n) || needNode {
 		o.Nodes[n.ID] = n
 	}
 }
 
 // If the way has the tag we want or if we've determined that it's
 // part of a relation that we want, store the way and the IDs of its dependent nodes.
-func (o *Data) processWay(w *osmpbf.Way, tag string, vals []string) (anotherPass bool) {
+func (o *Data) processWay(w *osmpbf.Way, keep KeepFunc) (anotherPass bool) {
 	hasWay, needWay := o.hasNeedWay(w.ID)
 	if hasWay {
 		return
 	}
-	if hasTag(w.Tags, tag, vals) || needWay {
+	if keep(o, w) || needWay {
 		o.Ways[w.ID] = w
 		for _, n := range w.NodeIDs {
 			if _, needNode := o.hasNeedNode(n); !needNode {
@@ -331,14 +450,12 @@ func (o *Data) processWay(w *osmpbf.Way, tag string, vals []string) (anotherPass
 // part of a different relation that we want, store the IDs of its
 // members and set the flag for another pass through the file to
 // get the IDs for the dependent nodes, ways and other relations in the relation.
-func (o *Data) processRelation(r *osmpbf.Relation,
-	tag string, vals []string) (anotherPass bool) {
-
+func (o *Data) processRelation(r *osmpbf.Relation, keep KeepFunc) (anotherPass bool) {
 	hasRelation, needRelation := o.hasNeedRelation(r.ID)
 	if hasRelation {
 		return
 	}
-	if hasTag(r.Tags, tag, vals) || needRelation {
+	if keep(o, r) || needRelation {
 		o.Relations[r.ID] = r
 		for _, m := range r.Members {
 			switch m.Type {
