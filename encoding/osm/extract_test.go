@@ -1,6 +1,7 @@
 package osm
 
 import (
+	"context"
 	"math"
 	"os"
 	"reflect"
@@ -67,11 +68,11 @@ func TestExtractTag_Line(t *testing.T) {
 			geom.Point{X: -157.8260688, Y: 21.404186000000003},
 			geom.Point{X: -157.8258194, Y: 21.403686500000003},
 		},
-		Tags: map[string]string{
-			"highway":          "path",
-			"surface":          "dirt",
-			"trail_visibility": "bad",
-			"access":           "private"},
+		Tags: map[string][]string{
+			"highway":          []string{"path"},
+			"surface":          []string{"dirt"},
+			"trail_visibility": []string{"bad"},
+			"access":           []string{"private"}},
 	}
 	have := geomTags[0]
 	if !reflect.DeepEqual(want, have) {
@@ -121,15 +122,15 @@ func TestExtractTag_Polygon(t *testing.T) {
 				geom.Point{X: -157.8244995, Y: 21.280087100000003},
 				geom.Point{X: -157.82454280000002, Y: 21.2800456}},
 		},
-		Tags: map[string]string{
-			"addr:city":        "Honolulu",
-			"addr:state":       "HI",
-			"addr:street":      "Nahua Street",
-			"addr:postcode":    "96815",
-			"addr:housenumber": "451",
-			"name":             "Napili Tower",
-			"website":          "http://www.napilitowers.com/",
-			"building":         "apartments"},
+		Tags: map[string][]string{
+			"addr:city":        []string{"Honolulu"},
+			"addr:state":       []string{"HI"},
+			"addr:street":      []string{"Nahua Street"},
+			"addr:postcode":    []string{"96815"},
+			"addr:housenumber": []string{"451"},
+			"name":             []string{"Napili Tower"},
+			"website":          []string{"http://www.napilitowers.com/"},
+			"building":         []string{"apartments"}},
 	}
 	have := geomTags[0]
 	if !reflect.DeepEqual(want, have) {
@@ -195,7 +196,7 @@ func TestExtract_bounds_point(t *testing.T) {
 		Min: geom.Point{X: -158.125, Y: 21.264},
 		Max: geom.Point{X: -157, Y: 22},
 	}
-	data, err := Extract(f, KeepBounds(b))
+	data, err := Extract(context.Background(), f, KeepBounds(b))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -236,7 +237,7 @@ func TestExtract_bounds_line(t *testing.T) {
 		Min: geom.Point{X: -158.124437, Y: 21.265047},
 		Max: geom.Point{X: -158, Y: 21.5},
 	}
-	data, err := Extract(f, KeepBounds(b))
+	data, err := Extract(context.Background(), f, KeepBounds(b))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -253,11 +254,11 @@ func TestExtract_bounds_line(t *testing.T) {
 			geom.Point{X: -157.8260688, Y: 21.404186000000003},
 			geom.Point{X: -157.8258194, Y: 21.403686500000003},
 		},
-		Tags: map[string]string{
-			"highway":          "path",
-			"surface":          "dirt",
-			"trail_visibility": "bad",
-			"access":           "private"},
+		Tags: map[string][]string{
+			"highway":          []string{"path"},
+			"surface":          []string{"dirt"},
+			"trail_visibility": []string{"bad"},
+			"access":           []string{"private"}},
 	}
 	have := geomTags[0]
 	if !reflect.DeepEqual(want, have) {
@@ -275,7 +276,7 @@ func TestExtract_bounds_polygon(t *testing.T) {
 		Min: geom.Point{X: -160, Y: 20},
 		Max: geom.Point{X: -157, Y: 23},
 	}
-	data, err := Extract(f, KeepBounds(b))
+	data, err := Extract(context.Background(), f, KeepBounds(b))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -312,15 +313,15 @@ func TestExtract_bounds_polygon(t *testing.T) {
 				geom.Point{X: -157.8244995, Y: 21.280087100000003},
 				geom.Point{X: -157.82454280000002, Y: 21.2800456}},
 		},
-		Tags: map[string]string{
-			"addr:city":        "Honolulu",
-			"addr:state":       "HI",
-			"addr:street":      "Nahua Street",
-			"addr:postcode":    "96815",
-			"addr:housenumber": "451",
-			"name":             "Napili Tower",
-			"website":          "http://www.napilitowers.com/",
-			"building":         "apartments"},
+		Tags: map[string][]string{
+			"addr:city":        []string{"Honolulu"},
+			"addr:state":       []string{"HI"},
+			"addr:street":      []string{"Nahua Street"},
+			"addr:postcode":    []string{"96815"},
+			"addr:housenumber": []string{"451"},
+			"name":             []string{"Napili Tower"},
+			"website":          []string{"http://www.napilitowers.com/"},
+			"building":         []string{"apartments"}},
 	}
 	have := geomTags[0]
 	if !reflect.DeepEqual(want, have) {
@@ -338,7 +339,7 @@ func TestExtract_bounds_multiLineString(t *testing.T) {
 		Min: geom.Point{X: -158.124437, Y: 21.265047},
 		Max: geom.Point{X: -158, Y: 21.5},
 	}
-	data, err := Extract(f, KeepBounds(b))
+	data, err := Extract(context.Background(), f, KeepBounds(b))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -367,7 +368,7 @@ func TestExtract_bounds_RelationPolygon(t *testing.T) {
 		Min: geom.Point{X: -180, Y: -90},
 		Max: geom.Point{X: 180, Y: 90},
 	}
-	data, err := Extract(f, KeepBounds(b))
+	data, err := Extract(context.Background(), f, KeepBounds(b))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -3,24 +3,26 @@
 package osm
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"runtime"
 
-	"github.com/qedus/osmpbf"
+	"github.com/paulmach/osm"
+	"github.com/paulmach/osm/osmpbf"
 )
 
 // Extract extracts OpenStreetMap data from osm.pbf file rs.
 // keep determines which records are included in the output.
-func Extract(rs io.ReadSeeker, keep KeepFunc) (*Data, error) {
+func Extract(ctx context.Context, rs io.ReadSeeker, keep KeepFunc) (*Data, error) {
 	o := &Data{
-		Nodes:     make(map[int64]*osmpbf.Node),
-		Ways:      make(map[int64]*osmpbf.Way),
-		Relations: make(map[int64]*osmpbf.Relation),
+		Nodes:     make(map[osm.NodeID]*osm.Node),
+		Ways:      make(map[osm.WayID]*osm.Way),
+		Relations: make(map[osm.RelationID]*osm.Relation),
 
-		dependentNodes:     make(map[int64]empty),
-		dependentWays:      make(map[int64]empty),
-		dependentRelations: make(map[int64]empty),
+		dependentNodes:     make(map[osm.NodeID]empty),
+		dependentWays:      make(map[osm.WayID]empty),
+		dependentRelations: make(map[osm.RelationID]empty),
 	}
 
 	needAnotherPass := true
@@ -30,32 +32,29 @@ func Extract(rs io.ReadSeeker, keep KeepFunc) (*Data, error) {
 		if _, err := rs.Seek(0, 0); err != nil {
 			return nil, err
 		}
-		data := osmpbf.NewDecoder(rs)
-		if err := data.Start(runtime.GOMAXPROCS(-1)); err != nil {
-			return nil, err
-		}
-		for {
-			var v interface{}
-			var err error
-			if v, err = data.Decode(); err == io.EOF {
-				break
-			} else if err != nil {
-				return nil, err
-			}
-			switch vtype := v.(type) {
-			case *osmpbf.Node:
-				o.processNode(v.(*osmpbf.Node), keep)
-			case *osmpbf.Way:
-				if o.processWay(v.(*osmpbf.Way), keep) {
+		scanner := osmpbf.New(ctx, rs, runtime.GOMAXPROCS(-1))
+		for scanner.Scan() {
+			obj := scanner.Object()
+			switch objType := obj.(type) {
+			case *osm.Node:
+				o.processNode(obj.(*osm.Node), keep)
+			case *osm.Way:
+				if o.processWay(obj.(*osm.Way), keep) {
 					needAnotherPass = true
 				}
-			case *osmpbf.Relation:
-				if o.processRelation(v.(*osmpbf.Relation), keep) {
+			case *osm.Relation:
+				if o.processRelation(obj.(*osm.Relation), keep) {
 					needAnotherPass = true
 				}
 			default:
-				return nil, fmt.Errorf("unknown type %T\n", vtype)
+				return nil, fmt.Errorf("unknown type %T\n", objType)
 			}
+		}
+		if err := scanner.Err(); err != nil {
+			return nil, err
+		}
+		if err := scanner.Close(); err != nil {
+			return nil, err
 		}
 		//passI++
 		//log.Printf("pass %d: %d nodes, %d ways, %d relations, "+
@@ -69,7 +68,7 @@ func Extract(rs io.ReadSeeker, keep KeepFunc) (*Data, error) {
 // ExtractTag extracts OpenStreetMap data with the given tag set to one of the
 // given values.
 func ExtractTag(rs io.ReadSeeker, tag string, values ...string) (*Data, error) {
-	return Extract(rs, KeepTags(map[string][]string{tag: values}))
+	return Extract(context.Background(), rs, KeepTags(map[string][]string{tag: values}))
 }
 
 // ObjectType specifies the valid OpenStreetMap types.
@@ -92,28 +91,28 @@ type empty struct{}
 
 // Data holds OpenStreetMap data and relationships.
 type Data struct {
-	Nodes     map[int64]*osmpbf.Node
-	Ways      map[int64]*osmpbf.Way
-	Relations map[int64]*osmpbf.Relation
+	Nodes     map[osm.NodeID]*osm.Node
+	Ways      map[osm.WayID]*osm.Way
+	Relations map[osm.RelationID]*osm.Relation
 
 	// These list the objects that are dependent on other objects,
 	// and the objects that they are dependent on.
-	dependentNodes     map[int64]empty
-	dependentRelations map[int64]empty
-	dependentWays      map[int64]empty
+	dependentNodes     map[osm.NodeID]empty
+	dependentWays      map[osm.WayID]empty
+	dependentRelations map[osm.RelationID]empty
 }
 
 // Filter returns a copy of the receiver where only objects
 // selected by keep are retained.
 func (o *Data) Filter(keep KeepFunc) *Data {
 	out := &Data{
-		Nodes:     make(map[int64]*osmpbf.Node),
-		Ways:      make(map[int64]*osmpbf.Way),
-		Relations: make(map[int64]*osmpbf.Relation),
+		Nodes:     make(map[osm.NodeID]*osm.Node),
+		Ways:      make(map[osm.WayID]*osm.Way),
+		Relations: make(map[osm.RelationID]*osm.Relation),
 
-		dependentNodes:     make(map[int64]empty),
-		dependentWays:      make(map[int64]empty),
-		dependentRelations: make(map[int64]empty),
+		dependentNodes:     make(map[osm.NodeID]empty),
+		dependentWays:      make(map[osm.WayID]empty),
+		dependentRelations: make(map[osm.RelationID]empty),
 	}
 
 	needAnotherPass := true
@@ -138,25 +137,27 @@ func (o *Data) Filter(keep KeepFunc) *Data {
 
 // hasTag checks if tags[t] is one of the values in wantTags. If len(v) == 0,
 // the function will return true is tags[t] has any value.
-func hasTag(tags map[string]string, wantTags map[string][]string) bool {
-	for t, v := range wantTags {
-		vv, ok := tags[t]
+func hasTag(tags map[string][]string, wantTags map[string][]string) bool {
+	for wantTagKey, wantTagValues := range wantTags {
+		tagValues, ok := tags[wantTagKey]
 		if !ok {
 			continue
 		}
-		if len(v) == 0 {
+		if len(tagValues) == 0 {
 			return true
 		}
-		for _, vvv := range v {
-			if vv == vvv {
-				return true
+		for _, wantTagValue := range wantTagValues {
+			for _, tagValue := range tagValues {
+				if tagValue == wantTagValue {
+					return true
+				}
 			}
 		}
 	}
 	return false
 }
 
-func (o *Data) hasNeedNode(id int64) (has, need bool) {
+func (o *Data) hasNeedNode(id osm.NodeID) (has, need bool) {
 	if _, ok := o.Nodes[id]; ok {
 		has = true
 		return
@@ -167,7 +168,7 @@ func (o *Data) hasNeedNode(id int64) (has, need bool) {
 	return
 }
 
-func (o *Data) hasNeedWay(id int64) (has, need bool) {
+func (o *Data) hasNeedWay(id osm.WayID) (has, need bool) {
 	if _, ok := o.Ways[id]; ok {
 		has = true
 		return
@@ -178,7 +179,7 @@ func (o *Data) hasNeedWay(id int64) (has, need bool) {
 	return
 }
 
-func (o *Data) hasNeedRelation(id int64) (has, need bool) {
+func (o *Data) hasNeedRelation(id osm.RelationID) (has, need bool) {
 	if _, ok := o.Relations[id]; ok {
 		has = true
 		return
@@ -190,7 +191,7 @@ func (o *Data) hasNeedRelation(id int64) (has, need bool) {
 }
 
 // If the node has the tag we want, add it to the list.
-func (o *Data) processNode(n *osmpbf.Node, keep KeepFunc) {
+func (o *Data) processNode(n *osm.Node, keep KeepFunc) {
 	hasNode, needNode := o.hasNeedNode(n.ID)
 	if hasNode {
 		return
@@ -202,16 +203,16 @@ func (o *Data) processNode(n *osmpbf.Node, keep KeepFunc) {
 
 // If the way has the tag we want or if we've determined that it's
 // part of a relation that we want, store the way and the IDs of its dependent nodes.
-func (o *Data) processWay(w *osmpbf.Way, keep KeepFunc) (anotherPass bool) {
+func (o *Data) processWay(w *osm.Way, keep KeepFunc) (anotherPass bool) {
 	hasWay, needWay := o.hasNeedWay(w.ID)
 	if hasWay {
 		return
 	}
 	if keep(o, w) || needWay {
 		o.Ways[w.ID] = w
-		for _, n := range w.NodeIDs {
-			if _, needNode := o.hasNeedNode(n); !needNode {
-				o.dependentNodes[n] = empty{}
+		for _, n := range w.Nodes {
+			if _, needNode := o.hasNeedNode(n.ID); !needNode {
+				o.dependentNodes[n.ID] = empty{}
 				anotherPass = true
 			}
 		}
@@ -223,7 +224,7 @@ func (o *Data) processWay(w *osmpbf.Way, keep KeepFunc) (anotherPass bool) {
 // part of a different relation that we want, store the IDs of its
 // members and set the flag for another pass through the file to
 // get the IDs for the dependent nodes, ways and other relations in the relation.
-func (o *Data) processRelation(r *osmpbf.Relation, keep KeepFunc) (anotherPass bool) {
+func (o *Data) processRelation(r *osm.Relation, keep KeepFunc) (anotherPass bool) {
 	hasRelation, needRelation := o.hasNeedRelation(r.ID)
 	if hasRelation {
 		return
@@ -232,19 +233,19 @@ func (o *Data) processRelation(r *osmpbf.Relation, keep KeepFunc) (anotherPass b
 		o.Relations[r.ID] = r
 		for _, m := range r.Members {
 			switch m.Type {
-			case osmpbf.NodeType:
-				if _, needNode := o.hasNeedNode(m.ID); !needNode {
-					o.dependentNodes[m.ID] = empty{}
+			case osm.TypeNode:
+				if _, needNode := o.hasNeedNode(osm.NodeID(m.Ref)); !needNode {
+					o.dependentNodes[osm.NodeID(m.Ref)] = empty{}
 					anotherPass = true
 				}
-			case osmpbf.WayType:
-				if _, needWay := o.hasNeedWay(m.ID); !needWay {
-					o.dependentWays[m.ID] = empty{}
+			case osm.TypeWay:
+				if _, needWay := o.hasNeedWay(osm.WayID(m.Ref)); !needWay {
+					o.dependentWays[osm.WayID(m.Ref)] = empty{}
 					anotherPass = true
 				}
-			case osmpbf.RelationType:
-				if _, needR := o.hasNeedRelation(m.ID); !needR {
-					o.dependentRelations[m.ID] = empty{}
+			case osm.TypeRelation:
+				if _, needR := o.hasNeedRelation(osm.RelationID(m.Ref)); !needR {
+					o.dependentRelations[osm.RelationID(m.Ref)] = empty{}
 					anotherPass = true
 				}
 			default:

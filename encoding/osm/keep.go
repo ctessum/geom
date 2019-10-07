@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/ctessum/geom"
-	"github.com/qedus/osmpbf"
+	"github.com/paulmach/osm"
 )
 
 // KeepFunc is a function that determines whether an OSM object should
@@ -21,12 +21,12 @@ type KeepFunc func(d *Data, object interface{}) bool
 func KeepTags(tags map[string][]string) KeepFunc {
 	return func(_ *Data, object interface{}) bool {
 		switch object.(type) {
-		case *osmpbf.Node:
-			return hasTag(object.(*osmpbf.Node).Tags, tags)
-		case *osmpbf.Way:
-			return hasTag(object.(*osmpbf.Way).Tags, tags)
-		case *osmpbf.Relation:
-			return hasTag(object.(*osmpbf.Relation).Tags, tags)
+		case *osm.Node:
+			return hasTag(tagsToMap(object.(*osm.Node).Tags), tags)
+		case *osm.Way:
+			return hasTag(tagsToMap(object.(*osm.Way).Tags), tags)
+		case *osm.Relation:
+			return hasTag(tagsToMap(object.(*osm.Relation).Tags), tags)
 		default:
 			panic(fmt.Errorf("osm: invalid object type %T", object))
 		}
@@ -39,34 +39,34 @@ func KeepTags(tags map[string][]string) KeepFunc {
 func KeepBounds(b *geom.Bounds) KeepFunc {
 	return func(o *Data, object interface{}) bool {
 		switch object.(type) {
-		case *osmpbf.Node:
+		case *osm.Node:
 			// For nodes, keep anything that is within b.
-			n := object.(*osmpbf.Node)
+			n := object.(*osm.Node)
 			return b.Overlaps(geom.Point{X: n.Lon, Y: n.Lat}.Bounds())
-		case *osmpbf.Way:
+		case *osm.Way:
 			// For ways, keep anything that requires a node that we're already keeping.
-			w := object.(*osmpbf.Way)
-			for _, n := range w.NodeIDs {
-				if has, _ := o.hasNeedNode(n); has {
+			w := object.(*osm.Way)
+			for _, n := range w.Nodes {
+				if has, _ := o.hasNeedNode(n.ID); has {
 					return true
 				}
 			}
-		case *osmpbf.Relation:
+		case *osm.Relation:
 			// For relations, keep anything that requires a node, way or relation that
 			// we're already keeping.
-			r := object.(*osmpbf.Relation)
+			r := object.(*osm.Relation)
 			for _, m := range r.Members {
 				switch m.Type {
-				case osmpbf.NodeType:
-					if has, _ := o.hasNeedNode(m.ID); has {
+				case osm.TypeNode:
+					if has, _ := o.hasNeedNode(osm.NodeID(m.Ref)); has {
 						return true
 					}
-				case osmpbf.WayType:
-					if has, _ := o.hasNeedWay(m.ID); has {
+				case osm.TypeWay:
+					if has, _ := o.hasNeedWay(osm.WayID(m.Ref)); has {
 						return true
 					}
-				case osmpbf.RelationType:
-					if has, _ := o.hasNeedRelation(m.ID); has {
+				case osm.TypeRelation:
+					if has, _ := o.hasNeedRelation(osm.RelationID(m.Ref)); has {
 						return true
 					}
 				default:

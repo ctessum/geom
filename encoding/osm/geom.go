@@ -5,13 +5,21 @@ import (
 
 	"github.com/ctessum/geom"
 	"github.com/ctessum/geom/op"
-	"github.com/qedus/osmpbf"
+	"github.com/paulmach/osm"
 )
 
 // GeomTags holds a geometry object and the tags that apply to it.
 type GeomTags struct {
 	geom.Geom
-	Tags map[string]string
+	Tags map[string][]string
+}
+
+func tagsToMap(tags osm.Tags) map[string][]string {
+	o := make(map[string][]string)
+	for _, t := range tags {
+		o[t.Key] = append(o[t.Key], t.Value)
+	}
+	return o
 }
 
 // Geom converts the OSM data to geometry objects, keeping the tag information.
@@ -25,7 +33,7 @@ func (o *Data) Geom() ([]*GeomTags, error) {
 			}
 			items = append(items, &GeomTags{
 				Geom: g,
-				Tags: r.Tags,
+				Tags: tagsToMap(r.Tags),
 			})
 		}
 	}
@@ -33,7 +41,7 @@ func (o *Data) Geom() ([]*GeomTags, error) {
 		if _, ok := o.dependentWays[w.ID]; !ok {
 			items = append(items, &GeomTags{
 				Geom: wayToGeom(w, o.Nodes),
-				Tags: w.Tags,
+				Tags: tagsToMap(w.Tags),
 			})
 		}
 	}
@@ -41,18 +49,18 @@ func (o *Data) Geom() ([]*GeomTags, error) {
 		if _, ok := o.dependentNodes[n.ID]; !ok {
 			items = append(items, &GeomTags{
 				Geom: nodeToPoint(n),
-				Tags: n.Tags,
+				Tags: tagsToMap(n.Tags),
 			})
 		}
 	}
 	return items, nil
 }
 
-func nodeToPoint(n *osmpbf.Node) geom.Point {
+func nodeToPoint(n *osm.Node) geom.Point {
 	return geom.Point{X: n.Lon, Y: n.Lat}
 }
 
-func wayToGeom(way *osmpbf.Way, nodes map[int64]*osmpbf.Node) geom.Geom {
+func wayToGeom(way *osm.Way, nodes map[osm.NodeID]*osm.Node) geom.Geom {
 	if wayIsClosed(way) {
 		return wayToPolygon(way, nodes)
 	}
@@ -60,43 +68,43 @@ func wayToGeom(way *osmpbf.Way, nodes map[int64]*osmpbf.Node) geom.Geom {
 }
 
 // wayIsClosed determines whether a way represents a polygon.
-func wayIsClosed(way *osmpbf.Way) bool {
-	return way.NodeIDs[0] == way.NodeIDs[len(way.NodeIDs)-1]
+func wayIsClosed(way *osm.Way) bool {
+	return way.Nodes[0].ID == way.Nodes[len(way.Nodes)-1].ID
 }
 
 // wayToPolygon converts a way to a polygon
-func wayToPolygon(way *osmpbf.Way, nodes map[int64]*osmpbf.Node) geom.Polygon {
+func wayToPolygon(way *osm.Way, nodes map[osm.NodeID]*osm.Node) geom.Polygon {
 	p := make(geom.Polygon, 1)
-	for _, nid := range way.NodeIDs {
-		p[0] = append(p[0], nodeToPoint(nodes[nid]))
+	for _, n := range way.Nodes {
+		p[0] = append(p[0], nodeToPoint(nodes[n.ID]))
 	}
 	return p
 }
 
 // wayToLineString converts a way to a LineString
-func wayToLineString(way *osmpbf.Way, nodes map[int64]*osmpbf.Node) geom.LineString {
+func wayToLineString(way *osm.Way, nodes map[osm.NodeID]*osm.Node) geom.LineString {
 	var p geom.LineString
-	for _, nid := range way.NodeIDs {
-		p = append(p, nodeToPoint(nodes[nid]))
+	for _, n := range way.Nodes {
+		p = append(p, nodeToPoint(nodes[n.ID]))
 	}
 	return p
 }
 
 // relationToGeom converts a relation to a geometry object.
-func relationToGeom(relation *osmpbf.Relation,
-	relations map[int64]*osmpbf.Relation, ways map[int64]*osmpbf.Way,
-	nodes map[int64]*osmpbf.Node) (geom.Geom, error) {
+func relationToGeom(relation *osm.Relation,
+	relations map[osm.RelationID]*osm.Relation, ways map[osm.WayID]*osm.Way,
+	nodes map[osm.NodeID]*osm.Node) (geom.Geom, error) {
 
 	var nNodes, nLines, nPolygons int
 	for _, m := range relation.Members {
 		switch m.Type {
-		case osmpbf.WayType:
-			if wayIsClosed(ways[m.ID]) {
+		case osm.TypeWay:
+			if wayIsClosed(ways[osm.WayID(m.Ref)]) {
 				nPolygons++
 			} else {
 				nLines++
 			}
-		case osmpbf.NodeType:
+		case osm.TypeNode:
 			nNodes++
 		}
 	}
@@ -113,14 +121,14 @@ func relationToGeom(relation *osmpbf.Relation,
 }
 
 // relationToMultiPoint converts a relation to a MultiPoint
-func relationToMultiPoint(relation *osmpbf.Relation,
-	nodes map[int64]*osmpbf.Node) geom.MultiPoint {
+func relationToMultiPoint(relation *osm.Relation,
+	nodes map[osm.NodeID]*osm.Node) geom.MultiPoint {
 
 	p := make(geom.MultiPoint, len(relation.Members))
 	for i, m := range relation.Members {
 		switch m.Type {
-		case osmpbf.NodeType:
-			p[i] = nodeToPoint(nodes[m.ID])
+		case osm.TypeNode:
+			p[i] = nodeToPoint(nodes[osm.NodeID(m.Ref)])
 		default:
 			panic(fmt.Errorf("unsupported relation type %T", m.Type))
 		}
@@ -129,13 +137,13 @@ func relationToMultiPoint(relation *osmpbf.Relation,
 }
 
 // relationToPolygon converts a relation to a polygon
-func relationToPolygon(relation *osmpbf.Relation, ways map[int64]*osmpbf.Way,
-	nodes map[int64]*osmpbf.Node) (geom.Polygon, error) {
+func relationToPolygon(relation *osm.Relation, ways map[osm.WayID]*osm.Way,
+	nodes map[osm.NodeID]*osm.Node) (geom.Polygon, error) {
 	var p geom.Polygon
 	for _, m := range relation.Members {
 		switch m.Type {
-		case osmpbf.WayType:
-			p = append(p, wayToPolygon(ways[m.ID], nodes)[0])
+		case osm.TypeWay:
+			p = append(p, wayToPolygon(ways[osm.WayID(m.Ref)], nodes)[0])
 		default:
 			panic(fmt.Errorf("unsupported relation type %T", m.Type))
 		}
@@ -148,13 +156,13 @@ func relationToPolygon(relation *osmpbf.Relation, ways map[int64]*osmpbf.Way,
 
 // relationToMultiLineString converts a relation to a MultiLineString,
 // deleting its contained elements from 'ways' and 'nodes'.
-func relationToMultiLineString(relation *osmpbf.Relation, ways map[int64]*osmpbf.Way,
-	nodes map[int64]*osmpbf.Node) geom.MultiLineString {
+func relationToMultiLineString(relation *osm.Relation, ways map[osm.WayID]*osm.Way,
+	nodes map[osm.NodeID]*osm.Node) geom.MultiLineString {
 	var p geom.MultiLineString
 	for _, m := range relation.Members {
 		switch m.Type {
-		case osmpbf.WayType:
-			p = append(p, wayToLineString(ways[m.ID], nodes))
+		case osm.TypeWay:
+			p = append(p, wayToLineString(ways[osm.WayID(m.Ref)], nodes))
 		default:
 			panic(fmt.Errorf("unsupported relation type %T", m.Type))
 		}
@@ -162,20 +170,20 @@ func relationToMultiLineString(relation *osmpbf.Relation, ways map[int64]*osmpbf
 	return p
 }
 
-func relationToGeometryCollection(relation *osmpbf.Relation,
-	relations map[int64]*osmpbf.Relation, ways map[int64]*osmpbf.Way,
-	nodes map[int64]*osmpbf.Node) (geom.Geom, error) {
+func relationToGeometryCollection(relation *osm.Relation,
+	relations map[osm.RelationID]*osm.Relation, ways map[osm.WayID]*osm.Way,
+	nodes map[osm.NodeID]*osm.Node) (geom.Geom, error) {
 
 	p := make(geom.GeometryCollection, len(relation.Members))
 	for i, m := range relation.Members {
 		switch m.Type {
-		case osmpbf.WayType:
-			p[i] = wayToGeom(ways[m.ID], nodes)
-		case osmpbf.NodeType:
-			p[i] = nodeToPoint(nodes[m.ID])
-		case osmpbf.RelationType:
+		case osm.TypeWay:
+			p[i] = wayToGeom(ways[osm.WayID(m.Ref)], nodes)
+		case osm.TypeNode:
+			p[i] = nodeToPoint(nodes[osm.NodeID(m.Ref)])
+		case osm.TypeRelation:
 			var err error
-			p[i], err = relationToGeom(relations[m.ID], relations, ways, nodes)
+			p[i], err = relationToGeom(relations[osm.RelationID(m.Ref)], relations, ways, nodes)
 			if err != nil {
 				return nil, err
 			}

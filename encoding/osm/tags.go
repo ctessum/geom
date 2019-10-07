@@ -1,12 +1,14 @@
 package osm
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"runtime"
 	"sort"
 
-	"github.com/qedus/osmpbf"
+	"github.com/paulmach/osm"
+	"github.com/paulmach/osm/osmpbf"
 )
 
 // Tags holds information about the tags that are in a database.
@@ -93,7 +95,7 @@ func (t *TagCount) DominantType() ObjectType {
 
 // CountTags returns the different tags in the database and the number of
 // instances of each one.
-func CountTags(rs io.ReadSeeker) (Tags, error) {
+func CountTags(ctx context.Context, rs io.ReadSeeker) (Tags, error) {
 	tags := make(map[string]map[string]*TagCount)
 
 	addTag := func(key, val string, typ ObjectType) {
@@ -116,41 +118,39 @@ func CountTags(rs io.ReadSeeker) (Tags, error) {
 	if _, err := rs.Seek(0, 0); err != nil {
 		return nil, err
 	}
-	data := osmpbf.NewDecoder(rs)
-	if err := data.Start(runtime.GOMAXPROCS(-1)); err != nil {
-		return nil, err
-	}
-	for {
-		var v interface{}
-		var err error
-		if v, err = data.Decode(); err == io.EOF {
-			break
-		} else if err != nil {
-			return nil, err
-		}
-		switch vtype := v.(type) {
-		case *osmpbf.Node:
-			for key, val := range v.(*osmpbf.Node).Tags {
-				addTag(key, val, Node)
+	scanner := osmpbf.New(ctx, rs, runtime.GOMAXPROCS(-1))
+	for scanner.Scan() {
+		obj := scanner.Object()
+		switch vtype := obj.(type) {
+		case *osm.Node:
+			for _, t := range obj.(*osm.Node).Tags {
+				addTag(t.Key, t.Value, Node)
 			}
-		case *osmpbf.Way:
-			if w := v.(*osmpbf.Way); wayIsClosed(w) {
-				for key, val := range w.Tags {
-					addTag(key, val, ClosedWay)
+		case *osm.Way:
+			if w := obj.(*osm.Way); wayIsClosed(w) {
+				for _, t := range w.Tags {
+					addTag(t.Key, t.Value, ClosedWay)
 				}
 			} else {
-				for key, val := range w.Tags {
-					addTag(key, val, OpenWay)
+				for _, t := range w.Tags {
+					addTag(t.Key, t.Value, OpenWay)
 				}
 			}
-		case *osmpbf.Relation:
-			for key, val := range v.(*osmpbf.Relation).Tags {
-				addTag(key, val, Relation)
+		case *osm.Relation:
+			for _, t := range obj.(*osm.Relation).Tags {
+				addTag(t.Key, t.Value, Relation)
 			}
 		default:
 			return nil, fmt.Errorf("unknown type %T\n", vtype)
 		}
 	}
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+	if err := scanner.Close(); err != nil {
+		return nil, err
+	}
+
 	var tagList Tags
 	for _, d := range tags {
 		for _, d2 := range d {
@@ -183,24 +183,24 @@ func (o *Data) CountTags() Tags {
 		tags[key][val] = t
 	}
 	for _, n := range o.Nodes {
-		for key, val := range n.Tags {
-			addTag(key, val, Node)
+		for _, t := range n.Tags {
+			addTag(t.Key, t.Value, Node)
 		}
 	}
 	for _, w := range o.Ways {
 		if wayIsClosed(w) {
-			for key, val := range w.Tags {
-				addTag(key, val, ClosedWay)
+			for _, t := range w.Tags {
+				addTag(t.Key, t.Value, ClosedWay)
 			}
 		} else {
-			for key, val := range w.Tags {
-				addTag(key, val, OpenWay)
+			for _, t := range w.Tags {
+				addTag(t.Key, t.Value, OpenWay)
 			}
 		}
 	}
 	for _, r := range o.Relations {
-		for key, val := range r.Tags {
-			addTag(key, val, Relation)
+		for _, t := range r.Tags {
+			addTag(t.Key, t.Value, Relation)
 		}
 	}
 

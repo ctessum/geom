@@ -1,6 +1,7 @@
 package osm
 
 import (
+	"context"
 	"os"
 	"reflect"
 	"testing"
@@ -12,7 +13,7 @@ func TestCountTags(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	tags, err := CountTags(f)
+	tags, err := CountTags(context.Background(), f)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -42,7 +43,7 @@ func TestData_CountTags(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	data, err := Extract(f, func(_ *Data, _ interface{}) bool { return true })
+	data, err := Extract(context.Background(), f, func(_ *Data, _ interface{}) bool { return true })
 	if err != nil {
 		t.Fatal(err)
 	}

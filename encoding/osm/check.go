@@ -3,7 +3,7 @@ package osm
 import (
 	"fmt"
 
-	"github.com/qedus/osmpbf"
+	"github.com/paulmach/osm"
 )
 
 // Check checks OSM data to ensure that all necessary components
@@ -18,12 +18,12 @@ func (o *Data) Check() error {
 		if w == nil {
 			return fmt.Errorf("way %d is nil", i)
 		}
-		for _, n := range w.NodeIDs {
-			if x, ok := o.Nodes[n]; !ok {
-				return fmt.Errorf("node %d is referenced by way %d but does not exist",
+		for _, n := range w.Nodes {
+			if x, ok := o.Nodes[n.ID]; !ok {
+				return fmt.Errorf("node %v is referenced by way %v but does not exist",
 					n, w.ID)
 			} else if x == nil {
-				return fmt.Errorf("node %d is referenced by way %d but is nil",
+				return fmt.Errorf("node %v is referenced by way %v but is nil",
 					n, w.ID)
 			}
 		}
@@ -34,29 +34,29 @@ func (o *Data) Check() error {
 		}
 		for _, m := range r.Members {
 			switch m.Type {
-			case osmpbf.NodeType:
-				if x, ok := o.Nodes[m.ID]; !ok {
+			case osm.TypeNode:
+				if x, ok := o.Nodes[osm.NodeID(m.Ref)]; !ok {
 					return fmt.Errorf("node %d is referenced by relation %d but does not exist",
-						m.ID, r.ID)
+						m.Ref, r.ID)
 				} else if x == nil {
 					return fmt.Errorf("node %d is referenced by relation %d but is nil",
-						m.ID, r.ID)
+						m.Ref, r.ID)
 				}
-			case osmpbf.WayType:
-				if x, ok := o.Ways[m.ID]; !ok {
+			case osm.TypeWay:
+				if x, ok := o.Ways[osm.WayID(m.Ref)]; !ok {
 					return fmt.Errorf("way %d is referenced by relation %d but does not exist",
-						m.ID, r.ID)
+						m.Ref, r.ID)
 				} else if x == nil {
 					return fmt.Errorf("way %d is referenced by relation %d but is nil",
-						m.ID, r.ID)
+						m.Ref, r.ID)
 				}
-			case osmpbf.RelationType:
-				if x, ok := o.Relations[m.ID]; !ok {
+			case osm.TypeRelation:
+				if x, ok := o.Relations[osm.RelationID(m.Ref)]; !ok {
 					return fmt.Errorf("relation %d is referenced by relation %d but does not exist",
-						m.ID, r.ID)
+						m.Ref, r.ID)
 				} else if x == nil {
 					return fmt.Errorf("relation %d is referenced by relation %d but is nil",
-						m.ID, r.ID)
+						m.Ref, r.ID)
 				}
 			default:
 				return fmt.Errorf("unknown member type %v in relation %d", m.Type, i)
