@@ -43,7 +43,7 @@ func TestData_CountTags(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	data, err := Extract(context.Background(), f, func(_ *Data, _ interface{}) bool { return true })
+	data, err := ExtractPBF(context.Background(), f, func(_ *Data, _ interface{}) bool { return true })
 	if err != nil {
 		t.Fatal(err)
 	}

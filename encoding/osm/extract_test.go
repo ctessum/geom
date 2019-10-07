@@ -196,7 +196,7 @@ func TestExtract_bounds_point(t *testing.T) {
 		Min: geom.Point{X: -158.125, Y: 21.264},
 		Max: geom.Point{X: -157, Y: 22},
 	}
-	data, err := Extract(context.Background(), f, KeepBounds(b))
+	data, err := ExtractPBF(context.Background(), f, KeepBounds(b))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -237,7 +237,7 @@ func TestExtract_bounds_line(t *testing.T) {
 		Min: geom.Point{X: -158.124437, Y: 21.265047},
 		Max: geom.Point{X: -158, Y: 21.5},
 	}
-	data, err := Extract(context.Background(), f, KeepBounds(b))
+	data, err := ExtractPBF(context.Background(), f, KeepBounds(b))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -276,7 +276,7 @@ func TestExtract_bounds_polygon(t *testing.T) {
 		Min: geom.Point{X: -160, Y: 20},
 		Max: geom.Point{X: -157, Y: 23},
 	}
-	data, err := Extract(context.Background(), f, KeepBounds(b))
+	data, err := ExtractPBF(context.Background(), f, KeepBounds(b))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -339,7 +339,7 @@ func TestExtract_bounds_multiLineString(t *testing.T) {
 		Min: geom.Point{X: -158.124437, Y: 21.265047},
 		Max: geom.Point{X: -158, Y: 21.5},
 	}
-	data, err := Extract(context.Background(), f, KeepBounds(b))
+	data, err := ExtractPBF(context.Background(), f, KeepBounds(b))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -368,7 +368,7 @@ func TestExtract_bounds_RelationPolygon(t *testing.T) {
 		Min: geom.Point{X: -180, Y: -90},
 		Max: geom.Point{X: 180, Y: 90},
 	}
-	data, err := Extract(context.Background(), f, KeepBounds(b))
+	data, err := ExtractPBF(context.Background(), f, KeepBounds(b))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -10,11 +10,26 @@ import (
 
 	"github.com/paulmach/osm"
 	"github.com/paulmach/osm/osmpbf"
+	"github.com/paulmach/osm/osmxml"
 )
 
-// Extract extracts OpenStreetMap data from osm.pbf file rs.
+// ExtractPBF extracts OpenStreetMap data from osm.pbf file rs.
 // keep determines which records are included in the output.
-func Extract(ctx context.Context, rs io.ReadSeeker, keep KeepFunc) (*Data, error) {
+func ExtractPBF(ctx context.Context, rs io.ReadSeeker, keep KeepFunc) (*Data, error) {
+	scanFunc := func() osm.Scanner { return osmpbf.New(ctx, rs, runtime.GOMAXPROCS(-1)) }
+	return extract(ctx, rs, scanFunc, keep)
+}
+
+// ExtractXML extracts OpenStreetMap data from osm file rs.
+// keep determines which records are included in the output.
+func ExtractXML(ctx context.Context, rs io.ReadSeeker, keep KeepFunc) (*Data, error) {
+	scanFunc := func() osm.Scanner { return osmxml.New(ctx, rs) }
+	return extract(ctx, rs, scanFunc, keep)
+}
+
+// extract extracts OpenStreetMap data from file rs.
+// keep determines which records are included in the output.
+func extract(ctx context.Context, rs io.ReadSeeker, scanFunc func() osm.Scanner, keep KeepFunc) (*Data, error) {
 	o := &Data{
 		Nodes:     make(map[osm.NodeID]*osm.Node),
 		Ways:      make(map[osm.WayID]*osm.Way),
@@ -32,7 +47,7 @@ func Extract(ctx context.Context, rs io.ReadSeeker, keep KeepFunc) (*Data, error
 		if _, err := rs.Seek(0, 0); err != nil {
 			return nil, err
 		}
-		scanner := osmpbf.New(ctx, rs, runtime.GOMAXPROCS(-1))
+		scanner := scanFunc()
 		for scanner.Scan() {
 			obj := scanner.Object()
 			switch objType := obj.(type) {
@@ -46,6 +61,7 @@ func Extract(ctx context.Context, rs io.ReadSeeker, keep KeepFunc) (*Data, error
 				if o.processRelation(obj.(*osm.Relation), keep) {
 					needAnotherPass = true
 				}
+			case *osm.Note, *osm.Bounds, *osm.User:
 			default:
 				return nil, fmt.Errorf("unknown type %T\n", objType)
 			}
@@ -68,7 +84,7 @@ func Extract(ctx context.Context, rs io.ReadSeeker, keep KeepFunc) (*Data, error
 // ExtractTag extracts OpenStreetMap data with the given tag set to one of the
 // given values.
 func ExtractTag(rs io.ReadSeeker, tag string, values ...string) (*Data, error) {
-	return Extract(context.Background(), rs, KeepTags(map[string][]string{tag: values}))
+	return ExtractPBF(context.Background(), rs, KeepTags(map[string][]string{tag: values}))
 }
 
 // ObjectType specifies the valid OpenStreetMap types.
