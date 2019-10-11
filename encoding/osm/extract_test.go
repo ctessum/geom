@@ -10,6 +10,37 @@ import (
 	"github.com/ctessum/geom"
 )
 
+func TestExtractFile_point(t *testing.T) {
+	data, err := ExtractFile(context.Background(), "testdata/honolulu_hawaii.osm.pbf", KeepTags(map[string][]string{"natural": []string{"tree"}}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	geomTags, err := data.Geom()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(geomTags) != 588 {
+		t.Errorf("have %d objects, want 588", len(geomTags))
+	}
+	minx := math.Inf(1)
+	miny := math.Inf(1)
+	for _, have := range geomTags {
+		p := have.Geom.(geom.Point)
+		minx = math.Min(minx, p.X)
+		miny = math.Min(miny, p.Y)
+	}
+	const (
+		wantx = -158.1244373
+		wanty = 21.265047600000003
+	)
+	if minx != wantx {
+		t.Errorf("minimum x value: have %g, want %g", minx, wantx)
+	}
+	if miny != wanty {
+		t.Errorf("minimum y value: have %g, want %g", miny, wanty)
+	}
+}
+
 func TestExtractTag_Point(t *testing.T) {
 	f, err := os.Open("testdata/honolulu_hawaii.osm.pbf")
 	defer f.Close()

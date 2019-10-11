@@ -6,17 +6,40 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"runtime"
+	"os"
+	"path/filepath"
 
 	"github.com/paulmach/osm"
 	"github.com/paulmach/osm/osmpbf"
 	"github.com/paulmach/osm/osmxml"
 )
 
+// ExtractFile extracts OpenStreetMap data from the given file path,
+// determining whether it is an XML or PBF file from the extension
+// (.osm or .pbf, respectively).
+// keep determines which records are included in the output.
+func ExtractFile(ctx context.Context, file string, keep KeepFunc) (*Data, error) {
+	f, err := os.Open(file)
+	if err != nil {
+		return nil, fmt.Errorf("osm: %v", err)
+	}
+	defer f.Close()
+	x := filepath.Ext(file)
+	switch x {
+	case ".pbf":
+		return ExtractPBF(ctx, f, keep)
+	case ".osm":
+		return ExtractXML(ctx, f, keep)
+	default:
+		return nil, fmt.Errorf("osm: invalid file extension '%s'", x)
+	}
+}
+
 // ExtractPBF extracts OpenStreetMap data from osm.pbf file rs.
 // keep determines which records are included in the output.
 func ExtractPBF(ctx context.Context, rs io.ReadSeeker, keep KeepFunc) (*Data, error) {
-	scanFunc := func() osm.Scanner { return osmpbf.New(ctx, rs, runtime.GOMAXPROCS(-1)) }
+	//scanFunc := func() osm.Scanner { return osmpbf.New(ctx, rs, runtime.GOMAXPROCS(-1)) }
+	scanFunc := func() osm.Scanner { return osmpbf.New(ctx, rs, 1) }
 	return extract(ctx, rs, scanFunc, keep)
 }
 
