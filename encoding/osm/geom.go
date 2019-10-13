@@ -2,6 +2,7 @@ package osm
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/ctessum/geom"
 	"github.com/ctessum/geom/op"
@@ -47,17 +48,23 @@ func (o *Data) Geom() ([]*GeomTags, error) {
 	}
 	for _, n := range o.Nodes {
 		if _, ok := o.dependentNodes[n.ID]; !ok {
-			items = append(items, &GeomTags{
-				Geom: nodeToPoint(n),
-				Tags: tagsToMap(n.Tags),
-			})
+			p, ok := nodeToPoint(n)
+			if ok {
+				items = append(items, &GeomTags{
+					Geom: p,
+					Tags: tagsToMap(n.Tags),
+				})
+			}
 		}
 	}
 	return items, nil
 }
 
-func nodeToPoint(n *osm.Node) geom.Point {
-	return geom.Point{X: n.Lon, Y: n.Lat}
+func nodeToPoint(n *osm.Node) (geom.Point, bool) {
+	if n == nil {
+		return geom.Point{X: math.NaN(), Y: math.NaN()}, false
+	}
+	return geom.Point{X: n.Lon, Y: n.Lat}, true
 }
 
 func wayToGeom(way *osm.Way, nodes map[osm.NodeID]*osm.Node) geom.Geom {
@@ -76,7 +83,10 @@ func wayIsClosed(way *osm.Way) bool {
 func wayToPolygon(way *osm.Way, nodes map[osm.NodeID]*osm.Node) geom.Polygon {
 	p := make(geom.Polygon, 1)
 	for _, n := range way.Nodes {
-		p[0] = append(p[0], nodeToPoint(nodes[n.ID]))
+		point, ok := nodeToPoint(nodes[n.ID])
+		if ok {
+			p[0] = append(p[0], point)
+		}
 	}
 	return p
 }
@@ -85,7 +95,10 @@ func wayToPolygon(way *osm.Way, nodes map[osm.NodeID]*osm.Node) geom.Polygon {
 func wayToLineString(way *osm.Way, nodes map[osm.NodeID]*osm.Node) geom.LineString {
 	var p geom.LineString
 	for _, n := range way.Nodes {
-		p = append(p, nodeToPoint(nodes[n.ID]))
+		point, ok := nodeToPoint(nodes[n.ID])
+		if ok {
+			p = append(p, point)
+		}
 	}
 	return p
 }
@@ -124,11 +137,14 @@ func relationToGeom(relation *osm.Relation,
 func relationToMultiPoint(relation *osm.Relation,
 	nodes map[osm.NodeID]*osm.Node) geom.MultiPoint {
 
-	p := make(geom.MultiPoint, len(relation.Members))
-	for i, m := range relation.Members {
+	p := make(geom.MultiPoint, 0, len(relation.Members))
+	for _, m := range relation.Members {
 		switch m.Type {
 		case osm.TypeNode:
-			p[i] = nodeToPoint(nodes[osm.NodeID(m.Ref)])
+			point, ok := nodeToPoint(nodes[osm.NodeID(m.Ref)])
+			if ok {
+				p = append(p, point)
+			}
 		default:
 			panic(fmt.Errorf("unsupported relation type %T", m.Type))
 		}
@@ -174,19 +190,22 @@ func relationToGeometryCollection(relation *osm.Relation,
 	relations map[osm.RelationID]*osm.Relation, ways map[osm.WayID]*osm.Way,
 	nodes map[osm.NodeID]*osm.Node) (geom.Geom, error) {
 
-	p := make(geom.GeometryCollection, len(relation.Members))
-	for i, m := range relation.Members {
+	p := make(geom.GeometryCollection, 0, len(relation.Members))
+	for _, m := range relation.Members {
 		switch m.Type {
 		case osm.TypeWay:
-			p[i] = wayToGeom(ways[osm.WayID(m.Ref)], nodes)
+			p = append(p, wayToGeom(ways[osm.WayID(m.Ref)], nodes))
 		case osm.TypeNode:
-			p[i] = nodeToPoint(nodes[osm.NodeID(m.Ref)])
+			point, ok := nodeToPoint(nodes[osm.NodeID(m.Ref)])
+			if ok {
+				p = append(p, point)
+			}
 		case osm.TypeRelation:
-			var err error
-			p[i], err = relationToGeom(relations[osm.RelationID(m.Ref)], relations, ways, nodes)
+			g, err := relationToGeom(relations[osm.RelationID(m.Ref)], relations, ways, nodes)
 			if err != nil {
 				return nil, err
 			}
+			p = append(p, g)
 		default:
 			panic(fmt.Errorf("unsupported relation type %T", m.Type))
 		}
