@@ -29,7 +29,7 @@ func (o *Data) Geom() ([]*GeomTags, error) {
 	for _, r := range o.Relations {
 		if _, ok := o.dependentRelations[r.ID]; !ok {
 			if r != nil {
-				g, err := relationToGeom(r, o.Relations, o.Ways, o.Nodes)
+				g, err := relationToGeom(r, o.Relations, o.Ways, o.Nodes, make(map[osm.RelationID]struct{}))
 				if err != nil {
 					return nil, err
 				}
@@ -110,7 +110,7 @@ func wayToLineString(way *osm.Way, nodes map[osm.NodeID]*osm.Node) geom.LineStri
 // relationToGeom converts a relation to a geometry object.
 func relationToGeom(relation *osm.Relation,
 	relations map[osm.RelationID]*osm.Relation, ways map[osm.WayID]*osm.Way,
-	nodes map[osm.NodeID]*osm.Node) (geom.Geom, error) {
+	nodes map[osm.NodeID]*osm.Node, idStack map[osm.RelationID]struct{}) (geom.Geom, error) {
 
 	var nNodes, nLines, nPolygons int
 	for _, m := range relation.Members {
@@ -134,7 +134,7 @@ func relationToGeom(relation *osm.Relation,
 	if nNodes == len(relation.Members) {
 		return relationToMultiPoint(relation, nodes), nil
 	}
-	return relationToGeometryCollection(relation, relations, ways, nodes)
+	return relationToGeometryCollection(relation, relations, ways, nodes, idStack)
 }
 
 // relationToMultiPoint converts a relation to a MultiPoint
@@ -196,7 +196,7 @@ func relationToMultiLineString(relation *osm.Relation, ways map[osm.WayID]*osm.W
 
 func relationToGeometryCollection(relation *osm.Relation,
 	relations map[osm.RelationID]*osm.Relation, ways map[osm.WayID]*osm.Way,
-	nodes map[osm.NodeID]*osm.Node) (geom.Geom, error) {
+	nodes map[osm.NodeID]*osm.Node, idStack map[osm.RelationID]struct{}) (geom.Geom, error) {
 
 	p := make(geom.GeometryCollection, 0, len(relation.Members))
 	for _, m := range relation.Members {
@@ -212,8 +212,13 @@ func relationToGeometryCollection(relation *osm.Relation,
 				p = append(p, point)
 			}
 		case osm.TypeRelation:
-			if r := relations[osm.RelationID(m.Ref)]; r != nil {
-				g, err := relationToGeom(r, relations, ways, nodes)
+			id := osm.RelationID(m.Ref)
+			if _, ok := idStack[id]; ok {
+				continue // Skip self-references, which cause infinite recursion.
+			}
+			idStack[id] = struct{}{}
+			if r := relations[id]; r != nil {
+				g, err := relationToGeom(r, relations, ways, nodes, idStack)
 				if err != nil {
 					return nil, err
 				}
