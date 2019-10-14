@@ -28,22 +28,26 @@ func (o *Data) Geom() ([]*GeomTags, error) {
 	items := make([]*GeomTags, 0, len(o.Ways))
 	for _, r := range o.Relations {
 		if _, ok := o.dependentRelations[r.ID]; !ok {
-			g, err := relationToGeom(r, o.Relations, o.Ways, o.Nodes)
-			if err != nil {
-				return nil, err
+			if r != nil {
+				g, err := relationToGeom(r, o.Relations, o.Ways, o.Nodes)
+				if err != nil {
+					return nil, err
+				}
+				items = append(items, &GeomTags{
+					Geom: g,
+					Tags: tagsToMap(r.Tags),
+				})
 			}
-			items = append(items, &GeomTags{
-				Geom: g,
-				Tags: tagsToMap(r.Tags),
-			})
 		}
 	}
 	for _, w := range o.Ways {
 		if _, ok := o.dependentWays[w.ID]; !ok {
-			items = append(items, &GeomTags{
-				Geom: wayToGeom(w, o.Nodes),
-				Tags: tagsToMap(w.Tags),
-			})
+			if w != nil && len(w.Nodes) > 0 {
+				items = append(items, &GeomTags{
+					Geom: wayToGeom(w, o.Nodes),
+					Tags: tagsToMap(w.Tags),
+				})
+			}
 		}
 	}
 	for _, n := range o.Nodes {
@@ -112,7 +116,7 @@ func relationToGeom(relation *osm.Relation,
 	for _, m := range relation.Members {
 		switch m.Type {
 		case osm.TypeWay:
-			if wayIsClosed(ways[osm.WayID(m.Ref)]) {
+			if w, ok := ways[osm.WayID(m.Ref)]; ok && len(w.Nodes) > 0 && wayIsClosed(w) {
 				nPolygons++
 			} else {
 				nLines++
@@ -159,7 +163,9 @@ func relationToPolygon(relation *osm.Relation, ways map[osm.WayID]*osm.Way,
 	for _, m := range relation.Members {
 		switch m.Type {
 		case osm.TypeWay:
-			p = append(p, wayToPolygon(ways[osm.WayID(m.Ref)], nodes)[0])
+			if w := ways[osm.WayID(m.Ref)]; w != nil {
+				p = append(p, wayToPolygon(w, nodes)[0])
+			}
 		default:
 			panic(fmt.Errorf("unsupported relation type %T", m.Type))
 		}
@@ -178,7 +184,9 @@ func relationToMultiLineString(relation *osm.Relation, ways map[osm.WayID]*osm.W
 	for _, m := range relation.Members {
 		switch m.Type {
 		case osm.TypeWay:
-			p = append(p, wayToLineString(ways[osm.WayID(m.Ref)], nodes))
+			if w := ways[osm.WayID(m.Ref)]; w != nil {
+				p = append(p, wayToLineString(w, nodes))
+			}
 		default:
 			panic(fmt.Errorf("unsupported relation type %T", m.Type))
 		}
@@ -194,18 +202,23 @@ func relationToGeometryCollection(relation *osm.Relation,
 	for _, m := range relation.Members {
 		switch m.Type {
 		case osm.TypeWay:
-			p = append(p, wayToGeom(ways[osm.WayID(m.Ref)], nodes))
+			way := ways[osm.WayID(m.Ref)]
+			if way != nil && len(way.Nodes) > 0 {
+				p = append(p, wayToGeom(way, nodes))
+			}
 		case osm.TypeNode:
 			point, ok := nodeToPoint(nodes[osm.NodeID(m.Ref)])
 			if ok {
 				p = append(p, point)
 			}
 		case osm.TypeRelation:
-			g, err := relationToGeom(relations[osm.RelationID(m.Ref)], relations, ways, nodes)
-			if err != nil {
-				return nil, err
+			if r := relations[osm.RelationID(m.Ref)]; r != nil {
+				g, err := relationToGeom(r, relations, ways, nodes)
+				if err != nil {
+					return nil, err
+				}
+				p = append(p, g)
 			}
-			p = append(p, g)
 		default:
 			panic(fmt.Errorf("unsupported relation type %T", m.Type))
 		}

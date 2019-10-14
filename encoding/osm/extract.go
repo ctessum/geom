@@ -182,7 +182,7 @@ func hasTag(tags map[string][]string, wantTags map[string][]string) bool {
 		if !ok {
 			continue
 		}
-		if len(tagValues) == 0 {
+		if len(wantTagValues) == 0 {
 			return true
 		}
 		for _, wantTagValue := range wantTagValues {
