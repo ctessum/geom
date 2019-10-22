@@ -79,3 +79,8 @@ func KeepBounds(b *geom.Bounds) KeepFunc {
 		return false
 	}
 }
+
+// KeepAll specifies that all objects should be kept.
+func KeepAll() KeepFunc {
+	return func(_ *Data, _ interface{}) bool { return true }
+}

@@ -10,6 +10,28 @@ import (
 	"github.com/ctessum/geom"
 )
 
+func TestDominantType(t *testing.T) {
+	data, err := ExtractFile(context.Background(), "testdata/honolulu_hawaii.osm.pbf", KeepAll())
+	if err != nil {
+		t.Fatal(err)
+	}
+	geomTags, err := data.Geom()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(geomTags) != 27806 {
+		t.Errorf("have %d objects, want 27806", len(geomTags))
+	}
+
+	dt, err := DominantType(geomTags)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if dt != Line {
+		t.Errorf("dominant type: %v != %v", dt, Line)
+	}
+}
+
 func TestExtractFile_point(t *testing.T) {
 	data, err := ExtractFile(context.Background(), "testdata/honolulu_hawaii.osm.pbf", KeepTags(map[string][]string{"natural": []string{"tree"}}))
 	if err != nil {

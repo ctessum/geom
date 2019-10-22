@@ -237,38 +237,62 @@ const (
 	Point GeomType = iota
 	Line
 	Poly
-	Collection
 )
+
+func countGeomTagsTypes(gt []*GeomTags) (points, lines, polys int, err error) {
+	for _, g := range gt {
+		pt, l, pl, err := countGeometryTypes(g.Geom)
+		if err != nil {
+			return -1, -1, -1, err
+		}
+		points += pt
+		lines += l
+		polys += pl
+	}
+	return
+}
+
+func countGeometryTypes(g geom.Geom) (points, lines, polys int, err error) {
+	switch g.(type) {
+	case geom.Point:
+		points++
+	case geom.MultiPoint:
+		points++
+	case geom.LineString, geom.MultiLineString:
+		lines++
+	case geom.Polygon:
+		polys++
+	case geom.GeometryCollection:
+		for _, f := range g.(geom.GeometryCollection) {
+			pt, l, pl, err := countGeometryTypes(f)
+			if err != nil {
+				return -1, -1, -1, err
+			}
+			points += pt
+			lines += l
+			polys += pl
+		}
+	default:
+		return -1, -1, -1, fmt.Errorf("invalid geometry type %T", g)
+	}
+	return
+}
 
 // DominantType returns the most frequently occurring type among the
 // given features.
 func DominantType(gt []*GeomTags) (GeomType, error) {
-	var points, lines, polys, collections int
-	for _, g := range gt {
-		switch g.Geom.(type) {
-		case geom.Point:
-			points++
-		case geom.MultiPoint:
-			points++
-		case geom.LineString, geom.MultiLineString:
-			lines++
-		case geom.Polygon:
-			polys++
-		case geom.GeometryCollection:
-			collections++
-			continue
-		default:
-			return -1, fmt.Errorf("invalid geometry type %T", g.Geom)
-		}
+	points, lines, polys, err := countGeomTagsTypes(gt)
+	if err != nil {
+		return -1, err
 	}
-	if points >= lines && points >= polys && points >= collections {
+	if points >= lines && points >= polys {
 		return Point, nil
 	}
-	if lines > points && lines >= polys && lines >= collections {
+	if lines > points && lines >= polys {
 		return Line, nil
 	}
-	if polys > points && polys > lines && polys >= collections {
+	if polys > points && polys > lines {
 		return Poly, nil
 	}
-	return Collection, nil
+	panic(fmt.Errorf("no dominant type: %d, %d, %d", points, lines, polys))
 }
