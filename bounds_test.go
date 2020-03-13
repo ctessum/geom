@@ -147,7 +147,10 @@ func TestBounds_Intersection(t *testing.T) {
 				Min: Point{0.5, 0.5},
 				Max: Point{2, 2},
 			},
-			i: Polygon{{{0.5, 1}, {0.5, 0.5}, {1, 0.5}, {1, 1}, {0.5, 1}}},
+			i: &Bounds{
+				Min: Point{0.5, 0.5},
+				Max: Point{1, 1},
+			},
 		},
 		{
 			p: &Bounds{

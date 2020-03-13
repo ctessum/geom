@@ -119,6 +119,18 @@ func (b *Bounds) Polygons() []Polygon {
 
 // Intersection returns the Intersection of the receiver with p.
 func (b *Bounds) Intersection(p Polygonal) Polygonal {
+	if bp, ok := p.(*Bounds); ok {
+		// Special case, other polygon is *Bounds.
+		i := &Bounds{
+			Min: Point{X: math.Max(b.Min.X, bp.Min.X), Y: math.Max(b.Min.Y, bp.Min.Y)},
+			Max: Point{X: math.Min(b.Max.X, bp.Max.X), Y: math.Min(b.Max.Y, bp.Max.Y)},
+		}
+		if i.Min.Equals(i.Max) {
+			return nil
+		}
+		return i
+	}
+
 	bp := p.Bounds()
 	if w := bp.Within(b); w == Inside || w == OnEdge {
 		// Polygon fully within bounds.
