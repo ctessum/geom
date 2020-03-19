@@ -2,6 +2,12 @@ package geom
 
 import "math"
 
+// Withiner is an interface for types that can be determined to be
+// within a polygon or not.
+type Withiner interface {
+	Within(Polygonal) WithinStatus
+}
+
 // pointInPolygonal determines whether "pt" is
 // within any of the polygons in "pg".
 // adapted from https://rosettacode.org/wiki/Ray-casting_algorithm#Go.

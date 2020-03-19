@@ -1,6 +1,10 @@
 package geom
 
-import "github.com/ctessum/polyclip-go"
+import (
+	"reflect"
+
+	"github.com/ctessum/polyclip-go"
+)
 
 // A Path is a series of connected points.
 type Path []Point
@@ -104,4 +108,19 @@ func (p Polygon) Points() func() Point {
 		i++
 		return p[j][i-1]
 	}
+}
+
+// Within calculates whether p is within poly.
+func (p Polygon) Within(poly Polygonal) WithinStatus {
+	if reflect.DeepEqual(p, poly) {
+		return OnEdge
+	}
+	for _, r := range p {
+		for _, pt := range r {
+			if pointInPolygonal(pt, poly) == Outside {
+				return Outside
+			}
+		}
+	}
+	return Inside
 }

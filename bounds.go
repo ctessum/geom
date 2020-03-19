@@ -125,7 +125,7 @@ func (b *Bounds) Intersection(p Polygonal) Polygonal {
 			Min: Point{X: math.Max(b.Min.X, bp.Min.X), Y: math.Max(b.Min.Y, bp.Min.Y)},
 			Max: Point{X: math.Min(b.Max.X, bp.Max.X), Y: math.Min(b.Max.Y, bp.Max.Y)},
 		}
-		if i.Min.Equals(i.Max) {
+		if i.Min.X >= i.Max.X && i.Min.Y >= i.Max.Y {
 			return nil
 		}
 		return i
