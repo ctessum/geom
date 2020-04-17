@@ -1,7 +1,7 @@
 module github.com/ctessum/geom
 
 require (
-	github.com/ctessum/polyclip-go v1.0.1
+	github.com/ctessum/polyclip-go v1.0.2-0.20200417141046-48e92ea36ddd
 	github.com/jonas-p/go-shp v0.1.2-0.20190401125246-9fd306ae10a6
 	github.com/paulmach/osm v0.1.0
 	gonum.org/v1/gonum v0.0.0-20190509213835-50179cd3f3f7
