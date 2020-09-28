@@ -19,7 +19,7 @@ func (o *Data) Check() error {
 			return fmt.Errorf("way %d is nil", i)
 		}
 		for _, n := range w.Nodes {
-			if x, ok := o.Nodes[n.ID]; !ok {
+			if x, ok := o.Nodes[n]; !ok {
 				return fmt.Errorf("node %v is referenced by way %v but does not exist",
 					n, w.ID)
 			} else if x == nil {

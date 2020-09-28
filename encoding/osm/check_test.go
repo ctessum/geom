@@ -11,7 +11,7 @@ func TestCheck(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	data, err := ExtractTag(f, "source", "Bing")
+	data, err := ExtractTag(f, "source", true, "Bing")
 	if err != nil {
 		t.Fatal(err)
 	}

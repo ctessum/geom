@@ -45,10 +45,10 @@ func (t *Tags) Table() [][]string {
 			tt.Key,
 			tt.Value,
 			fmt.Sprintf("%d", tt.TotalCount),
-			fmt.Sprintf("%d", tt.ObjectCount[Node]),
-			fmt.Sprintf("%d", tt.ObjectCount[ClosedWay]),
-			fmt.Sprintf("%d", tt.ObjectCount[OpenWay]),
-			fmt.Sprintf("%d", tt.ObjectCount[Relation]),
+			fmt.Sprintf("%d", tt.ObjectCount[NodeType]),
+			fmt.Sprintf("%d", tt.ObjectCount[ClosedWayType]),
+			fmt.Sprintf("%d", tt.ObjectCount[OpenWayType]),
+			fmt.Sprintf("%d", tt.ObjectCount[RelationType]),
 		}
 	}
 	return o
@@ -124,24 +124,24 @@ func CountTags(ctx context.Context, rs io.ReadSeeker) (Tags, error) {
 		switch vtype := obj.(type) {
 		case *osm.Node:
 			for _, t := range obj.(*osm.Node).Tags {
-				addTag(t.Key, t.Value, Node)
+				addTag(t.Key, t.Value, NodeType)
 			}
 		case *osm.Way:
-			if w := obj.(*osm.Way); wayIsClosed(w) {
+			if w := obj.(*osm.Way); wayIsClosed(copyWay(w, true)) {
 				for _, t := range w.Tags {
-					addTag(t.Key, t.Value, ClosedWay)
+					addTag(t.Key, t.Value, ClosedWayType)
 				}
 			} else {
 				for _, t := range w.Tags {
-					addTag(t.Key, t.Value, OpenWay)
+					addTag(t.Key, t.Value, OpenWayType)
 				}
 			}
 		case *osm.Relation:
 			for _, t := range obj.(*osm.Relation).Tags {
-				addTag(t.Key, t.Value, Relation)
+				addTag(t.Key, t.Value, RelationType)
 			}
 		default:
-			return nil, fmt.Errorf("unknown type %T\n", vtype)
+			return nil, fmt.Errorf("unknown type %T", vtype)
 		}
 	}
 	if err := scanner.Err(); err != nil {
@@ -184,23 +184,23 @@ func (o *Data) CountTags() Tags {
 	}
 	for _, n := range o.Nodes {
 		for _, t := range n.Tags {
-			addTag(t.Key, t.Value, Node)
+			addTag(t.Key, t.Value, NodeType)
 		}
 	}
 	for _, w := range o.Ways {
 		if wayIsClosed(w) {
 			for _, t := range w.Tags {
-				addTag(t.Key, t.Value, ClosedWay)
+				addTag(t.Key, t.Value, ClosedWayType)
 			}
 		} else {
 			for _, t := range w.Tags {
-				addTag(t.Key, t.Value, OpenWay)
+				addTag(t.Key, t.Value, OpenWayType)
 			}
 		}
 	}
 	for _, r := range o.Relations {
 		for _, t := range r.Tags {
-			addTag(t.Key, t.Value, Relation)
+			addTag(t.Key, t.Value, RelationType)
 		}
 	}
 

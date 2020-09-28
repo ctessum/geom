@@ -25,15 +25,15 @@ func TestCountTags(t *testing.T) {
 		return t.Key == "highway" && t.Value == "residential"
 	})
 	tableWant := [][]string{
-		[]string{"Key", "Value", "Total", "Node", "Closed way", "Open way", "Relation"},
-		[]string{"highway", "residential", "6839", "0", "55", "6784", "0"}}
+		{"Key", "Value", "Total", "Node", "Closed way", "Open way", "Relation"},
+		{"highway", "residential", "6839", "0", "55", "6784", "0"}}
 	tableHave := tags2.Table()
 	if !reflect.DeepEqual(tableWant, tableHave) {
 		t.Error("tables don't match")
 	}
 	dt := (*tags2)[0].DominantType()
-	if dt != OpenWay {
-		t.Errorf("dominant type should be %d but is %d", OpenWay, dt)
+	if dt != OpenWayType {
+		t.Errorf("dominant type should be %d but is %d", OpenWayType, dt)
 	}
 }
 
@@ -43,7 +43,7 @@ func TestData_CountTags(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	data, err := ExtractPBF(context.Background(), f, func(_ *Data, _ interface{}) bool { return true })
+	data, err := ExtractPBF(context.Background(), f, func(_ *Data, _ interface{}) bool { return true }, true)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,14 +56,14 @@ func TestData_CountTags(t *testing.T) {
 		return t.Key == "highway" && t.Value == "residential"
 	})
 	tableWant := [][]string{
-		[]string{"Key", "Value", "Total", "Node", "Closed way", "Open way", "Relation"},
-		[]string{"highway", "residential", "6839", "0", "55", "6784", "0"}}
+		{"Key", "Value", "Total", "Node", "Closed way", "Open way", "Relation"},
+		{"highway", "residential", "6839", "0", "55", "6784", "0"}}
 	tableHave := tags2.Table()
 	if !reflect.DeepEqual(tableWant, tableHave) {
 		t.Error("tables don't match")
 	}
 	dt := (*tags2)[0].DominantType()
-	if dt != OpenWay {
-		t.Errorf("dominant type should be %d but is %d", OpenWay, dt)
+	if dt != OpenWayType {
+		t.Errorf("dominant type should be %d but is %d", OpenWayType, dt)
 	}
 }

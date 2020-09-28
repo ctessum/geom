@@ -16,6 +16,9 @@ type GeomTags struct {
 }
 
 func tagsToMap(tags osm.Tags) map[string][]string {
+	if len(tags) == 0 {
+		return nil
+	}
 	o := make(map[string][]string)
 	for _, t := range tags {
 		o[t.Key] = append(o[t.Key], t.Value)
@@ -64,14 +67,14 @@ func (o *Data) Geom() ([]*GeomTags, error) {
 	return items, nil
 }
 
-func nodeToPoint(n *osm.Node) (geom.Point, bool) {
+func nodeToPoint(n *Node) (geom.Point, bool) {
 	if n == nil {
 		return geom.Point{X: math.NaN(), Y: math.NaN()}, false
 	}
 	return geom.Point{X: n.Lon, Y: n.Lat}, true
 }
 
-func wayToGeom(way *osm.Way, nodes map[osm.NodeID]*osm.Node) geom.Geom {
+func wayToGeom(way *Way, nodes map[osm.NodeID]*Node) geom.Geom {
 	if wayIsClosed(way) {
 		return wayToPolygon(way, nodes)
 	}
@@ -79,15 +82,15 @@ func wayToGeom(way *osm.Way, nodes map[osm.NodeID]*osm.Node) geom.Geom {
 }
 
 // wayIsClosed determines whether a way represents a polygon.
-func wayIsClosed(way *osm.Way) bool {
-	return way.Nodes[0].ID == way.Nodes[len(way.Nodes)-1].ID
+func wayIsClosed(way *Way) bool {
+	return way.Nodes[0] == way.Nodes[len(way.Nodes)-1]
 }
 
 // wayToPolygon converts a way to a polygon
-func wayToPolygon(way *osm.Way, nodes map[osm.NodeID]*osm.Node) geom.Polygon {
+func wayToPolygon(way *Way, nodes map[osm.NodeID]*Node) geom.Polygon {
 	p := make(geom.Polygon, 1)
 	for _, n := range way.Nodes {
-		point, ok := nodeToPoint(nodes[n.ID])
+		point, ok := nodeToPoint(nodes[n])
 		if ok {
 			p[0] = append(p[0], point)
 		}
@@ -96,10 +99,10 @@ func wayToPolygon(way *osm.Way, nodes map[osm.NodeID]*osm.Node) geom.Polygon {
 }
 
 // wayToLineString converts a way to a LineString
-func wayToLineString(way *osm.Way, nodes map[osm.NodeID]*osm.Node) geom.LineString {
+func wayToLineString(way *Way, nodes map[osm.NodeID]*Node) geom.LineString {
 	var p geom.LineString
 	for _, n := range way.Nodes {
-		point, ok := nodeToPoint(nodes[n.ID])
+		point, ok := nodeToPoint(nodes[n])
 		if ok {
 			p = append(p, point)
 		}
@@ -108,9 +111,9 @@ func wayToLineString(way *osm.Way, nodes map[osm.NodeID]*osm.Node) geom.LineStri
 }
 
 // relationToGeom converts a relation to a geometry object.
-func relationToGeom(relation *osm.Relation,
-	relations map[osm.RelationID]*osm.Relation, ways map[osm.WayID]*osm.Way,
-	nodes map[osm.NodeID]*osm.Node, idStack map[osm.RelationID]struct{}) (geom.Geom, error) {
+func relationToGeom(relation *Relation,
+	relations map[osm.RelationID]*Relation, ways map[osm.WayID]*Way,
+	nodes map[osm.NodeID]*Node, idStack map[osm.RelationID]struct{}) (geom.Geom, error) {
 
 	var nNodes, nLines, nPolygons int
 	for _, m := range relation.Members {
@@ -138,8 +141,8 @@ func relationToGeom(relation *osm.Relation,
 }
 
 // relationToMultiPoint converts a relation to a MultiPoint
-func relationToMultiPoint(relation *osm.Relation,
-	nodes map[osm.NodeID]*osm.Node) geom.MultiPoint {
+func relationToMultiPoint(relation *Relation,
+	nodes map[osm.NodeID]*Node) geom.MultiPoint {
 
 	p := make(geom.MultiPoint, 0, len(relation.Members))
 	for _, m := range relation.Members {
@@ -157,8 +160,8 @@ func relationToMultiPoint(relation *osm.Relation,
 }
 
 // relationToPolygon converts a relation to a polygon
-func relationToPolygon(relation *osm.Relation, ways map[osm.WayID]*osm.Way,
-	nodes map[osm.NodeID]*osm.Node) (geom.Polygon, error) {
+func relationToPolygon(relation *Relation, ways map[osm.WayID]*Way,
+	nodes map[osm.NodeID]*Node) (geom.Polygon, error) {
 	var p geom.Polygon
 	for _, m := range relation.Members {
 		switch m.Type {
@@ -178,8 +181,8 @@ func relationToPolygon(relation *osm.Relation, ways map[osm.WayID]*osm.Way,
 
 // relationToMultiLineString converts a relation to a MultiLineString,
 // deleting its contained elements from 'ways' and 'nodes'.
-func relationToMultiLineString(relation *osm.Relation, ways map[osm.WayID]*osm.Way,
-	nodes map[osm.NodeID]*osm.Node) geom.MultiLineString {
+func relationToMultiLineString(relation *Relation, ways map[osm.WayID]*Way,
+	nodes map[osm.NodeID]*Node) geom.MultiLineString {
 	var p geom.MultiLineString
 	for _, m := range relation.Members {
 		switch m.Type {
@@ -194,9 +197,9 @@ func relationToMultiLineString(relation *osm.Relation, ways map[osm.WayID]*osm.W
 	return p
 }
 
-func relationToGeometryCollection(relation *osm.Relation,
-	relations map[osm.RelationID]*osm.Relation, ways map[osm.WayID]*osm.Way,
-	nodes map[osm.NodeID]*osm.Node, idStack map[osm.RelationID]struct{}) (geom.Geom, error) {
+func relationToGeometryCollection(relation *Relation,
+	relations map[osm.RelationID]*Relation, ways map[osm.WayID]*Way,
+	nodes map[osm.NodeID]*Node, idStack map[osm.RelationID]struct{}) (geom.Geom, error) {
 
 	p := make(geom.GeometryCollection, 0, len(relation.Members))
 	for _, m := range relation.Members {
@@ -231,11 +234,17 @@ func relationToGeometryCollection(relation *osm.Relation,
 	return p, nil
 }
 
+// GeomType specifies the valid geometry types.
 type GeomType int
 
 const (
+	// Point is a point geometry.
 	Point GeomType = iota
+
+	// Line is a linear geometry.
 	Line
+
+	// Poly is a polygonal geometry.
 	Poly
 )
 

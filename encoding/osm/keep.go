@@ -22,11 +22,17 @@ func KeepTags(tags map[string][]string) KeepFunc {
 	return func(_ *Data, object interface{}) bool {
 		switch object.(type) {
 		case *osm.Node:
-			return hasTag(tagsToMap(object.(*osm.Node).Tags), tags)
+			return hasTag(object.(*osm.Node).Tags, tags)
+		case *Node:
+			return hasTag(object.(*Node).Tags, tags)
 		case *osm.Way:
-			return hasTag(tagsToMap(object.(*osm.Way).Tags), tags)
+			return hasTag(object.(*osm.Way).Tags, tags)
+		case *Way:
+			return hasTag(object.(*Way).Tags, tags)
 		case *osm.Relation:
-			return hasTag(tagsToMap(object.(*osm.Relation).Tags), tags)
+			return hasTag(object.(*osm.Relation).Tags, tags)
+		case *Relation:
+			return hasTag(object.(*Relation).Tags, tags)
 		default:
 			panic(fmt.Errorf("osm: invalid object type %T", object))
 		}

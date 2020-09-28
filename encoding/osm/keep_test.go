@@ -7,7 +7,7 @@ import (
 )
 
 func TestKeepTags(t *testing.T) {
-	k := KeepTags(map[string][]string{"x": []string{}})
+	k := KeepTags(map[string][]string{"x": {}})
 	r := &osm.Node{
 		Tags: []osm.Tag{
 			{

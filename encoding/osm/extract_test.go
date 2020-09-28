@@ -11,7 +11,7 @@ import (
 )
 
 func TestDominantType(t *testing.T) {
-	data, err := ExtractFile(context.Background(), "testdata/honolulu_hawaii.osm.pbf", KeepAll())
+	data, err := ExtractFile(context.Background(), "testdata/honolulu_hawaii.osm.pbf", KeepAll(), true)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -33,7 +33,7 @@ func TestDominantType(t *testing.T) {
 }
 
 func TestExtractFile_point(t *testing.T) {
-	data, err := ExtractFile(context.Background(), "testdata/honolulu_hawaii.osm.pbf", KeepTags(map[string][]string{"natural": []string{"tree"}}))
+	data, err := ExtractFile(context.Background(), "testdata/honolulu_hawaii.osm.pbf", KeepTags(map[string][]string{"natural": {"tree"}}), true)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -69,7 +69,7 @@ func TestExtractTag_Point(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	data, err := ExtractTag(f, "natural", "tree")
+	data, err := ExtractTag(f, "natural", true, "tree")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -105,7 +105,7 @@ func TestExtractTag_Line(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	data, err := ExtractTag(f, "trail_visibility", "bad")
+	data, err := ExtractTag(f, "trail_visibility", true, "bad")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -122,10 +122,10 @@ func TestExtractTag_Line(t *testing.T) {
 			geom.Point{X: -157.8258194, Y: 21.403686500000003},
 		},
 		Tags: map[string][]string{
-			"highway":          []string{"path"},
-			"surface":          []string{"dirt"},
-			"trail_visibility": []string{"bad"},
-			"access":           []string{"private"}},
+			"highway":          {"path"},
+			"surface":          {"dirt"},
+			"trail_visibility": {"bad"},
+			"access":           {"private"}},
 	}
 	have := geomTags[0]
 	if !reflect.DeepEqual(want, have) {
@@ -139,7 +139,7 @@ func TestExtractTag_Polygon(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	data, err := ExtractTag(f, "name", "Napili Tower")
+	data, err := ExtractTag(f, "name", true, "Napili Tower")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -153,37 +153,37 @@ func TestExtractTag_Polygon(t *testing.T) {
 	want := &GeomTags{
 		Geom: geom.Polygon{
 			[]geom.Point{
-				geom.Point{X: -157.82454280000002, Y: 21.2800456},
-				geom.Point{X: -157.8245124, Y: 21.280018000000002},
-				geom.Point{X: -157.8245062, Y: 21.280024},
-				geom.Point{X: -157.8244428, Y: 21.279966400000003},
-				geom.Point{X: -157.8243979, Y: 21.2800093},
-				geom.Point{X: -157.82441010000002, Y: 21.2800204},
-				geom.Point{X: -157.8243701, Y: 21.2800587},
-				geom.Point{X: -157.82436380000001, Y: 21.2800531},
-				geom.Point{X: -157.82432680000002, Y: 21.280088600000003},
-				geom.Point{X: -157.8243377, Y: 21.2800985},
-				geom.Point{X: -157.8242916, Y: 21.280142700000003},
-				geom.Point{X: -157.8242788, Y: 21.280131100000002},
-				geom.Point{X: -157.8242406, Y: 21.280167900000002},
-				geom.Point{X: -157.82431160000002, Y: 21.280232100000003},
-				geom.Point{X: -157.8243443, Y: 21.280200800000003},
-				geom.Point{X: -157.8243622, Y: 21.280217},
-				geom.Point{X: -157.82442550000002, Y: 21.2801563},
-				geom.Point{X: -157.82441540000002, Y: 21.280147200000002},
-				geom.Point{X: -157.8244885, Y: 21.2800771},
-				geom.Point{X: -157.8244995, Y: 21.280087100000003},
-				geom.Point{X: -157.82454280000002, Y: 21.2800456}},
+				{X: -157.82454280000002, Y: 21.2800456},
+				{X: -157.8245124, Y: 21.280018000000002},
+				{X: -157.8245062, Y: 21.280024},
+				{X: -157.8244428, Y: 21.279966400000003},
+				{X: -157.8243979, Y: 21.2800093},
+				{X: -157.82441010000002, Y: 21.2800204},
+				{X: -157.8243701, Y: 21.2800587},
+				{X: -157.82436380000001, Y: 21.2800531},
+				{X: -157.82432680000002, Y: 21.280088600000003},
+				{X: -157.8243377, Y: 21.2800985},
+				{X: -157.8242916, Y: 21.280142700000003},
+				{X: -157.8242788, Y: 21.280131100000002},
+				{X: -157.8242406, Y: 21.280167900000002},
+				{X: -157.82431160000002, Y: 21.280232100000003},
+				{X: -157.8243443, Y: 21.280200800000003},
+				{X: -157.8243622, Y: 21.280217},
+				{X: -157.82442550000002, Y: 21.2801563},
+				{X: -157.82441540000002, Y: 21.280147200000002},
+				{X: -157.8244885, Y: 21.2800771},
+				{X: -157.8244995, Y: 21.280087100000003},
+				{X: -157.82454280000002, Y: 21.2800456}},
 		},
 		Tags: map[string][]string{
-			"addr:city":        []string{"Honolulu"},
-			"addr:state":       []string{"HI"},
-			"addr:street":      []string{"Nahua Street"},
-			"addr:postcode":    []string{"96815"},
-			"addr:housenumber": []string{"451"},
-			"name":             []string{"Napili Tower"},
-			"website":          []string{"http://www.napilitowers.com/"},
-			"building":         []string{"apartments"}},
+			"addr:city":        {"Honolulu"},
+			"addr:state":       {"HI"},
+			"addr:street":      {"Nahua Street"},
+			"addr:postcode":    {"96815"},
+			"addr:housenumber": {"451"},
+			"name":             {"Napili Tower"},
+			"website":          {"http://www.napilitowers.com/"},
+			"building":         {"apartments"}},
 	}
 	have := geomTags[0]
 	if !reflect.DeepEqual(want, have) {
@@ -197,7 +197,7 @@ func TestExtractTag_MultiLineString(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	data, err := ExtractTag(f, "wikipedia", "en:Pearl City, Hawaii")
+	data, err := ExtractTag(f, "wikipedia", true, "en:Pearl City, Hawaii")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -221,7 +221,7 @@ func TestExtractTag_RelationPolygon(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	data, err := ExtractTag(f, "start_date", "1974")
+	data, err := ExtractTag(f, "start_date", true, "1974")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -249,11 +249,11 @@ func TestExtract_bounds_point(t *testing.T) {
 		Min: geom.Point{X: -158.125, Y: 21.264},
 		Max: geom.Point{X: -157, Y: 22},
 	}
-	data, err := ExtractPBF(context.Background(), f, KeepBounds(b))
+	data, err := ExtractPBF(context.Background(), f, KeepBounds(b), true)
 	if err != nil {
 		t.Fatal(err)
 	}
-	data = data.Filter(KeepTags(map[string][]string{"natural": []string{"tree"}}))
+	data = data.Filter(KeepTags(map[string][]string{"natural": {"tree"}}))
 	geomTags, err := data.Geom()
 	if err != nil {
 		t.Fatal(err)
@@ -290,11 +290,11 @@ func TestExtract_bounds_line(t *testing.T) {
 		Min: geom.Point{X: -158.124437, Y: 21.265047},
 		Max: geom.Point{X: -158, Y: 21.5},
 	}
-	data, err := ExtractPBF(context.Background(), f, KeepBounds(b))
+	data, err := ExtractPBF(context.Background(), f, KeepBounds(b), true)
 	if err != nil {
 		t.Fatal(err)
 	}
-	data = data.Filter(KeepTags(map[string][]string{"trail_visibility": []string{"bad"}}))
+	data = data.Filter(KeepTags(map[string][]string{"trail_visibility": {"bad"}}))
 	geomTags, err := data.Geom()
 	if err != nil {
 		t.Fatal(err)
@@ -308,10 +308,10 @@ func TestExtract_bounds_line(t *testing.T) {
 			geom.Point{X: -157.8258194, Y: 21.403686500000003},
 		},
 		Tags: map[string][]string{
-			"highway":          []string{"path"},
-			"surface":          []string{"dirt"},
-			"trail_visibility": []string{"bad"},
-			"access":           []string{"private"}},
+			"highway":          {"path"},
+			"surface":          {"dirt"},
+			"trail_visibility": {"bad"},
+			"access":           {"private"}},
 	}
 	have := geomTags[0]
 	if !reflect.DeepEqual(want, have) {
@@ -329,11 +329,11 @@ func TestExtract_bounds_polygon(t *testing.T) {
 		Min: geom.Point{X: -160, Y: 20},
 		Max: geom.Point{X: -157, Y: 23},
 	}
-	data, err := ExtractPBF(context.Background(), f, KeepBounds(b))
+	data, err := ExtractPBF(context.Background(), f, KeepBounds(b), true)
 	if err != nil {
 		t.Fatal(err)
 	}
-	data = data.Filter(KeepTags(map[string][]string{"name": []string{"Napili Tower"}}))
+	data = data.Filter(KeepTags(map[string][]string{"name": {"Napili Tower"}}))
 	geomTags, err := data.Geom()
 	if err != nil {
 		t.Fatal(err)
@@ -344,37 +344,37 @@ func TestExtract_bounds_polygon(t *testing.T) {
 	want := &GeomTags{
 		Geom: geom.Polygon{
 			[]geom.Point{
-				geom.Point{X: -157.82454280000002, Y: 21.2800456},
-				geom.Point{X: -157.8245124, Y: 21.280018000000002},
-				geom.Point{X: -157.8245062, Y: 21.280024},
-				geom.Point{X: -157.8244428, Y: 21.279966400000003},
-				geom.Point{X: -157.8243979, Y: 21.2800093},
-				geom.Point{X: -157.82441010000002, Y: 21.2800204},
-				geom.Point{X: -157.8243701, Y: 21.2800587},
-				geom.Point{X: -157.82436380000001, Y: 21.2800531},
-				geom.Point{X: -157.82432680000002, Y: 21.280088600000003},
-				geom.Point{X: -157.8243377, Y: 21.2800985},
-				geom.Point{X: -157.8242916, Y: 21.280142700000003},
-				geom.Point{X: -157.8242788, Y: 21.280131100000002},
-				geom.Point{X: -157.8242406, Y: 21.280167900000002},
-				geom.Point{X: -157.82431160000002, Y: 21.280232100000003},
-				geom.Point{X: -157.8243443, Y: 21.280200800000003},
-				geom.Point{X: -157.8243622, Y: 21.280217},
-				geom.Point{X: -157.82442550000002, Y: 21.2801563},
-				geom.Point{X: -157.82441540000002, Y: 21.280147200000002},
-				geom.Point{X: -157.8244885, Y: 21.2800771},
-				geom.Point{X: -157.8244995, Y: 21.280087100000003},
-				geom.Point{X: -157.82454280000002, Y: 21.2800456}},
+				{X: -157.82454280000002, Y: 21.2800456},
+				{X: -157.8245124, Y: 21.280018000000002},
+				{X: -157.8245062, Y: 21.280024},
+				{X: -157.8244428, Y: 21.279966400000003},
+				{X: -157.8243979, Y: 21.2800093},
+				{X: -157.82441010000002, Y: 21.2800204},
+				{X: -157.8243701, Y: 21.2800587},
+				{X: -157.82436380000001, Y: 21.2800531},
+				{X: -157.82432680000002, Y: 21.280088600000003},
+				{X: -157.8243377, Y: 21.2800985},
+				{X: -157.8242916, Y: 21.280142700000003},
+				{X: -157.8242788, Y: 21.280131100000002},
+				{X: -157.8242406, Y: 21.280167900000002},
+				{X: -157.82431160000002, Y: 21.280232100000003},
+				{X: -157.8243443, Y: 21.280200800000003},
+				{X: -157.8243622, Y: 21.280217},
+				{X: -157.82442550000002, Y: 21.2801563},
+				{X: -157.82441540000002, Y: 21.280147200000002},
+				{X: -157.8244885, Y: 21.2800771},
+				{X: -157.8244995, Y: 21.280087100000003},
+				{X: -157.82454280000002, Y: 21.2800456}},
 		},
 		Tags: map[string][]string{
-			"addr:city":        []string{"Honolulu"},
-			"addr:state":       []string{"HI"},
-			"addr:street":      []string{"Nahua Street"},
-			"addr:postcode":    []string{"96815"},
-			"addr:housenumber": []string{"451"},
-			"name":             []string{"Napili Tower"},
-			"website":          []string{"http://www.napilitowers.com/"},
-			"building":         []string{"apartments"}},
+			"addr:city":        {"Honolulu"},
+			"addr:state":       {"HI"},
+			"addr:street":      {"Nahua Street"},
+			"addr:postcode":    {"96815"},
+			"addr:housenumber": {"451"},
+			"name":             {"Napili Tower"},
+			"website":          {"http://www.napilitowers.com/"},
+			"building":         {"apartments"}},
 	}
 	have := geomTags[0]
 	if !reflect.DeepEqual(want, have) {
@@ -392,11 +392,11 @@ func TestExtract_bounds_multiLineString(t *testing.T) {
 		Min: geom.Point{X: -158.124437, Y: 21.265047},
 		Max: geom.Point{X: -158, Y: 21.5},
 	}
-	data, err := ExtractPBF(context.Background(), f, KeepBounds(b))
+	data, err := ExtractPBF(context.Background(), f, KeepBounds(b), true)
 	if err != nil {
 		t.Fatal(err)
 	}
-	data = data.Filter(KeepTags(map[string][]string{"wikipedia": []string{"en:Pearl City, Hawaii"}}))
+	data = data.Filter(KeepTags(map[string][]string{"wikipedia": {"en:Pearl City, Hawaii"}}))
 	geomTags, err := data.Geom()
 	if err != nil {
 		t.Fatal(err)
@@ -421,11 +421,11 @@ func TestExtract_bounds_RelationPolygon(t *testing.T) {
 		Min: geom.Point{X: -180, Y: -90},
 		Max: geom.Point{X: 180, Y: 90},
 	}
-	data, err := ExtractPBF(context.Background(), f, KeepBounds(b))
+	data, err := ExtractPBF(context.Background(), f, KeepBounds(b), true)
 	if err != nil {
 		t.Fatal(err)
 	}
-	data = data.Filter(KeepTags(map[string][]string{"start_date": []string{"1974"}}))
+	data = data.Filter(KeepTags(map[string][]string{"start_date": {"1974"}}))
 	geomTags, err := data.Geom()
 	if err != nil {
 		t.Fatal(err)
