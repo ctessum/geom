@@ -2,11 +2,10 @@ package proj
 
 import (
 	"fmt"
+	"gonum.org/v1/gonum/floats/scalar"
 	"math"
 	"reflect"
 	"strings"
-
-	"gonum.org/v1/gonum/floats"
 )
 
 // A Transformer takes input coordinates and returns output coordinates and an error.
@@ -109,7 +108,7 @@ func equal(v1, v2 reflect.Value, ulp uint) bool {
 			if math.IsNaN(fv1) != math.IsNaN(fv2) {
 				return false
 			}
-			if !math.IsNaN(fv1) && !floats.EqualWithinULP(fv1, fv2, ulp) {
+			if !math.IsNaN(fv1) && !scalar.EqualWithinULP(fv1, fv2, ulp) {
 				return false
 			}
 		case reflect.Int:
@@ -130,7 +129,7 @@ func equal(v1, v2 reflect.Value, ulp uint) bool {
 			}
 		case reflect.Slice:
 			for i := 0; i < f1.Len(); i++ {
-				if !floats.EqualWithinULP(f1.Index(i).Float(), f2.Index(i).Float(), ulp) {
+				if !scalar.EqualWithinULP(f1.Index(i).Float(), f2.Index(i).Float(), ulp) {
 					return false
 				}
 			}
